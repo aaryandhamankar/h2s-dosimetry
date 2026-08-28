@@ -3,15 +3,26 @@
 import { useEffect, useState } from 'react';
 import { useAppStore } from '@/stores/app-store';
 import { AlertStatus, AlertSeverity } from '@/types';
-import { AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 
 export default function HSEAlertsPage() {
   const { alerts, acknowledgeAlert, currentUser } = useAppStore();
   const [mounted, setMounted] = useState(false);
   const [filter, setFilter] = useState<'ALL' | 'OPEN' | 'ACKNOWLEDGED'>('ALL');
+  const [acknowledgingId, setAcknowledgingId] = useState<string | null>(null);
 
   useEffect(() => { setMounted(true); }, []);
+
+  const handleAcknowledge = async (id: string) => {
+    if (acknowledgingId) return;
+    setAcknowledgingId(id);
+    try {
+      await acknowledgeAlert(id, currentUser?.displayName || 'Safety Officer');
+    } finally {
+      setAcknowledgingId(null);
+    }
+  };
 
   if (!mounted) return <div className="text-[13px] text-[#7A8178]">Loading incident queue...</div>;
 
@@ -136,10 +147,18 @@ export default function HSEAlertsPage() {
                     </div>
                   ) : (
                     <button
-                      onClick={() => acknowledgeAlert(alert.id, currentUser?.displayName || 'Safety Officer')}
-                      className="gov-btn-primary w-full sm:w-auto h-9 px-4 text-[12px] sm:text-[13px] font-semibold"
+                      onClick={() => handleAcknowledge(alert.id)}
+                      disabled={acknowledgingId === alert.id}
+                      className="gov-btn-primary w-full sm:w-auto h-9 px-4 text-[12px] sm:text-[13px] font-semibold flex items-center justify-center gap-1.5"
                     >
-                      <span>Acknowledge Incident</span>
+                      {acknowledgingId === alert.id ? (
+                        <>
+                          <Loader2 size={13} className="animate-spin" />
+                          <span>Acknowledging...</span>
+                        </>
+                      ) : (
+                        <span>Acknowledge Incident</span>
+                      )}
                     </button>
                   )}
                 </div>

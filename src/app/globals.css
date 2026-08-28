@@ -25,6 +25,13 @@
     -moz-osx-font-smoothing: grayscale;
     letter-spacing: -0.01em;
   }
+
+  /* Accessible Focus Ring for Keyboard Users across buttons, links & inputs */
+  :focus-visible {
+    outline: 2px solid #5C822D !important;
+    outline-offset: 2px !important;
+    border-radius: 4px;
+  }
 }
 
 /* 4px Indian Tricolor Accent Ribbon running 100% full viewport width */
@@ -60,6 +67,7 @@
   border: 1px solid #E7E5DE;
   border-radius: 6px;
   box-shadow: none;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .gov-card-soft {
@@ -67,6 +75,17 @@
   border: 1px solid #E7E5DE;
   border-radius: 6px;
   box-shadow: none;
+}
+
+/* Base Disabled State Rule */
+button:disabled, 
+input:disabled, 
+select:disabled, 
+textarea:disabled,
+a.disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
 }
 
 /* Administrative Buttons */
@@ -82,8 +101,9 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, transform 0.1s ease-in-out;
   border: 1px solid #5C822D;
+  user-select: none;
 }
 
 .gov-btn-primary:hover {
@@ -93,6 +113,7 @@
 
 .gov-btn-primary:active {
   background-color: #35551F;
+  transform: scale(0.98);
 }
 
 .gov-btn-secondary {
@@ -108,12 +129,18 @@
   justify-content: center;
   gap: 8px;
   border: 1px solid #E7E5DE;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, transform 0.1s ease-in-out;
+  user-select: none;
 }
 
 .gov-btn-secondary:hover {
   background-color: #F0EFE9;
   border-color: #D5D2C9;
+}
+
+.gov-btn-secondary:active {
+  background-color: #E7E5DE;
+  transform: scale(0.98);
 }
 
 .gov-btn-danger {
@@ -128,12 +155,17 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, transform 0.1s ease-in-out;
   border: 1px solid #A94442;
+  user-select: none;
 }
 
 .gov-btn-danger:hover {
   background-color: #8F3937;
+}
+
+.gov-btn-danger:active {
+  transform: scale(0.98);
 }
 
 .gov-btn-warning {
@@ -148,12 +180,17 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, transform 0.1s ease-in-out;
   border: 1px solid #C96B32;
+  user-select: none;
 }
 
 .gov-btn-warning:hover {
   background-color: #B35B26;
+}
+
+.gov-btn-warning:active {
+  transform: scale(0.98);
 }
 
 /* Institutional Badges & Status Pills */
@@ -202,4 +239,27 @@
   background-color: #EEF3E7;
   color: #5C822D;
   border: 1px solid #C8DEC0;
+}
+
+/* Skeleton Loading Utilities */
+.skeleton-box {
+  background: linear-gradient(90deg, #F0EFE9 25%, #E7E5DE 50%, #F0EFE9 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Support Prefers-Reduced-Motion for Accessible Motion Safety */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

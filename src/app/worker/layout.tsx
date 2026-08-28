@@ -55,7 +55,7 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex flex-col items-center py-1 px-2 sm:px-4 rounded-md transition-all flex-1 max-w-[100px] ${
+                className={`flex flex-col items-center justify-center min-h-[44px] py-1 px-2 sm:px-4 rounded-md transition-all flex-1 max-w-[110px] ${
                   isActive 
                     ? 'text-[#35551F] bg-[#EEF3E7] font-bold border-b-2 border-[#5C822D]' 
                     : 'text-[#596158] hover:text-[#263026] hover:bg-[#F7F6F1]'

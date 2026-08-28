@@ -217,7 +217,7 @@ export default function WorkerScanPage() {
   };
 
   const executePipeline = async (scenario: DemoScenario, title: string, imageUrl?: string) => {
-    if (!currentUser) return;
+    if (!currentUser || processing) return;
     
     setActiveScenarioTitle(title);
     setProcessing(true);
@@ -252,7 +252,7 @@ export default function WorkerScanPage() {
 
   if (processing) {
     return (
-      <div className="max-w-xl mx-auto py-8 space-y-6">
+      <div className="max-w-xl mx-auto py-8 space-y-6" aria-busy="true" role="status" aria-live="polite">
         <div className="gov-card p-6 sm:p-8 space-y-5">
           <div className="text-center space-y-2">
             <div className="w-12 h-12 rounded-full bg-[#EEF3E7] text-[#5C822D] mx-auto flex items-center justify-center border border-[#C8DEC0]">
