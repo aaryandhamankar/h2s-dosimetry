@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80">
-  <!-- Clean, bold text-based logo for MRPL -->
-  <text x="10" y="55" font-family="system-ui, sans-serif" font-weight="900" font-size="42" fill="#263026" letter-spacing="-1">MRPL</text>
-  <!-- Accent dot -->
-  <circle cx="128" cy="50" r="6" fill="#5C822D" />
-  <text x="142" y="52" font-family="system-ui, sans-serif" font-weight="700" font-size="16" fill="#D32F2F">ONGC</text>
-</svg>

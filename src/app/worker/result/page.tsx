@@ -19,7 +19,7 @@ import { formatDateTime, formatDose, getValidityLabel } from '@/lib/utils';
 import { ValidityStatus, RiskStatus } from '@/types';
 import Link from 'next/link';
 import Image from 'next/image';
-import mrplLogo from '../../../../public/mrpl-logo.svg';
+import mrplLogo from '../../../../public/mrpl-logo.png';
 
 function ResultContent() {
   const searchParams = useSearchParams();

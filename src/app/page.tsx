@@ -15,7 +15,7 @@ import {
   FileCheck,
 } from 'lucide-react';
 import Image from 'next/image';
-import mrplLogo from '../../public/mrpl-logo.svg';
+import mrplLogo from '../../public/mrpl-logo.png';
 
 export default function LandingPage() {
   const router = useRouter();

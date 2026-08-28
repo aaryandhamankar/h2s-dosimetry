@@ -11,7 +11,7 @@ import {
 import { AccessibilityBar } from './accessibility-bar';
 import { UniversalSearch } from './universal-search';
 import Image from 'next/image';
-import mrplLogo from '../../public/mrpl-logo.svg';
+import mrplLogo from '../../public/mrpl-logo.png';
 
 export function PortalHeaderWrapper() {
   const pathname = usePathname();

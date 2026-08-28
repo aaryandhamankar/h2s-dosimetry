@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { PhoneCall, CheckCircle2, Sparkles, X, Award, Beaker, Code2, Users2, Cpu, Compass } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import mrplLogo from '../../public/mrpl-logo.svg';
+import mrplLogo from '../../public/mrpl-logo.png';
 
 const TEAM_MEMBERS = [
   {
