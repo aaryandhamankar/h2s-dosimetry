@@ -73,40 +73,40 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-2xs flex items-start justify-center pt-16 sm:pt-24 px-4">
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-2xs flex items-start justify-center pt-4 sm:pt-24 px-2.5 sm:px-4">
       <div 
-        className="bg-white border border-[#E7E5DE] rounded-md max-w-2xl w-full shadow-lg overflow-hidden flex flex-col max-h-[80vh]"
+        className="bg-white border border-[#E7E5DE] rounded-md max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[80vh]"
         onClick={e => e.stopPropagation()}
       >
         
         {/* Search Input Header */}
-        <div className="p-4 border-b border-[#E7E5DE] flex items-center gap-3 bg-[#FAFBFD]">
-          <Search className="w-5 h-5 text-[#5C822D] flex-shrink-0" />
+        <div className="p-3 sm:p-4 border-b border-[#E7E5DE] flex items-center gap-2.5 bg-[#FAFBFD]">
+          <Search className="w-4 sm:w-5 h-4 sm:h-5 text-[#5C822D] flex-shrink-0" />
           <input
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Search workers, badge IDs, safety alerts, or SOP topics..."
-            className="flex-1 bg-transparent text-[15px] text-[#263026] placeholder-[#7A8178] focus:outline-none"
+            placeholder="Search workers, badge IDs, safety alerts..."
+            className="flex-1 bg-transparent text-[13px] sm:text-[15px] text-[#263026] placeholder-[#7A8178] focus:outline-none"
             autoFocus
           />
           <button 
             onClick={onClose} 
-            className="text-[#7A8178] hover:text-[#263026] p-1 rounded hover:bg-[#F0EFE9]"
+            className="text-[#7A8178] hover:text-[#263026] p-1.5 rounded hover:bg-[#F0EFE9]"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Category Filter Tabs */}
-        <div className="flex items-center gap-1.5 px-4 py-2 bg-[#F7F6F1] border-b border-[#E7E5DE] text-[12px] overflow-x-auto">
+        <div className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#F7F6F1] border-b border-[#E7E5DE] text-[11px] sm:text-[12px] overflow-x-auto">
           {(['ALL', 'WORKERS', 'DOSIMETERS', 'ALERTS', 'SOP'] as const).map(cat => (
             <button
               key={cat}
               onClick={() => setCategory(cat)}
-              className={`px-3 py-1 rounded font-semibold transition-all ${
+              className={`px-2.5 sm:px-3 py-1 rounded font-semibold transition-all whitespace-nowrap flex-shrink-0 ${
                 category === cat 
-                  ? 'bg-[#5C822D] text-white' 
+                  ? 'bg-[#5C822D] text-white shadow-2xs' 
                   : 'bg-white border border-[#E7E5DE] text-[#596158] hover:bg-[#F0EFE9]'
               }`}
             >

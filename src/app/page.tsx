@@ -42,56 +42,57 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="flex-1 py-8 px-4 sm:px-8">
-      <div className="max-w-[1200px] mx-auto space-y-8">
+    <div className="flex-1 py-4 sm:py-8 px-3 sm:px-8">
+      <div className="max-w-[1200px] mx-auto space-y-5 sm:space-y-8">
         
         {/* Main Institutional Portal Header Panel */}
-        <div className="gov-card p-6 sm:p-8 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E7E5DE] pb-6">
-            <div className="flex items-start gap-4">
-              <div className="h-13 flex-shrink-0 flex items-center justify-center p-1.5 bg-white rounded-lg border border-[#E7E5DE] shadow-xs">
-              <Image 
+        <div className="gov-card p-4 sm:p-8 space-y-4 sm:space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E7E5DE] pb-4 sm:pb-6">
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="h-11 sm:h-13 w-11 sm:w-13 flex-shrink-0 flex items-center justify-center p-1 bg-white rounded-lg border border-[#E7E5DE] shadow-xs">
+                <Image 
                   src={mrplLogo} 
                   alt="ONGC MRPL Logo" 
-                  className="h-10 w-auto object-contain rounded-md"
+                  className="h-9 sm:h-10 w-auto object-contain rounded-md"
+                  priority
                 />
               </div>
-              <div className="space-y-1">
-                <span className="text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
-                  ONGC · MRPL Directorate of Health, Safety & Environment
+              <div className="space-y-0.5 sm:space-y-1">
+                <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
+                  ONGC · MRPL Directorate of HSE
                 </span>
-                <h1 className="text-[26px] sm:text-[30px] font-bold text-[#263026] leading-tight">
+                <h1 className="text-[19px] sm:text-[28px] font-bold text-[#263026] leading-tight">
                   Wearable Passive Colorimetric H₂S Exposure Dosimeter System
                 </h1>
-                <p className="text-[15px] text-[#596158]">
+                <p className="text-[13px] sm:text-[15px] text-[#596158] leading-relaxed">
                   Quantitative smartphone optical verification platform for refinery operators & hazardous chemical zone surveillance.
                 </p>
               </div>
             </div>
 
-            <div className="flex-shrink-0 text-right sm:border-l sm:border-[#E7E5DE] sm:pl-6">
-              <span className="gov-badge gov-badge-normal text-[13px]">
+            <div className="flex-shrink-0 flex sm:flex-col items-center sm:items-end justify-between sm:justify-center sm:border-l sm:border-[#E7E5DE] sm:pl-6 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#E7E5DE]">
+              <span className="gov-badge gov-badge-normal text-[11px] sm:text-[13px]">
                 <CheckCircle2 className="w-3.5 h-3.5" /> ISO/CIE Standard D65
               </span>
-              <p className="text-[12px] text-[#7A8178] mt-1 font-mono">CHEM-002 · Cu-PAN & Bismuth(III)</p>
+              <p className="text-[11px] sm:text-[12px] text-[#7A8178] sm:mt-1 font-mono">CHEM-002 · Cu-PAN & Bi(III)</p>
             </div>
           </div>
 
           {/* Elongated Wearable Wristband Hardware Architecture */}
-          <div className="bg-[#FAFBF9] border border-[#E7E5DE] rounded-md p-5 sm:p-6 space-y-4">
+          <div className="bg-[#FAFBF9] border border-[#E7E5DE] rounded-md p-3.5 sm:p-6 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h2 className="text-[16px] font-bold text-[#263026] flex items-center gap-2">
+                <h2 className="text-[15px] sm:text-[16px] font-bold text-[#263026] flex items-center gap-2">
                   <Layers className="w-4 h-4 text-[#5C822D]" /> Wearable Silicone Wristband & Sensor Pod Schematic
                 </h2>
-                <p className="text-[13px] text-[#596158]">
+                <p className="text-[12px] sm:text-[13px] text-[#596158]">
                   Elongated wristband strap featuring lead-free Copper-PAN / Bismuth(III) matrix & 4-patch calibration bar
                 </p>
               </div>
 
               {/* Dose Preview Switcher */}
-              <div className="flex items-center gap-2 text-[13px] font-semibold">
-                <span className="text-[#7A8178]">Simulate Exposure:</span>
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[12px] sm:text-[13px] font-semibold">
+                <span className="text-[#7A8178] w-full sm:w-auto">Simulate Exposure:</span>
                 {[
                   { label: 'Normal (3.2)', val: 3.2 },
                   { label: 'Elevated (12.4)', val: 12.4 },
@@ -100,9 +101,9 @@ export default function LandingPage() {
                   <button
                     key={p.val}
                     onClick={() => setSelectedPreviewDose(p.val)}
-                    className={`px-3 py-1 rounded text-[12px] font-semibold transition-all ${
+                    className={`px-2.5 sm:px-3 py-1 rounded text-[11px] sm:text-[12px] font-semibold transition-all ${
                       selectedPreviewDose === p.val
-                        ? 'bg-[#5C822D] text-white'
+                        ? 'bg-[#5C822D] text-white shadow-2xs'
                         : 'bg-white border border-[#E7E5DE] text-[#596158] hover:bg-[#F0EFE9]'
                     }`}
                   >
@@ -110,6 +111,11 @@ export default function LandingPage() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Mobile Swipe Hint */}
+            <div className="sm:hidden text-center text-[11px] text-[#7A8178] font-medium bg-[#F0EFE9] py-1 px-2 rounded border border-[#E7E5DE]">
+              ↔ Scroll horizontally to inspect wristband hardware
             </div>
 
             {/* Realistic Elongated Wristband Diagram */}

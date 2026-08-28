@@ -48,12 +48,12 @@ export function DemoControlPanel() {
       {/* Floating Demo Trigger Button */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-4 right-4 z-40 bg-white hover:bg-[#F7F6F1] text-[#263026] text-[12px] font-semibold px-3 py-1.5 rounded-md shadow-xs border border-[#E7E5DE] flex items-center gap-2 transition-all"
+        className="fixed bottom-16 sm:bottom-4 right-3 sm:right-4 z-30 bg-white/95 backdrop-blur-2xs hover:bg-[#F7F6F1] text-[#263026] text-[11px] sm:text-[12px] font-semibold px-2.5 sm:px-3 py-1.5 rounded-md shadow-md border border-[#E7E5DE] flex items-center gap-1.5 sm:gap-2 transition-all"
         title="Evaluator Test Helper (Press 'D' key)"
       >
         <span className="w-2 h-2 rounded-full bg-[#5C822D]" />
         <span>Demo Controls</span>
-        <kbd className="bg-[#F7F6F1] text-[#7A8178] px-1 py-0.2 rounded text-[10px] border border-[#E7E5DE]">D</kbd>
+        <kbd className="bg-[#F7F6F1] text-[#7A8178] px-1 py-0.2 rounded text-[10px] border border-[#E7E5DE] hidden sm:inline">D</kbd>
       </button>
 
       {/* Modal Dialog */}

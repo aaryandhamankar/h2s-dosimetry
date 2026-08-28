@@ -95,84 +95,85 @@ function ResultContent() {
       </div>
 
       {/* Main Official Exposure Certificate Card */}
-      <div className="gov-card p-6 sm:p-8 space-y-6">
+      <div className="gov-card p-4 sm:p-8 space-y-4 sm:space-y-6">
         
         {/* Certificate Header Masthead */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E7E5DE] pb-5">
-          <div className="flex items-center gap-3">
-            <div className="h-11 flex-shrink-0 flex items-center justify-center p-1 bg-white rounded-lg border border-[#E7E5DE] shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-[#E7E5DE] pb-4 sm:pb-5">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="h-10 sm:h-11 w-10 sm:w-11 flex-shrink-0 flex items-center justify-center p-1 bg-white rounded-lg border border-[#E7E5DE] shadow-xs">
               <Image 
                 src={mrplLogo} 
                 alt="MRPL Logo" 
-                className="h-9 w-auto object-contain rounded-md"
+                className="h-8 sm:h-9 w-auto object-contain rounded-md"
+                priority
               />
             </div>
             <div>
-              <span className="text-[11px] font-bold text-[#5C822D] uppercase tracking-wider block">
-                MRPL Occupational Health & Safety Directorate
+              <span className="text-[10px] sm:text-[11px] font-bold text-[#5C822D] uppercase tracking-wider block">
+                MRPL Health & Safety Directorate
               </span>
-              <h1 className="text-[20px] font-bold text-[#263026]">
+              <h1 className="text-[17px] sm:text-[20px] font-bold text-[#263026] leading-tight">
                 Verified Exposure Reading Certificate
               </h1>
-              <div className="text-[12px] text-[#7A8178] font-mono mt-0.5">
-                Scan ID: {scan.id} · Certified on {formatDateTime(scan.capturedAt)}
+              <div className="text-[11px] sm:text-[12px] text-[#7A8178] font-mono mt-0.5">
+                Scan ID: {scan.id.substring(0, 14)}... · Certified on {formatDateTime(scan.capturedAt)}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-start sm:self-auto">
             {statusBadge}
           </div>
         </div>
 
         {/* Action Instruction Banner */}
-        <div className={`p-4 rounded-md border text-[14px] ${bannerClass} space-y-1`}>
+        <div className={`p-3.5 sm:p-4 rounded-md border text-[13px] sm:text-[14px] ${bannerClass} space-y-1`}>
           <div className="font-bold flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4" />
+            <ShieldCheck className="w-4 h-4 flex-shrink-0" />
             <span>{actionTitle}</span>
           </div>
-          <p className="text-[13px] leading-relaxed opacity-95">{actionText}</p>
+          <p className="text-[12px] sm:text-[13px] leading-relaxed opacity-95">{actionText}</p>
         </div>
 
         {/* Primary Exposure Value Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           
-          <div className="bg-[#FAFBF9] p-5 rounded-md border border-[#E7E5DE]">
-            <span className="text-[12px] text-[#7A8178] uppercase tracking-wider font-semibold block">
+          <div className="bg-[#FAFBF9] p-4 sm:p-5 rounded-md border border-[#E7E5DE]">
+            <span className="text-[11px] sm:text-[12px] text-[#7A8178] uppercase tracking-wider font-semibold block">
               Cumulative Exposure Dose
             </span>
-            <div className="text-[28px] font-bold text-[#263026] mt-1 font-mono">
+            <div className="text-[24px] sm:text-[28px] font-bold text-[#263026] mt-1 font-mono">
               {res?.estimatedDose !== null && res?.estimatedDose !== undefined
                 ? `${formatDose(res.estimatedDose)} ${res.doseUnit}`
                 : 'Unverified'}
             </div>
-            <span className="text-[12px] text-[#7A8178] block mt-1">
+            <span className="text-[11px] sm:text-[12px] text-[#7A8178] block mt-0.5">
               Linear Chemosensor Range: 0–30 ppm·h
             </span>
           </div>
 
-          <div className="bg-[#FAFBF9] p-5 rounded-md border border-[#E7E5DE]">
-            <span className="text-[12px] text-[#7A8178] uppercase tracking-wider font-semibold block">
+          <div className="bg-[#FAFBF9] p-4 sm:p-5 rounded-md border border-[#E7E5DE]">
+            <span className="text-[11px] sm:text-[12px] text-[#7A8178] uppercase tracking-wider font-semibold block">
               Estimated 8-Hour TWA
             </span>
-            <div className="text-[28px] font-bold text-[#263026] mt-1 font-mono">
+            <div className="text-[24px] sm:text-[28px] font-bold text-[#263026] mt-1 font-mono">
               {res?.estimatedTwa !== null && res?.estimatedTwa !== undefined
                 ? `${formatDose(res.estimatedTwa)} ${res.twaUnit}`
                 : 'N/A'}
             </div>
-            <span className="text-[12px] text-[#7A8178] block mt-1">
+            <span className="text-[11px] sm:text-[12px] text-[#7A8178] block mt-0.5">
               OSHA PEL Threshold: 10.0 ppm TWA
             </span>
           </div>
 
-          <div className="bg-[#FAFBF9] p-5 rounded-md border border-[#E7E5DE]">
-            <span className="text-[12px] text-[#7A8178] uppercase tracking-wider font-semibold block">
+          <div className="bg-[#FAFBF9] p-4 sm:p-5 rounded-md border border-[#E7E5DE]">
+            <span className="text-[11px] sm:text-[12px] text-[#7A8178] uppercase tracking-wider font-semibold block">
               Metrology Validity
             </span>
-            <div className="text-[20px] font-bold text-[#263026] mt-1">
+            <div className="text-[18px] sm:text-[20px] font-bold text-[#263026] mt-1">
               {getValidityLabel(res?.validityStatus || ValidityStatus.VALID)}
             </div>
-            <span className="text-[12px] text-[#5C822D] font-semibold block mt-1">
+            <span className="text-[11px] sm:text-[12px] text-[#5C822D] font-semibold block mt-0.5">
               Confidence Score: {res?.confidence ? `${(res.confidence * 100).toFixed(0)}%` : '95%'}
             </span>
           </div>
@@ -180,22 +181,22 @@ function ResultContent() {
         </div>
 
         {/* Continuous Regulatory Exposure Scale */}
-        <div className="space-y-4 bg-[#FAFBF9] p-5 rounded-md border border-[#E7E5DE]">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[13px]">
+        <div className="space-y-3 sm:space-y-4 bg-[#FAFBF9] p-3.5 sm:p-5 rounded-md border border-[#E7E5DE]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[12px] sm:text-[13px]">
             <div>
               <span className="font-bold text-[#263026] block">
-                Regulatory Exposure Scale Position (0 to 25 ppm·h)
+                Regulatory Exposure Scale (0 to 25 ppm·h)
               </span>
-              <span className="text-[12px] text-[#596158]">
-                Occupational Safety Calibration Reference (Linear Cu-PAN / Bi³⁺ Substrate)
+              <span className="text-[11px] sm:text-[12px] text-[#596158]">
+                Occupational Calibration Reference (Cu-PAN / Bi³⁺ Substrate)
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-mono font-semibold bg-white px-2 py-0.5 rounded border border-[#E7E5DE] text-[#263026]">
-                OSHA PEL: 10 ppm 8h TWA
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="text-[10px] sm:text-[11px] font-mono font-semibold bg-white px-1.5 sm:px-2 py-0.5 rounded border border-[#E7E5DE] text-[#263026]">
+                PEL: 10 ppm
               </span>
-              <span className="text-[11px] font-mono font-semibold bg-[#F7EAEA] px-2 py-0.5 rounded border border-[#F0C4C4] text-[#A94442]">
-                Ceiling: 20 ppm·h
+              <span className="text-[10px] sm:text-[11px] font-mono font-semibold bg-[#F7EAEA] px-1.5 sm:px-2 py-0.5 rounded border border-[#F0C4C4] text-[#A94442]">
+                Ceiling: 20 ppm
               </span>
             </div>
           </div>
@@ -207,7 +208,7 @@ function ResultContent() {
                 className="absolute top-0 transform -translate-x-1/2 flex flex-col items-center transition-all duration-500 z-10"
                 style={{ left: `${pointerPercent}%` }}
               >
-                <span className={`text-white text-[11px] font-bold px-2 py-0.5 rounded font-mono shadow-xs ${
+                <span className={`text-white text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.2 sm:py-0.5 rounded font-mono shadow-xs whitespace-nowrap ${
                   res?.riskStatus === RiskStatus.NORMAL
                     ? 'bg-[#5C822D]'
                     : res?.riskStatus === RiskStatus.ELEVATED
@@ -218,7 +219,7 @@ function ResultContent() {
                 }`}>
                   {formatDose(res.estimatedDose)} ppm·h
                 </span>
-                <div className={`w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] ${
+                <div className={`w-0 h-0 border-l-[4px] sm:border-l-[5px] border-l-transparent border-r-[4px] sm:border-r-[5px] border-r-transparent border-t-[5px] sm:border-t-[6px] ${
                   res?.riskStatus === RiskStatus.NORMAL
                     ? 'border-t-[#5C822D]'
                     : res?.riskStatus === RiskStatus.ELEVATED
@@ -236,14 +237,14 @@ function ResultContent() {
             <div className="w-full h-5 rounded-md overflow-hidden flex border border-[#D5D2C9] shadow-2xs">
               {/* Normal: 0 to 5 ppm*h (20% of 25) */}
               <div 
-                className="w-1/5 bg-[#5C822D] h-full flex items-center justify-center text-[10px] font-bold text-white/90 border-r border-white/30" 
+                className="w-1/5 bg-[#5C822D] h-full flex items-center justify-center text-[9px] sm:text-[10px] font-bold text-white/90 border-r border-white/30" 
                 title="Normal (<5 ppm·h)"
               >
-                NORMAL
+                SAFE
               </div>
               {/* Elevated: 5 to 15 ppm*h (40% of 25) */}
               <div 
-                className="w-2/5 bg-[#D99B26] h-full flex items-center justify-center text-[10px] font-bold text-white/90 border-r border-white/30 relative" 
+                className="w-2/5 bg-[#D99B26] h-full flex items-center justify-center text-[9px] sm:text-[10px] font-bold text-white/90 border-r border-white/30 relative" 
                 title="Elevated (5-15 ppm·h)"
               >
                 ELEVATED
@@ -252,50 +253,78 @@ function ResultContent() {
               </div>
               {/* High: 15 to 20 ppm*h (20% of 25) */}
               <div 
-                className="w-1/5 bg-[#C96B32] h-full flex items-center justify-center text-[10px] font-bold text-white/90 border-r border-white/30" 
+                className="w-1/5 bg-[#C96B32] h-full flex items-center justify-center text-[9px] sm:text-[10px] font-bold text-white/90 border-r border-white/30" 
                 title="High (15-20 ppm·h)"
               >
                 HIGH
               </div>
               {/* Critical: 20 to 25+ ppm*h (20% of 25) */}
               <div 
-                className="w-1/5 bg-[#A94442] h-full flex items-center justify-center text-[10px] font-bold text-white/90" 
+                className="w-1/5 bg-[#A94442] h-full flex items-center justify-center text-[9px] sm:text-[10px] font-bold text-white/90" 
                 title="Critical (≥20 ppm·h)"
               >
-                CRITICAL
+                CRIT
               </div>
             </div>
           </div>
 
           {/* Scale Axis Numerical Ticks */}
-          <div className="flex justify-between text-[11px] text-[#596158] font-mono pt-0.5">
-            <span className="font-semibold text-[#5C822D]">0 ppm·h (Safe)</span>
-            <span>5 ppm·h</span>
-            <span className="font-bold text-[#D99B26]">10 ppm (PEL)</span>
-            <span>15 ppm·h</span>
-            <span className="font-bold text-[#A94442]">20 ppm (Ceiling)</span>
-            <span className="text-[#A94442]">25+ ppm·h</span>
+          <div className="flex justify-between text-[10px] sm:text-[11px] text-[#596158] font-mono pt-0.5">
+            <span className="font-semibold text-[#5C822D]">0</span>
+            <span>5</span>
+            <span className="font-bold text-[#D99B26]">10 (PEL)</span>
+            <span>15</span>
+            <span className="font-bold text-[#A94442]">20 (Max)</span>
+            <span className="text-[#A94442]">25+</span>
           </div>
 
           {/* Sub-Legend Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-[#E7E5DE] text-[12px]">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-[#E7E5DE] text-[11px] sm:text-[12px]">
             <div className="flex items-center gap-1.5 text-[#596158]">
-              <span className="w-3 h-3 rounded-xs bg-[#5C822D] flex-shrink-0" />
-              <span>Safe (&lt;5 ppm·h)</span>
+              <span className="w-2.5 h-2.5 rounded-xs bg-[#5C822D] flex-shrink-0" />
+              <span>Safe (&lt;5)</span>
             </div>
             <div className="flex items-center gap-1.5 text-[#596158]">
-              <span className="w-3 h-3 rounded-xs bg-[#D99B26] flex-shrink-0" />
-              <span>Elevated (5–15 ppm·h)</span>
+              <span className="w-2.5 h-2.5 rounded-xs bg-[#D99B26] flex-shrink-0" />
+              <span>Elevated (5–15)</span>
             </div>
             <div className="flex items-center gap-1.5 text-[#596158]">
-              <span className="w-3 h-3 rounded-xs bg-[#C96B32] flex-shrink-0" />
-              <span>High (15–20 ppm·h)</span>
+              <span className="w-2.5 h-2.5 rounded-xs bg-[#C96B32] flex-shrink-0" />
+              <span>High (15–20)</span>
             </div>
             <div className="flex items-center gap-1.5 text-[#596158]">
-              <span className="w-3 h-3 rounded-xs bg-[#A94442] flex-shrink-0" />
-              <span>Critical (≥20 ppm·h)</span>
+              <span className="w-2.5 h-2.5 rounded-xs bg-[#A94442] flex-shrink-0" />
+              <span>Critical (≥20)</span>
             </div>
           </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 sm:pt-4 border-t border-[#E7E5DE]">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+            <Link
+              href="/worker/scan"
+              className="gov-btn-primary text-[13px] sm:text-[14px] h-11 justify-center"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>Perform Another Scan</span>
+            </Link>
+
+            <Link
+              href="/worker/history"
+              className="gov-btn-secondary text-[13px] sm:text-[14px] h-11 justify-center"
+            >
+              <span>View Exposure History</span>
+            </Link>
+          </div>
+
+          <button
+            onClick={() => window.print()}
+            className="gov-btn-secondary text-[13px] sm:text-[14px] h-11 hidden sm:inline-flex"
+          >
+            <Printer className="w-4 h-4" />
+            <span>Print Official Certificate</span>
+          </button>
         </div>
 
         {/* Captured Badge Snapshot Preview */}

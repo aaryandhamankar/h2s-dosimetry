@@ -316,72 +316,74 @@ export default function WorkerScanPage() {
       </div>
 
       {/* Main Camera Viewfinder Card */}
-      <div className="gov-card p-6 space-y-5">
-        <div className="flex items-center justify-between border-b border-[#E7E5DE] pb-4">
+      <div className="gov-card p-4 sm:p-6 space-y-4 sm:space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E7E5DE] pb-3 sm:pb-4">
           <div>
-            <h1 className="text-[20px] font-bold text-[#263026]">
+            <h1 className="text-[18px] sm:text-[20px] font-bold text-[#263026]">
               Optical Dosimeter Scanner
             </h1>
-            <p className="text-[14px] text-[#596158]">
+            <p className="text-[13px] sm:text-[14px] text-[#596158]">
               Align your wristband badge inside the reticle under ambient refinery lighting.
             </p>
           </div>
-          <span className="gov-badge gov-badge-normal text-[12px]">D65 CHROMATIC ADAPTATION</span>
+          <span className="gov-badge gov-badge-normal text-[11px] sm:text-[12px] self-start sm:self-auto">
+            D65 CHROMATIC ADAPTATION
+          </span>
         </div>
 
         {/* Viewport Frame */}
-        <div className="relative bg-[#1C241C] rounded-md overflow-hidden min-h-[280px] sm:min-h-[340px] flex items-center justify-center border-2 border-[#E7E5DE]">
+        <div className="relative bg-[#1C241C] rounded-md overflow-hidden min-h-[260px] sm:min-h-[340px] flex items-center justify-center border-2 border-[#E7E5DE]">
           {/* Live Video */}
           <video
             ref={videoRef}
             playsInline
             autoPlay
             muted
-            className={`w-full h-full object-cover max-h-[360px] ${cameraActive ? 'block' : 'hidden'}`}
+            className={`w-full h-full object-cover max-h-[340px] ${cameraActive ? 'block' : 'hidden'}`}
           />
 
           {/* Hidden Canvas */}
           <canvas ref={canvasRef} className="hidden" />
 
           {/* Alignment Reticle & 4-Patch Reference Bar */}
-          <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 z-10">
+          <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-3 sm:p-4 z-10">
             {/* Top 4-Patch Reference Overlay */}
             <div className="flex items-center justify-center">
-              <div className="flex items-center gap-1.5 bg-black/75 backdrop-blur-2xs px-3 py-1.5 rounded border border-white/30 text-white shadow-xs">
-                <span className="text-[10px] font-bold uppercase tracking-wider font-mono mr-1">CALIBRATION BAR:</span>
-                <span className="w-5 h-3.5 bg-[#FFFFFF] border border-white/80 rounded-xs shadow-2xs" title="White" />
-                <span className="w-5 h-3.5 bg-[#7F7F7F] border border-white/50 rounded-xs shadow-2xs" title="Gray" />
-                <span className="w-5 h-3.5 bg-[#00A3E0] border border-white/50 rounded-xs shadow-2xs" title="Cyan" />
-                <span className="w-5 h-3.5 bg-[#EC008C] border border-white/50 rounded-xs shadow-2xs" title="Magenta" />
+              <div className="flex items-center gap-1 sm:gap-1.5 bg-black/80 backdrop-blur-2xs px-2.5 sm:px-3 py-1 sm:py-1.5 rounded border border-white/30 text-white shadow-xs">
+                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider font-mono mr-1">CALIBRATION:</span>
+                <span className="w-4 sm:w-5 h-3 sm:h-3.5 bg-[#FFFFFF] border border-white/80 rounded-xs shadow-2xs" title="White" />
+                <span className="w-4 sm:w-5 h-3 sm:h-3.5 bg-[#7F7F7F] border border-white/50 rounded-xs shadow-2xs" title="Gray" />
+                <span className="w-4 sm:w-5 h-3 sm:h-3.5 bg-[#00A3E0] border border-white/50 rounded-xs shadow-2xs" title="Cyan" />
+                <span className="w-4 sm:w-5 h-3 sm:h-3.5 bg-[#EC008C] border border-white/50 rounded-xs shadow-2xs" title="Magenta" />
               </div>
             </div>
 
             {/* Center Reticle Box */}
-            <div className="flex items-center justify-center flex-1">
-              <div className="w-52 h-40 border-2 border-dashed border-white/80 rounded-md flex items-center justify-center relative shadow-xs">
+            <div className="flex items-center justify-center flex-1 py-2">
+              <div className="w-44 sm:w-52 h-36 sm:h-40 border-2 border-dashed border-white/80 rounded-md flex items-center justify-center relative shadow-xs">
                 <div className="w-3 h-3 border-t-2 border-l-2 border-[#C96B32] absolute -top-1 -left-1" />
                 <div className="w-3 h-3 border-t-2 border-r-2 border-[#C96B32] absolute -top-1 -right-1" />
                 <div className="w-3 h-3 border-b-2 border-l-2 border-[#C96B32] absolute -bottom-1 -left-1" />
                 <div className="w-3 h-3 border-b-2 border-r-2 border-[#C96B32] absolute -bottom-1 -right-1" />
-                <Crosshair className="w-8 h-8 text-white/70 animate-pulse" />
+                <Crosshair className="w-7 sm:w-8 h-7 sm:h-8 text-white/70 animate-pulse" />
               </div>
             </div>
 
-            <div className="text-center text-[11px] text-white/90 font-mono bg-black/60 py-1 px-2.5 rounded mx-auto">
+            <div className="text-center text-[10px] sm:text-[11px] text-white/90 font-mono bg-black/70 py-0.5 sm:py-1 px-2 rounded mx-auto">
               ALIGN SENSOR SPOT IN RETICLE
             </div>
           </div>
 
           {/* Fallback Message if camera ungranted */}
           {!cameraActive && (
-            <div className="p-6 text-center text-white space-y-2.5 z-0">
-              <VideoOff className="w-10 h-10 text-white/40 mx-auto" />
-              <p className="text-[13px] text-white/80 max-w-sm mx-auto">
+            <div className="p-4 sm:p-6 text-center text-white space-y-2 z-0">
+              <VideoOff className="w-8 sm:w-10 h-8 sm:h-10 text-white/40 mx-auto" />
+              <p className="text-[12px] sm:text-[13px] text-white/80 max-w-sm mx-auto">
                 {cameraError || 'Camera permission pending. Click button below to capture photo or retry.'}
               </p>
               <button
                 onClick={startCamera}
-                className="gov-btn-secondary text-[12px] h-8 px-3 inline-flex items-center gap-1 text-white bg-white/10 hover:bg-white/20 border-white/30"
+                className="gov-btn-secondary text-[11px] sm:text-[12px] h-8 px-3 inline-flex items-center gap-1 text-white bg-white/10 hover:bg-white/20 border-white/30"
               >
                 <RefreshCw size={12} />
                 <span>Retry Camera</span>
@@ -391,18 +393,18 @@ export default function WorkerScanPage() {
         </div>
 
         {/* Single Primary Capture Button */}
-        <div className="space-y-3 pt-2">
+        <div className="space-y-2.5 pt-1 sm:pt-2">
           <button
             onClick={handleCaptureClick}
-            className="gov-btn-primary w-full h-11 text-[15px] font-semibold"
+            className="gov-btn-primary w-full h-12 text-[15px] font-semibold shadow-sm"
           >
             <Camera className="w-5 h-5" />
             <span>Capture Badge Photo & Verify</span>
           </button>
 
           {/* File Upload Option */}
-          <div className="text-center">
-            <label className="text-[13px] text-[#596158] hover:text-[#5C822D] hover:underline cursor-pointer inline-flex items-center gap-1.5">
+          <div className="text-center pt-1">
+            <label className="text-[12px] sm:text-[13px] text-[#596158] hover:text-[#5C822D] hover:underline cursor-pointer inline-flex items-center gap-1.5 p-1">
               <Upload size={14} className="text-[#5C822D]" />
               <span>Or choose existing badge image file from disk</span>
               <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
@@ -413,41 +415,41 @@ export default function WorkerScanPage() {
 
       {/* 6 Calibrated Test Samples */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-[14px] font-bold text-[#263026] uppercase tracking-wider">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <h2 className="text-[13px] sm:text-[14px] font-bold text-[#263026] uppercase tracking-wider">
             Calibrated Chemical Darkening Test Samples:
           </h2>
-          <span className="text-[12px] text-[#7A8178]">1-Click Verification</span>
+          <span className="text-[11px] sm:text-[12px] text-[#7A8178]">1-Click Quick Verification</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
           {scenarios.map((s) => (
             <button
               key={s.id}
               onClick={() => executePipeline(s.id, s.title)}
-              className="p-4 bg-white border border-[#E7E5DE] hover:border-[#5C822D] hover:bg-[#FAFBF9] rounded-md text-left transition-all space-y-2 group"
+              className="p-3.5 sm:p-4 bg-white border border-[#E7E5DE] hover:border-[#5C822D] hover:bg-[#FAFBF9] rounded-md text-left transition-all space-y-2 group active:bg-[#EEF3E7]"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
                   <span 
                     className="w-4 h-4 rounded-full border border-[#E7E5DE] shadow-2xs flex-shrink-0"
                     style={{ backgroundColor: s.colorHex }}
                   />
-                  <span className="font-semibold text-[14px] text-[#263026] group-hover:text-[#5C822D]">
+                  <span className="font-semibold text-[13px] sm:text-[14px] text-[#263026] group-hover:text-[#5C822D] truncate">
                     {s.title}
                   </span>
                 </div>
-                <span className={`gov-badge ${s.badgeClass} text-[11px]`}>
+                <span className={`gov-badge ${s.badgeClass} text-[10px] sm:text-[11px] flex-shrink-0`}>
                   {s.badge}
                 </span>
               </div>
 
-              <p className="text-[13px] text-[#596158] leading-snug">
+              <p className="text-[12px] sm:text-[13px] text-[#596158] leading-snug">
                 {s.desc}
               </p>
 
-              <div className="flex items-center justify-between pt-1 border-t border-[#F7F6F1] text-[12px] font-mono">
-                <span className="text-[#7A8178]">Calibrated Dose: <strong className="text-[#263026]">{s.dose}</strong></span>
+              <div className="flex items-center justify-between pt-1 border-t border-[#F7F6F1] text-[11px] sm:text-[12px] font-mono">
+                <span className="text-[#7A8178]">Dose: <strong className="text-[#263026]">{s.dose}</strong></span>
                 <span className="text-[#5C822D] font-semibold flex items-center gap-1 group-hover:underline">
                   <span>Verify</span>
                   <ArrowRight size={12} />

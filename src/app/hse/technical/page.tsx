@@ -25,74 +25,74 @@ function TechnicalContent() {
   const selectedScan = scans.find(s => s.id === selectedScanId) || scans[0];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       
       {/* Header */}
-      <div className="border-b border-[#E7E5DE] pb-4">
-        <span className="text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
-          Metrology Audit & Calibration Traceability
+      <div className="border-b border-[#E7E5DE] pb-3 sm:pb-4">
+        <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
+          Metrology Audit & Traceability
         </span>
-        <h1 className="text-[24px] font-bold text-[#263026]">MRPL Metrology & Scientific Provenance</h1>
-        <p className="text-[14px] text-[#596158]">
-          Official audit review for optical image validation, CIELAB colorimetry, and calibration curve traceability
+        <h1 className="text-[18px] sm:text-[24px] font-bold text-[#263026]">MRPL Metrology & Scientific Provenance</h1>
+        <p className="text-[13px] sm:text-[14px] text-[#596158]">
+          Audit review for optical image validation, CIELAB colorimetry, & calibration curve traceability
         </p>
       </div>
 
       {/* Registry Standards Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-[13px]">
-        <div className="gov-card p-5 space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-[12px] sm:text-[13px]">
+        <div className="gov-card p-4 sm:p-5 space-y-2">
           <div className="flex items-center gap-2 font-bold text-[#263026]">
             <Cpu className="w-4 h-4 text-[#5C822D]" />
             <span>Active Inference Engine</span>
           </div>
-          <div className="space-y-1.5 bg-[#FAFBF9] p-3.5 rounded-md border border-[#E7E5DE] text-[#596158]">
-            <div className="flex justify-between"><span>Model ID:</span> <strong className="text-[#263026]">{MODEL_CONFIG.id}</strong></div>
+          <div className="space-y-1.5 bg-[#FAFBF9] p-3 sm:p-3.5 rounded-md border border-[#E7E5DE] text-[#596158]">
+            <div className="flex justify-between"><span>Model ID:</span> <strong className="text-[#263026] font-mono">{MODEL_CONFIG.id}</strong></div>
             <div className="flex justify-between"><span>Version:</span> <span>v{MODEL_CONFIG.version}</span></div>
             <div className="flex justify-between"><span>Algorithm:</span> <span>{MODEL_CONFIG.algorithm}</span></div>
             <div className="flex justify-between"><span>Status:</span> <strong className="text-[#5C822D]">{MODEL_CONFIG.status}</strong></div>
           </div>
         </div>
 
-        <div className="gov-card p-5 space-y-2">
+        <div className="gov-card p-4 sm:p-5 space-y-2">
           <div className="flex items-center gap-2 font-bold text-[#263026]">
             <Database className="w-4 h-4 text-[#5C822D]" />
             <span>Calibration Curve</span>
           </div>
-          <div className="space-y-1.5 bg-[#FAFBF9] p-3.5 rounded-md border border-[#E7E5DE] text-[#596158]">
-            <div className="flex justify-between"><span>Calibration ID:</span> <strong className="text-[#263026]">{CALIBRATION_CONFIG.id}</strong></div>
+          <div className="space-y-1.5 bg-[#FAFBF9] p-3 sm:p-3.5 rounded-md border border-[#E7E5DE] text-[#596158]">
+            <div className="flex justify-between"><span>Calibration ID:</span> <strong className="text-[#263026] font-mono">{CALIBRATION_CONFIG.id}</strong></div>
             <div className="flex justify-between"><span>Version:</span> <span>v{CALIBRATION_CONFIG.version}</span></div>
             <div className="flex justify-between"><span>Range:</span> <span>0.0 – 30.0 ppm·h</span></div>
-            <div className="flex justify-between"><span>Illuminant:</span> <span>ISO/CIE Standard D65</span></div>
+            <div className="flex justify-between"><span>Illuminant:</span> <span>ISO/CIE D65</span></div>
           </div>
         </div>
 
-        <div className="gov-card p-5 space-y-2">
+        <div className="gov-card p-4 sm:p-5 space-y-2">
           <div className="flex items-center gap-2 font-bold text-[#263026]">
             <Layers className="w-4 h-4 text-[#5C822D]" />
             <span>Chemical Substrate Specs</span>
           </div>
-          <div className="space-y-1.5 bg-[#FAFBF9] p-3.5 rounded-md border border-[#E7E5DE] text-[#596158]">
-            <div className="flex justify-between"><span>Chemistry:</span> <strong className="text-[#263026]">Cu-PAN / Bi(III) Matrix</strong></div>
-            <div className="flex justify-between"><span>Reaction:</span> <span>Copper & Bismuth Sulfide</span></div>
-            <div className="flex justify-between"><span>Fiducial Grid:</span> <span>4-Patch Color Reference</span></div>
-            <div className="flex justify-between"><span>Metric:</span> <strong className="text-[#5C822D]">CIE76 ΔE*ab in L*a*b*</strong></div>
+          <div className="space-y-1.5 bg-[#FAFBF9] p-3 sm:p-3.5 rounded-md border border-[#E7E5DE] text-[#596158]">
+            <div className="flex justify-between"><span>Chemistry:</span> <strong className="text-[#263026]">Cu-PAN / Bi(III)</strong></div>
+            <div className="flex justify-between"><span>Reaction:</span> <span>CuS & Bi₂S₃</span></div>
+            <div className="flex justify-between"><span>Fiducial Grid:</span> <span>4-Patch Grid</span></div>
+            <div className="flex justify-between"><span>Metric:</span> <strong className="text-[#5C822D]">CIE76 ΔE*ab</strong></div>
           </div>
         </div>
       </div>
 
       {/* Main Inspection Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 text-[13px]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 text-[13px]">
         
         {/* Scans Selector Column */}
         <div className="lg:col-span-4 gov-card overflow-hidden">
-          <div className="p-4 border-b border-[#E7E5DE] bg-[#FAFBF9] flex items-center justify-between text-[13px]">
+          <div className="p-3.5 sm:p-4 border-b border-[#E7E5DE] bg-[#FAFBF9] flex items-center justify-between text-[12px] sm:text-[13px]">
             <span className="font-bold text-[#263026] uppercase tracking-wider">
               Scans Log ({scans.length})
             </span>
             <span className="text-[#7A8178]">Audit Provenance</span>
           </div>
 
-          <div className="divide-y divide-[#E7E5DE] max-h-[520px] overflow-y-auto">
+          <div className="divide-y divide-[#E7E5DE] max-h-[360px] sm:max-h-[520px] overflow-y-auto">
             {scans.map(s => {
               const isSelected = s.id === selectedScan?.id;
               const r = s.exposureResult;
@@ -100,13 +100,13 @@ function TechnicalContent() {
                 <button
                   key={s.id}
                   onClick={() => setSelectedScanId(s.id)}
-                  className={`w-full p-3.5 text-left transition-all ${
+                  className={`w-full p-3 sm:p-3.5 text-left transition-all ${
                     isSelected ? 'bg-[#EEF3E7] border-l-4 border-[#5C822D]' : 'hover:bg-[#FAFBF9]'
                   }`}
                 >
                   <div className="flex justify-between items-center">
-                    <span className="font-mono text-[12px] font-bold text-[#263026]">
-                      {s.id.substring(0, 14)}...
+                    <span className="font-mono text-[11px] sm:text-[12px] font-bold text-[#263026]">
+                      {s.id.substring(0, 12)}...
                     </span>
                     <span className={`gov-badge ${
                       r?.riskStatus === RiskStatus.NORMAL
@@ -116,12 +116,12 @@ function TechnicalContent() {
                         : r?.riskStatus === RiskStatus.HIGH
                         ? 'gov-badge-high'
                         : 'gov-badge-critical'
-                    } text-[10px]`}>
+                    } text-[9px] sm:text-[10px]`}>
                       {r?.riskStatus || 'UNVERIFIED'}
                     </span>
                   </div>
 
-                  <div className="text-[12px] text-[#596158] mt-1 flex justify-between">
+                  <div className="text-[11px] sm:text-[12px] text-[#596158] mt-1 flex justify-between">
                     <span>{s.workerId} · {s.dosimeterId}</span>
                     <strong className="text-[#263026]">
                       {r?.estimatedDose !== null ? `${formatDose(r?.estimatedDose ?? 0)} ppm·h` : '—'}

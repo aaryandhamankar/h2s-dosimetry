@@ -39,96 +39,96 @@ export default function HSEOverviewPage() {
   ).slice(0, 7);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       
       {/* Page Title Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7E5DE] pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7E5DE] pb-3 sm:pb-4">
         <div>
-          <span className="text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
+          <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
             Supervisory Command Center
           </span>
-          <h1 className="text-[24px] font-bold text-[#263026]">
-            Refinery HSE Directorate Safety Overview
+          <h1 className="text-[19px] sm:text-[24px] font-bold text-[#263026]">
+            Refinery HSE Safety Overview
           </h1>
-          <p className="text-[14px] text-[#596158] mt-0.5">
+          <p className="text-[13px] sm:text-[14px] text-[#596158] mt-0.5">
             Mangalore Refinery and Petrochemicals Limited · Gas Surveillance Zone A
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
             onClick={() => window.print()}
-            className="gov-btn-secondary text-[13px] h-9"
+            className="gov-btn-secondary text-[12px] sm:text-[13px] h-9"
           >
             <Printer size={14} />
-            <span>Print Shift Audit Report</span>
+            <span>Print Report</span>
           </button>
         </div>
       </div>
 
       {/* 4 Core Operational Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         
-        <div className="gov-card p-5 space-y-2">
-          <span className="text-[12px] text-[#7A8178] font-semibold uppercase tracking-wider block">
-            Monitored Workforce
+        <div className="gov-card p-3.5 sm:p-5 space-y-1 sm:space-y-2">
+          <span className="text-[10px] sm:text-[12px] text-[#7A8178] font-semibold uppercase tracking-wider block truncate">
+            Monitored Staff
           </span>
-          <div className="text-[28px] font-bold text-[#263026] font-mono">
+          <div className="text-[22px] sm:text-[28px] font-bold text-[#263026] font-mono">
             {uniqueWorkers || 5}
           </div>
-          <span className="text-[12px] text-[#596158] block">
-            Active Shift A Personnel
+          <span className="text-[11px] sm:text-[12px] text-[#596158] block truncate">
+            Active Personnel
           </span>
         </div>
 
-        <div className="gov-card p-5 space-y-2">
-          <span className="text-[12px] text-[#7A8178] font-semibold uppercase tracking-wider block">
+        <div className="gov-card p-3.5 sm:p-5 space-y-1 sm:space-y-2">
+          <span className="text-[10px] sm:text-[12px] text-[#7A8178] font-semibold uppercase tracking-wider block truncate">
             Total Scans Logged
           </span>
-          <div className="text-[28px] font-bold text-[#5C822D] font-mono">
+          <div className="text-[22px] sm:text-[28px] font-bold text-[#5C822D] font-mono">
             {scans.length}
           </div>
-          <span className="text-[12px] text-[#35551F] font-semibold block">
-            {validScans.length} Validated ({((validScans.length / Math.max(1, scans.length)) * 100).toFixed(0)}%)
+          <span className="text-[11px] sm:text-[12px] text-[#35551F] font-semibold block truncate">
+            {validScans.length} Valid ({((validScans.length / Math.max(1, scans.length)) * 100).toFixed(0)}%)
           </span>
         </div>
 
-        <div className="gov-card p-5 space-y-2">
-          <span className="text-[12px] text-[#7A8178] font-semibold uppercase tracking-wider block">
-            Exceedance Incidents
+        <div className="gov-card p-3.5 sm:p-5 space-y-1 sm:space-y-2">
+          <span className="text-[10px] sm:text-[12px] text-[#7A8178] font-semibold uppercase tracking-wider block truncate">
+            Exceedance
           </span>
-          <div className="text-[28px] font-bold text-[#A94442] font-mono">
+          <div className="text-[22px] sm:text-[28px] font-bold text-[#A94442] font-mono">
             {riskCounts.high + riskCounts.critical}
           </div>
-          <span className="text-[12px] text-[#A94442] font-semibold block">
-            {riskCounts.critical} Critical Ceiling (&gt;20 ppm)
+          <span className="text-[11px] sm:text-[12px] text-[#A94442] font-semibold block truncate">
+            {riskCounts.critical} Critical (&gt;20 ppm)
           </span>
         </div>
 
-        <div className="gov-card p-5 space-y-2">
-          <span className="text-[12px] text-[#7A8178] font-semibold uppercase tracking-wider block">
-            Active Alert Queue
+        <div className="gov-card p-3.5 sm:p-5 space-y-1 sm:space-y-2">
+          <span className="text-[10px] sm:text-[12px] text-[#7A8178] font-semibold uppercase tracking-wider block truncate">
+            Active Alerts
           </span>
-          <div className="text-[28px] font-bold text-[#C96B32] font-mono">
+          <div className="text-[22px] sm:text-[28px] font-bold text-[#C96B32] font-mono">
             {openAlerts.length}
           </div>
-          <span className="text-[12px] text-[#596158] block">
-            Require Safety Dispatch
+          <span className="text-[11px] sm:text-[12px] text-[#596158] block truncate">
+            Require Action
           </span>
         </div>
 
       </div>
 
       {/* Safety Compliance Distribution & Active Alert Queue */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         
         {/* Exposure Distribution Breakdown */}
-        <div className="gov-card p-6 space-y-4">
+        <div className="gov-card p-4 sm:p-6 space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between border-b border-[#E7E5DE] pb-3">
-            <h2 className="text-[16px] font-bold text-[#263026]">
+            <h2 className="text-[15px] sm:text-[16px] font-bold text-[#263026]">
               Workforce Exposure Breakdown
             </h2>
-            <span className="text-[12px] text-[#7A8178]">Shift Summary</span>
+            <span className="text-[11px] sm:text-[12px] text-[#7A8178]">Shift Summary</span>
           </div>
 
           <div className="space-y-3 text-[13px]">

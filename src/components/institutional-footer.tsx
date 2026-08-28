@@ -389,22 +389,22 @@ export function InstitutionalFooter() {
             </div>
 
             {/* Modal Header */}
-            <div className="p-6 bg-white border-b border-[#E7E5DE] flex items-start justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg bg-[#EEF3E7] border border-[#C8DEC0] flex items-center justify-center text-[#5C822D] shadow-2xs">
-                  <Award className="w-6 h-6" />
+            <div className="p-4 sm:p-6 bg-white border-b border-[#E7E5DE] flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-lg bg-[#EEF3E7] border border-[#C8DEC0] flex items-center justify-center text-[#5C822D] shadow-2xs flex-shrink-0">
+                  <Award className="w-5 sm:w-6 h-5 sm:h-6" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-bold text-[#5C822D] uppercase tracking-wider font-mono">
-                      SPECIAL COMMENDATION · HACKATHON 2026
+                    <span className="text-[10px] sm:text-[11px] font-bold text-[#5C822D] uppercase tracking-wider font-mono">
+                      COMMENDATION · 2026
                     </span>
                   </div>
-                  <h3 className="text-[20px] font-bold text-[#263026]">
-                    H₂S Gas Dosimetry Innovation Directorate
+                  <h3 className="text-[16px] sm:text-[20px] font-bold text-[#263026] leading-tight">
+                    H₂S Gas Dosimetry Directorate
                   </h3>
-                  <p className="text-[13px] text-[#596158]">
-                    Wearable Passive Colorimetric Chemosensor & Optical Telemetry Platform
+                  <p className="text-[12px] sm:text-[13px] text-[#596158]">
+                    Wearable Colorimetric Chemosensor Platform
                   </p>
                 </div>
               </div>
@@ -413,48 +413,48 @@ export function InstitutionalFooter() {
                 onClick={() => setEasterEggOpen(false)}
                 className="text-[#7A8178] hover:text-[#263026] p-1.5 rounded-md hover:bg-[#F0EFE9] transition-colors"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
             {/* Team Members Grid */}
-            <div className="p-6 max-h-[60vh] overflow-y-auto space-y-4">
-              <div className="text-[12px] font-bold uppercase tracking-wider text-[#7A8178] flex items-center justify-between">
+            <div className="p-4 sm:p-6 max-h-[70vh] overflow-y-auto space-y-3 sm:space-y-4">
+              <div className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-[#7A8178] flex items-center justify-between">
                 <span>Core Project Team (6 Leads)</span>
-                <span className="text-[#5C822D] font-mono">MRPL INVENT-2026</span>
+                <span className="text-[#5C822D] font-mono">MRPL INVENT</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                 {TEAM_MEMBERS.map((m) => {
                   const Icon = m.icon;
                   return (
                     <div 
                       key={m.name}
-                      className="p-3.5 bg-white rounded-lg border border-[#E7E5DE] hover:border-[#5C822D] hover:shadow-xs transition-all space-y-1.5 group"
+                      className="p-3 sm:p-3.5 bg-white rounded-lg border border-[#E7E5DE] hover:border-[#5C822D] hover:shadow-xs transition-all space-y-1.5 group"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded bg-[#EEF3E7] text-[#5C822D] flex items-center justify-center flex-shrink-0 group-hover:bg-[#5C822D] group-hover:text-white transition-colors">
-                            <Icon size={15} />
+                          <div className="w-6 sm:w-7 h-6 sm:h-7 rounded bg-[#EEF3E7] text-[#5C822D] flex items-center justify-center flex-shrink-0 group-hover:bg-[#5C822D] group-hover:text-white transition-colors">
+                            <Icon size={14} />
                           </div>
                           <div>
-                            <div className="font-bold text-[14px] text-[#263026] group-hover:text-[#5C822D] leading-tight">
+                            <div className="font-bold text-[13px] sm:text-[14px] text-[#263026] group-hover:text-[#5C822D] leading-tight">
                               {m.name}
                             </div>
-                            <div className="text-[11px] text-[#7A8178] font-mono">{m.code}</div>
+                            <div className="text-[10px] sm:text-[11px] text-[#7A8178] font-mono">{m.code}</div>
                           </div>
                         </div>
 
-                        <span className="gov-badge gov-badge-normal text-[9px] py-0.5 px-2">
+                        <span className="gov-badge gov-badge-normal text-[8px] sm:text-[9px] py-0.5 px-1.5">
                           {m.badge}
                         </span>
                       </div>
 
-                      <div className="text-[12px] font-semibold text-[#35551F] pt-0.5">
+                      <div className="text-[11px] sm:text-[12px] font-semibold text-[#35551F] pt-0.5">
                         {m.role}
                       </div>
 
-                      <div className="text-[11px] text-[#596158] bg-[#FAFBF9] p-2 rounded border border-[#E7E5DE] font-mono">
+                      <div className="text-[10px] sm:text-[11px] text-[#596158] bg-[#FAFBF9] p-1.5 rounded border border-[#E7E5DE] font-mono">
                         💡 {m.highlight}
                       </div>
                     </div>
@@ -463,42 +463,42 @@ export function InstitutionalFooter() {
               </div>
 
               {/* Scientific System Badge */}
-              <div className="p-4 bg-[#EEF3E7] rounded-lg border border-[#C8DEC0] text-[12px] space-y-1 text-[#35551F]">
+              <div className="p-3 sm:p-4 bg-[#EEF3E7] rounded-lg border border-[#C8DEC0] text-[11px] sm:text-[12px] space-y-1 text-[#35551F]">
                 <div className="font-bold flex items-center gap-1.5">
-                  <CheckCircle2 size={15} className="text-[#5C822D]" />
+                  <CheckCircle2 size={14} className="text-[#5C822D]" />
                   <span>Validated Innovation Principles</span>
                 </div>
                 <p className="opacity-90">
-                  Lead-free optical chemosensing (Copper-PAN & Bismuth matrix) · Bradford Chromatic Normalization under ISO/CIE D65 · Deterministic Edge Inference.
+                  Lead-free optical chemosensing (Copper-PAN & Bismuth matrix) · Bradford Chromatic Normalization under ISO/CIE D65.
                 </p>
               </div>
             </div>
 
             {/* Modal Action Footer */}
-            <div className="p-4 bg-white border-t border-[#E7E5DE] flex items-center justify-between text-[12px]">
-              <div className="text-[#7A8178]">
+            <div className="p-3.5 sm:p-4 bg-white border-t border-[#E7E5DE] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-[12px]">
+              <div className="text-[#7A8178] text-center sm:text-left">
                 {celebrating ? (
-                  <span className="text-[#5C822D] font-bold animate-pulse flex items-center gap-1.5">
+                  <span className="text-[#5C822D] font-bold animate-pulse flex items-center justify-center sm:justify-start gap-1.5">
                     <Sparkles size={14} className="text-[#FF9933]" />
-                    <span>🎉 Celebrating the 2026 Hackathon Team!</span>
+                    <span>🎉 Celebrating Team!</span>
                   </span>
                 ) : (
-                  <span>Created for National Gas Safety & Public-Sector Excellence</span>
+                  <span>National Gas Safety & Excellence</span>
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 justify-end">
                 <button
                   onClick={triggerCelebration}
-                  className="gov-btn-primary text-[12px] h-8 px-3 font-semibold flex items-center gap-1.5 shadow-xs hover:shadow-sm"
+                  className="gov-btn-primary text-[11px] sm:text-[12px] h-8 px-3 font-semibold flex items-center gap-1.5 shadow-xs hover:shadow-sm flex-1 sm:flex-initial justify-center"
                 >
-                  <span className="text-[14px]">🥳</span>
+                  <span className="text-[13px]">🥳</span>
                   <span>Celebrate Team</span>
                 </button>
 
                 <button
                   onClick={() => setEasterEggOpen(false)}
-                  className="gov-btn-secondary text-[12px] h-8 px-3"
+                  className="gov-btn-secondary text-[11px] sm:text-[12px] h-8 px-3 flex-1 sm:flex-initial justify-center"
                 >
                   <span>Close</span>
                 </button>

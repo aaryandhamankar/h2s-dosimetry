@@ -41,11 +41,11 @@ export function AccessibilityBar({ onOpenSearch }: { onOpenSearch?: () => void }
   };
 
   return (
-    <div className="bg-[#F0EFE9] text-[#596158] text-[12px] px-4 sm:px-8 py-1 select-none border-b border-[#E7E5DE]">
-      <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-3 h-6">
+    <div className="bg-[#F0EFE9] text-[#596158] text-[11px] sm:text-[12px] px-3 sm:px-8 py-1 select-none border-b border-[#E7E5DE]">
+      <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-2 min-h-6">
         
         {/* Left: Skip Link + Date & Shift Clock */}
-        <div className="flex items-center gap-3 text-[12px]">
+        <div className="flex items-center gap-2 text-[11px] sm:text-[12px] overflow-hidden">
           <a
             href="#main-content"
             className="sr-only focus:not-sr-only focus:bg-[#5C822D] focus:text-white focus:px-2 focus:py-0.5 focus:rounded text-xs"
@@ -53,18 +53,18 @@ export function AccessibilityBar({ onOpenSearch }: { onOpenSearch?: () => void }
             Skip to main content
           </a>
 
-          <div className="flex items-center gap-2 text-[#596158]">
-            <span className="flex items-center gap-1.5">
-              <CalendarIcon size={12} className="text-[#7A8178]" />
+          <div className="flex items-center gap-1.5 sm:gap-2 text-[#596158] truncate">
+            <span className="hidden xs:flex items-center gap-1">
+              <CalendarIcon size={11} className="text-[#7A8178]" />
               <span>{currentDate || '28 Aug 2026'}</span>
             </span>
-            <span className="text-[#D5D2C9]">|</span>
-            <span className="flex items-center gap-1.5 font-mono">
-              <Clock size={12} className="text-[#7A8178]" />
+            <span className="text-[#D5D2C9] hidden xs:inline">|</span>
+            <span className="flex items-center gap-1 font-mono">
+              <Clock size={11} className="text-[#7A8178]" />
               <span>{currentTime || '12:55'}</span>
             </span>
-            <span className="text-[#D5D2C9] hidden sm:inline">|</span>
-            <span className="hidden sm:inline text-[#35551F] font-semibold text-[11px]">
+            <span className="text-[#D5D2C9] hidden md:inline">|</span>
+            <span className="hidden md:inline text-[#35551F] font-semibold text-[11px]">
               Shift A (06:00 – 14:00 IST)
             </span>
           </div>
