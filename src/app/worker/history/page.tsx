@@ -1,116 +1,343 @@
 'use client';
 
 import { useAppStore } from '@/stores/app-store';
-import { ChevronRight, History, Camera } from 'lucide-react';
+import { 
+  ChevronRight, 
+  History as HistoryIcon, 
+  Camera, 
+  User, 
+  Edit3, 
+  X, 
+  Save, 
+  ShieldCheck, 
+  AlertTriangle, 
+  CheckCircle2, 
+  Clock, 
+  ArrowRight,
+  Layers
+} from 'lucide-react';
 import { formatDateTime, formatDose } from '@/lib/utils';
-import { ValidityStatus, RiskStatus } from '@/types';
+import { ValidityStatus, RiskStatus, ShiftStatus } from '@/types';
+import { useState } from 'react';
 import Link from 'next/link';
 
 export default function HistoryPage() {
-  const { scans, currentUser } = useAppStore();
+  const { 
+    scans, 
+    currentUser, 
+    activeShift, 
+    activeDosimeter, 
+    updateUserProfile 
+  } = useAppStore();
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editName, setEditName] = useState(currentUser?.displayName || 'Rajesh Kumar');
+  const [editDept, setEditDept] = useState(currentUser?.department || 'Operations');
+  const [editSite, setEditSite] = useState(currentUser?.site || 'Refinery Zone A');
+  const [editCode, setEditCode] = useState(currentUser?.workerCode || 'W-001');
 
   const userScans = scans
     .filter(s => !currentUser || s.workerId === currentUser.id)
     .sort((a, b) => new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime());
 
+  const latestScan = userScans[0] || null;
+
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateUserProfile({
+      displayName: editName,
+      department: editDept,
+      site: editSite,
+      workerCode: editCode,
+    });
+    setEditModalOpen(false);
+  };
+
+  const getActionSummary = (status?: RiskStatus) => {
+    if (status === RiskStatus.CRITICAL) return 'Evacuate area immediately & report to muster point';
+    if (status === RiskStatus.HIGH) return 'Action required: verify PPE and notify shift lead';
+    if (status === RiskStatus.ELEVATED) return 'Caution advised: check area ventilation';
+    return 'Normal operations: within safe permissible limit';
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
       
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E7E5DE] pb-3 sm:pb-4">
-        <div>
-          <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
-            Occupational Dossier
-          </span>
-          <h1 className="text-[18px] sm:text-[22px] font-bold text-[#263026]">Personal Exposure History Ledger</h1>
-          <p className="text-[13px] sm:text-[14px] text-[#596158]">Official chronological ledger of personal dosimeter readings</p>
-        </div>
-        <span className="gov-badge gov-badge-normal text-[11px] sm:text-[12px] self-start sm:self-auto">
-          {userScans.length} Total Records
-        </span>
-      </div>
-
-      {/* History Records List */}
-      {userScans.length === 0 ? (
-        <div className="gov-card p-6 sm:p-10 text-center space-y-3">
-          <History className="w-8 sm:w-10 h-8 sm:h-10 text-[#7A8178] mx-auto" />
-          <h2 className="text-[15px] sm:text-[16px] font-bold text-[#263026]">No Exposure Records Found</h2>
-          <p className="text-[13px] sm:text-[14px] text-[#596158] max-w-sm mx-auto">
-            You have not recorded any dosimeter readings yet. Use the Scan Dosimeter tab at the conclusion of your shift.
-          </p>
-        </div>
-      ) : (
-        <div className="gov-card overflow-hidden">
-          <div className="p-3.5 sm:p-4 border-b border-[#E7E5DE] bg-[#FAFBF9] text-[12px] sm:text-[13px] font-bold text-[#263026] uppercase tracking-wider flex items-center justify-between">
-            <span>Verified Shift History</span>
-            <span className="text-[#7A8178] text-[11px] sm:text-[12px]">Newest First</span>
+      {/* 1. LAST SCAN PROMINENT HIGHLIGHT CARD */}
+      {latestScan ? (
+        <div className="gov-card p-4 sm:p-6 border-2 border-[#5C822D]/30 space-y-3 sm:space-y-4">
+          <div className="flex items-center justify-between border-b border-[#E7E5DE] pb-2.5">
+            <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider flex items-center gap-1.5">
+              <Clock className="w-4 h-4" /> Latest Exposure Reading (Last Scan)
+            </span>
+            <span className="text-[11px] sm:text-[12px] text-[#7A8178]">
+              {formatDateTime(latestScan.capturedAt)}
+            </span>
           </div>
 
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className={`gov-badge ${
+                  latestScan.exposureResult?.riskStatus === RiskStatus.NORMAL
+                    ? 'gov-badge-normal'
+                    : latestScan.exposureResult?.riskStatus === RiskStatus.ELEVATED
+                    ? 'gov-badge-elevated'
+                    : latestScan.exposureResult?.riskStatus === RiskStatus.HIGH
+                    ? 'gov-badge-high'
+                    : 'gov-badge-critical'
+                } text-[11px] sm:text-[12px]`}>
+                  {latestScan.exposureResult?.riskStatus || 'VERIFIED'}
+                </span>
+                <span className="font-mono text-[12px] text-[#596158]">
+                  Badge: <strong className="text-[#263026]">{latestScan.dosimeterId}</strong>
+                </span>
+              </div>
+
+              <div className="text-[12px] sm:text-[13px] text-[#596158] pt-0.5">
+                <strong>Action:</strong> {getActionSummary(latestScan.exposureResult?.riskStatus)}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 self-end sm:self-center">
+              <div className="text-right">
+                <div className="text-[24px] sm:text-[28px] font-black text-[#263026] font-mono leading-none">
+                  {latestScan.exposureResult?.estimatedDose !== null && latestScan.exposureResult?.estimatedDose !== undefined
+                    ? `${formatDose(latestScan.exposureResult.estimatedDose)} ${latestScan.exposureResult.doseUnit}`
+                    : 'Unverified'}
+                </div>
+                <div className="text-[11px] text-[#7A8178] mt-0.5">
+                  8h TWA: {latestScan.exposureResult?.estimatedTwa !== null && latestScan.exposureResult?.estimatedTwa !== undefined ? `${formatDose(latestScan.exposureResult.estimatedTwa)} ppm` : 'N/A'}
+                </div>
+              </div>
+
+              <Link
+                href={`/worker/result?scanId=${latestScan.id}`}
+                className="gov-btn-primary h-10 px-3 text-[12px] sm:text-[13px] font-semibold flex items-center gap-1 shadow-xs"
+              >
+                <span>Details</span>
+                <ChevronRight size={14} />
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="gov-card p-4 text-center text-[13px] text-[#7A8178]">
+          No previous scan recorded yet. Use the scanner tab to log your first reading.
+        </div>
+      )}
+
+      {/* 2. WORKER PROFILE DETAILS CARD & EDIT FORM */}
+      <div className="gov-card p-4 sm:p-5 space-y-3">
+        <div className="flex items-center justify-between border-b border-[#E7E5DE] pb-2.5">
+          <div className="flex items-center gap-2">
+            <User className="w-4 h-4 text-[#5C822D]" />
+            <h2 className="text-[14px] sm:text-[15px] font-bold text-[#263026]">
+              Worker Profile Dossier
+            </h2>
+          </div>
+
+          <button
+            onClick={() => {
+              setEditName(currentUser?.displayName || 'Rajesh Kumar');
+              setEditDept(currentUser?.department || 'Operations');
+              setEditSite(currentUser?.site || 'Refinery Zone A');
+              setEditCode(currentUser?.workerCode || 'W-001');
+              setEditModalOpen(true);
+            }}
+            className="p-1.5 px-2.5 rounded-md bg-[#F7F6F1] hover:bg-[#F0EFE9] border border-[#E7E5DE] text-[#263026] text-[12px] font-semibold flex items-center gap-1.5 transition-colors"
+          >
+            <Edit3 size={13} className="text-[#5C822D]" />
+            <span>Edit Details</span>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-[12px] sm:text-[13px]">
+          <div className="bg-[#FAFBF9] p-2.5 rounded border border-[#E7E5DE]">
+            <span className="text-[10px] text-[#7A8178] uppercase font-bold block">Operator Name</span>
+            <strong className="text-[#263026] truncate block">{currentUser?.displayName || 'Rajesh Kumar'}</strong>
+          </div>
+          <div className="bg-[#FAFBF9] p-2.5 rounded border border-[#E7E5DE]">
+            <span className="text-[10px] text-[#7A8178] uppercase font-bold block">Worker Code</span>
+            <span className="text-[#263026] font-mono font-bold">{currentUser?.workerCode || 'W-001'}</span>
+          </div>
+          <div className="bg-[#FAFBF9] p-2.5 rounded border border-[#E7E5DE]">
+            <span className="text-[10px] text-[#7A8178] uppercase font-bold block">Department</span>
+            <span className="text-[#263026] truncate block">{currentUser?.department || 'Operations'}</span>
+          </div>
+          <div className="bg-[#FAFBF9] p-2.5 rounded border border-[#E7E5DE]">
+            <span className="text-[10px] text-[#7A8178] uppercase font-bold block">Work Area</span>
+            <span className="text-[#263026] truncate block">{currentUser?.site || 'Refinery Zone A'}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. RECENT / HISTORICAL READINGS LIST (Clean, Compact Mobile Cards) */}
+      <div className="gov-card overflow-hidden">
+        <div className="p-3.5 sm:p-4 border-b border-[#E7E5DE] bg-[#FAFBF9] text-[12px] sm:text-[13px] font-bold text-[#263026] uppercase tracking-wider flex items-center justify-between">
+          <span className="flex items-center gap-1.5">
+            <HistoryIcon size={14} className="text-[#5C822D]" />
+            <span>Exposure Scan Ledger ({userScans.length})</span>
+          </span>
+          <span className="text-[#7A8178] text-[11px] sm:text-[12px]">Chronological</span>
+        </div>
+
+        {userScans.length === 0 ? (
+          <div className="p-8 text-center space-y-2">
+            <HistoryIcon className="w-8 h-8 text-[#7A8178] mx-auto" />
+            <p className="text-[13px] text-[#596158]">No exposure readings logged yet.</p>
+          </div>
+        ) : (
           <div className="divide-y divide-[#E7E5DE]">
             {userScans.map((scan) => {
               const res = scan.exposureResult;
               const isValid = res?.validityStatus === ValidityStatus.VALID;
 
-              let badge = <span className="gov-badge gov-badge-normal text-[11px]">Normal</span>;
+              let badge = <span className="gov-badge gov-badge-normal text-[10px] sm:text-[11px]">Normal</span>;
               if (res?.riskStatus === RiskStatus.ELEVATED) {
-                badge = <span className="gov-badge gov-badge-elevated text-[11px]">Elevated</span>;
+                badge = <span className="gov-badge gov-badge-elevated text-[10px] sm:text-[11px]">Elevated</span>;
               } else if (res?.riskStatus === RiskStatus.HIGH) {
-                badge = <span className="gov-badge gov-badge-high text-[11px]">High</span>;
+                badge = <span className="gov-badge gov-badge-high text-[10px] sm:text-[11px]">High</span>;
               } else if (res?.riskStatus === RiskStatus.CRITICAL) {
-                badge = <span className="gov-badge gov-badge-critical text-[11px]">Critical</span>;
+                badge = <span className="gov-badge gov-badge-critical text-[10px] sm:text-[11px]">Critical</span>;
               } else if (!isValid) {
-                badge = <span className="gov-badge gov-badge-neutral text-[11px]">Unverified</span>;
+                badge = <span className="gov-badge gov-badge-neutral text-[10px] sm:text-[11px]">Unverified</span>;
               }
 
               return (
                 <Link
                   key={scan.id}
                   href={`/worker/result?scanId=${scan.id}`}
-                  className="p-3.5 sm:p-5 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 hover:bg-[#FAFBF9] transition-colors block group"
+                  className="p-3 sm:p-4 flex items-center justify-between gap-3 hover:bg-[#FAFBF9] transition-colors group"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {/* Badge Snapshot thumbnail */}
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                     {scan.capturedImageUrl ? (
-                      <div className="w-12 sm:w-14 h-10 sm:h-11 rounded border border-[#E7E5DE] overflow-hidden bg-black flex-shrink-0 shadow-2xs">
+                      <div className="w-11 sm:w-13 h-9 sm:h-10 rounded border border-[#E7E5DE] overflow-hidden bg-black flex-shrink-0">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={scan.capturedImageUrl} alt="Badge Thumbnail" className="w-full h-full object-cover" />
+                        <img src={scan.capturedImageUrl} alt="Badge" className="w-full h-full object-cover" />
                       </div>
                     ) : (
-                      <div className="w-10 sm:w-11 h-10 sm:h-11 rounded bg-[#F7F6F1] border border-[#E7E5DE] flex items-center justify-center text-[#7A8178] flex-shrink-0">
-                        <Camera size={16} />
+                      <div className="w-9 h-9 rounded bg-[#F7F6F1] border border-[#E7E5DE] flex items-center justify-center text-[#7A8178] flex-shrink-0">
+                        <Camera size={15} />
                       </div>
                     )}
 
-                    <div className="space-y-0.5 min-w-0">
-                      <div className="font-semibold text-[13px] sm:text-[15px] text-[#263026] group-hover:text-[#5C822D] truncate">
+                    <div className="min-w-0 space-y-0.5">
+                      <div className="font-semibold text-[13px] sm:text-[14px] text-[#263026] group-hover:text-[#5C822D] truncate">
                         {formatDateTime(scan.capturedAt)}
                       </div>
-                      <div className="text-[11px] sm:text-[12px] text-[#596158] font-mono truncate">
-                        Badge: <strong className="text-[#263026]">{scan.dosimeterId}</strong> · ID: {scan.id.substring(0, 10)}...
+                      <div className="text-[11px] text-[#596158] font-mono truncate">
+                        Badge: {scan.dosimeterId} · {currentUser?.site || 'Zone A'}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between xs:justify-end gap-3 w-full xs:w-auto pt-2 xs:pt-0 border-t xs:border-t-0 border-[#F0EFE9]">
-                    <div className="text-left xs:text-right">
-                      <div className="text-[15px] sm:text-[17px] font-bold text-[#263026] font-mono">
+                  <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
+                    <div className="text-right">
+                      <div className="text-[14px] sm:text-[16px] font-bold text-[#263026] font-mono">
                         {res?.estimatedDose !== null && res?.estimatedDose !== undefined
                           ? `${formatDose(res.estimatedDose)} ${res.doseUnit}`
                           : 'Unverified'}
                       </div>
-                      <div className="text-[11px] text-[#7A8178]">
-                        8h TWA: {res?.estimatedTwa !== null && res?.estimatedTwa !== undefined ? `${formatDose(res.estimatedTwa)} ppm` : 'N/A'}
+                      <div className="text-[10px] text-[#7A8178]">
+                        TWA: {res?.estimatedTwa !== null && res?.estimatedTwa !== undefined ? `${formatDose(res.estimatedTwa)} ppm` : '—'}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       {badge}
-                      <ChevronRight size={16} className="text-[#7A8178] group-hover:text-[#5C822D] hidden sm:inline" />
+                      <ChevronRight size={15} className="text-[#7A8178] group-hover:text-[#5C822D] hidden xs:inline" />
                     </div>
                   </div>
                 </Link>
               );
             })}
+          </div>
+        )}
+      </div>
+
+      {/* EDIT PROFILE MODAL */}
+      {editModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-2xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-md w-full shadow-2xl border border-[#E7E5DE] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            
+            <div className="p-4 border-b border-[#E7E5DE] flex items-center justify-between bg-[#FAFBF9]">
+              <div className="flex items-center gap-2 font-bold text-[15px] text-[#263026]">
+                <Edit3 className="w-4 h-4 text-[#5C822D]" />
+                <span>Edit Profile Details</span>
+              </div>
+              <button 
+                onClick={() => setEditModalOpen(false)}
+                className="text-[#7A8178] hover:text-[#263026] p-1 rounded hover:bg-[#F0EFE9]"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProfile} className="p-4 sm:p-5 space-y-3.5 text-[13px]">
+              <div>
+                <label className="font-semibold text-[#263026] block mb-1">Full Name:</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full p-2.5 border border-[#D5D2C9] rounded-md bg-white text-[#263026] focus:outline-2 focus:outline-[#5C822D]"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-[#263026] block mb-1">Worker Code:</label>
+                  <input
+                    type="text"
+                    value={editCode}
+                    onChange={(e) => setEditCode(e.target.value)}
+                    className="w-full p-2.5 border border-[#D5D2C9] rounded-md bg-white text-[#263026] font-mono focus:outline-2 focus:outline-[#5C822D]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-[#263026] block mb-1">Department:</label>
+                  <input
+                    type="text"
+                    value={editDept}
+                    onChange={(e) => setEditDept(e.target.value)}
+                    className="w-full p-2.5 border border-[#D5D2C9] rounded-md bg-white text-[#263026] focus:outline-2 focus:outline-[#5C822D]"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-semibold text-[#263026] block mb-1">Assigned Plant Work Area:</label>
+                <input
+                  type="text"
+                  value={editSite}
+                  onChange={(e) => setEditSite(e.target.value)}
+                  className="w-full p-2.5 border border-[#D5D2C9] rounded-md bg-white text-[#263026] focus:outline-2 focus:outline-[#5C822D]"
+                  required
+                />
+              </div>
+
+              <div className="pt-3 border-t border-[#E7E5DE] flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditModalOpen(false)}
+                  className="gov-btn-secondary text-[12px] h-9 px-3"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="gov-btn-primary text-[12px] h-9 px-4 font-semibold flex items-center gap-1.5"
+                >
+                  <Save size={14} />
+                  <span>Save Profile</span>
+                </button>
+              </div>
+            </form>
+
           </div>
         </div>
       )}
@@ -118,3 +345,4 @@ export default function HistoryPage() {
     </div>
   );
 }
+

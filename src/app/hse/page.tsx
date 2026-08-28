@@ -5,7 +5,16 @@ import { useAppStore } from '@/stores/app-store';
 import { RiskStatus, AlertStatus, ValidityStatus } from '@/types';
 import {
   Printer,
-  ChevronRight
+  ChevronRight,
+  AlertTriangle,
+  CheckCircle2,
+  Users,
+  TrendingUp,
+  Cpu,
+  ChevronDown,
+  ShieldCheck,
+  Activity,
+  Layers
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatDose, formatDateTime } from '@/lib/utils';
@@ -13,6 +22,7 @@ import { formatDose, formatDateTime } from '@/lib/utils';
 export default function HSEOverviewPage() {
   const { scans, alerts } = useAppStore();
   const [mounted, setMounted] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -36,7 +46,7 @@ export default function HSEOverviewPage() {
 
   const recentScans = [...scans].sort((a, b) =>
     new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime()
-  ).slice(0, 7);
+  ).slice(0, 6);
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -47,11 +57,11 @@ export default function HSEOverviewPage() {
           <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
             Supervisory Command Center
           </span>
-          <h1 className="text-[19px] sm:text-[24px] font-bold text-[#263026]">
-            Refinery HSE Safety Overview
+          <h1 className="text-[18px] sm:text-[24px] font-bold text-[#263026]">
+            Plant Safety & Exposure Dashboard
           </h1>
-          <p className="text-[13px] sm:text-[14px] text-[#596158] mt-0.5">
-            Mangalore Refinery and Petrochemicals Limited · Gas Surveillance Zone A
+          <p className="text-[12px] sm:text-[14px] text-[#596158] mt-0.5">
+            Refinery Zone A · Gas Dosimetry Surveillance
           </p>
         </div>
 
@@ -66,75 +76,99 @@ export default function HSEOverviewPage() {
         </div>
       </div>
 
-      {/* 4 Core Operational Metric Cards */}
+      {/* TIER 1: ACTIVE ALERTS BANNER (If open alerts exist) */}
+      {openAlerts.length > 0 && (
+        <div className="p-3.5 sm:p-4 rounded-lg bg-[#F7EAEA] border-2 border-[#F0C4C4] text-[#A94442] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="w-5 h-5 flex-shrink-0 animate-pulse" />
+            <div>
+              <strong className="text-[14px] block">
+                {openAlerts.length} Unacknowledged Safety Limit Alert{openAlerts.length > 1 ? 's' : ''}
+              </strong>
+              <span className="text-[12px] text-[#A94442]/90">
+                Personnel dosimeter threshold exceedances require supervisory triage.
+              </span>
+            </div>
+          </div>
+
+          <Link
+            href="/hse/alerts"
+            className="gov-btn-primary bg-[#A94442] hover:bg-[#8F3331] text-white text-[12px] sm:text-[13px] h-8 px-3.5 self-start sm:self-auto shadow-xs"
+          >
+            <span>Review & Acknowledge →</span>
+          </Link>
+        </div>
+      )}
+
+      {/* TIER 1: 4 CORE ESSENTIAL KPI METRIC CARDS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         
-        <div className="gov-card p-3.5 sm:p-5 space-y-1 sm:space-y-2">
-          <span className="text-[10px] sm:text-[12px] text-[#7A8178] font-semibold uppercase tracking-wider block truncate">
+        <div className="gov-card p-3.5 sm:p-5 space-y-1">
+          <span className="text-[10px] sm:text-[11px] text-[#7A8178] font-bold uppercase tracking-wider block truncate">
             Monitored Staff
           </span>
-          <div className="text-[22px] sm:text-[28px] font-bold text-[#263026] font-mono">
+          <div className="text-[24px] sm:text-[30px] font-bold text-[#263026] font-mono leading-none">
             {uniqueWorkers || 5}
           </div>
-          <span className="text-[11px] sm:text-[12px] text-[#596158] block truncate">
-            Active Personnel
+          <span className="text-[11px] sm:text-[12px] text-[#596158] block truncate pt-0.5">
+            Active in Zone A
           </span>
         </div>
 
-        <div className="gov-card p-3.5 sm:p-5 space-y-1 sm:space-y-2">
-          <span className="text-[10px] sm:text-[12px] text-[#7A8178] font-semibold uppercase tracking-wider block truncate">
+        <div className="gov-card p-3.5 sm:p-5 space-y-1">
+          <span className="text-[10px] sm:text-[11px] text-[#7A8178] font-bold uppercase tracking-wider block truncate">
             Total Scans Logged
           </span>
-          <div className="text-[22px] sm:text-[28px] font-bold text-[#5C822D] font-mono">
+          <div className="text-[24px] sm:text-[30px] font-bold text-[#5C822D] font-mono leading-none">
             {scans.length}
           </div>
-          <span className="text-[11px] sm:text-[12px] text-[#35551F] font-semibold block truncate">
+          <span className="text-[11px] sm:text-[12px] text-[#35551F] font-semibold block truncate pt-0.5">
             {validScans.length} Valid ({((validScans.length / Math.max(1, scans.length)) * 100).toFixed(0)}%)
           </span>
         </div>
 
-        <div className="gov-card p-3.5 sm:p-5 space-y-1 sm:space-y-2">
-          <span className="text-[10px] sm:text-[12px] text-[#7A8178] font-semibold uppercase tracking-wider block truncate">
-            Exceedance
+        <div className="gov-card p-3.5 sm:p-5 space-y-1">
+          <span className="text-[10px] sm:text-[11px] text-[#7A8178] font-bold uppercase tracking-wider block truncate">
+            Exceedance (&gt;10 ppm)
           </span>
-          <div className="text-[22px] sm:text-[28px] font-bold text-[#A94442] font-mono">
+          <div className={`text-[24px] sm:text-[30px] font-bold font-mono leading-none ${riskCounts.high + riskCounts.critical > 0 ? 'text-[#A94442]' : 'text-[#263026]'}`}>
             {riskCounts.high + riskCounts.critical}
           </div>
-          <span className="text-[11px] sm:text-[12px] text-[#A94442] font-semibold block truncate">
-            {riskCounts.critical} Critical (&gt;20 ppm)
+          <span className="text-[11px] sm:text-[12px] text-[#A94442] font-semibold block truncate pt-0.5">
+            {riskCounts.critical} Critical (&gt;20 ppm·h)
           </span>
         </div>
 
-        <div className="gov-card p-3.5 sm:p-5 space-y-1 sm:space-y-2">
-          <span className="text-[10px] sm:text-[12px] text-[#7A8178] font-semibold uppercase tracking-wider block truncate">
-            Active Alerts
+        <div className="gov-card p-3.5 sm:p-5 space-y-1">
+          <span className="text-[10px] sm:text-[11px] text-[#7A8178] font-bold uppercase tracking-wider block truncate">
+            Open Alerts
           </span>
-          <div className="text-[22px] sm:text-[28px] font-bold text-[#C96B32] font-mono">
+          <div className={`text-[24px] sm:text-[30px] font-bold font-mono leading-none ${openAlerts.length > 0 ? 'text-[#C96B32]' : 'text-[#5C822D]'}`}>
             {openAlerts.length}
           </div>
-          <span className="text-[11px] sm:text-[12px] text-[#596158] block truncate">
-            Require Action
+          <span className="text-[11px] sm:text-[12px] text-[#596158] block truncate pt-0.5">
+            {openAlerts.length > 0 ? 'Requires Action' : 'All Clear'}
           </span>
         </div>
 
       </div>
 
-      {/* Safety Compliance Distribution & Active Alert Queue */}
+      {/* TIER 2: USEFUL SUPPORTING INFORMATION (Exposure Distribution & Recent Scans) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         
         {/* Exposure Distribution Breakdown */}
-        <div className="gov-card p-4 sm:p-6 space-y-3 sm:space-y-4">
-          <div className="flex items-center justify-between border-b border-[#E7E5DE] pb-3">
-            <h2 className="text-[15px] sm:text-[16px] font-bold text-[#263026]">
-              Workforce Exposure Breakdown
+        <div className="gov-card p-4 sm:p-5 space-y-3">
+          <div className="flex items-center justify-between border-b border-[#E7E5DE] pb-2.5">
+            <h2 className="text-[14px] sm:text-[15px] font-bold text-[#263026]">
+              Workforce Risk Distribution
             </h2>
-            <span className="text-[11px] sm:text-[12px] text-[#7A8178]">Shift Summary</span>
+            <span className="text-[11px] text-[#7A8178]">Active Shift</span>
           </div>
 
-          <div className="space-y-3 text-[13px]">
+          <div className="space-y-2 text-[12px] sm:text-[13px]">
             <div className="flex items-center justify-between p-2.5 rounded bg-[#FAFBF9] border border-[#E7E5DE]">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#5C822D]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#5C822D]" />
                 <span className="font-semibold text-[#263026]">Normal (&lt;5 ppm·h)</span>
               </div>
               <span className="font-bold text-[#263026] font-mono">{riskCounts.normal}</span>
@@ -142,7 +176,7 @@ export default function HSEOverviewPage() {
 
             <div className="flex items-center justify-between p-2.5 rounded bg-[#FAFBF9] border border-[#E7E5DE]">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#C96B32]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#D99B26]" />
                 <span className="font-semibold text-[#263026]">Elevated (5–15 ppm·h)</span>
               </div>
               <span className="font-bold text-[#263026] font-mono">{riskCounts.elevated}</span>
@@ -150,7 +184,7 @@ export default function HSEOverviewPage() {
 
             <div className="flex items-center justify-between p-2.5 rounded bg-[#FAFBF9] border border-[#E7E5DE]">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#D47A32]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#C96B32]" />
                 <span className="font-semibold text-[#263026]">High (15–20 ppm·h)</span>
               </div>
               <span className="font-bold text-[#263026] font-mono">{riskCounts.high}</span>
@@ -158,28 +192,25 @@ export default function HSEOverviewPage() {
 
             <div className="flex items-center justify-between p-2.5 rounded bg-[#FAFBF9] border border-[#E7E5DE]">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#A94442]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#A94442]" />
                 <span className="font-semibold text-[#263026]">Critical (&gt;20 ppm·h)</span>
               </div>
               <span className="font-bold text-[#263026] font-mono">{riskCounts.critical}</span>
             </div>
           </div>
 
-          <div className="pt-2 border-t border-[#E7E5DE]">
-            <Link
-              href="/hse/exposure"
-              className="text-[13px] text-[#5C822D] font-semibold hover:underline flex items-center justify-between"
-            >
-              <span>View Full Analytics Trends</span>
-              <ChevronRight size={14} />
+          <div className="pt-2 border-t border-[#E7E5DE] flex justify-between items-center text-[12px]">
+            <Link href="/hse/exposure" className="text-[#5C822D] font-semibold hover:underline flex items-center gap-1">
+              <span>View Analytics Trends</span>
+              <ChevronRight size={13} />
             </Link>
           </div>
         </div>
 
-        {/* Real-Time Shift Scan Telemetry Table */}
-        <div className="gov-card p-6 space-y-4 lg:col-span-2">
-          <div className="flex items-center justify-between border-b border-[#E7E5DE] pb-3">
-            <h2 className="text-[16px] font-bold text-[#263026]">
+        {/* Real-Time Personnel Telemetry Feed (Responsive Table on Desktop, Cards on Mobile) */}
+        <div className="gov-card p-4 sm:p-5 space-y-3 lg:col-span-2">
+          <div className="flex items-center justify-between border-b border-[#E7E5DE] pb-2.5">
+            <h2 className="text-[14px] sm:text-[15px] font-bold text-[#263026]">
               Real-Time Personnel Verification Feed
             </h2>
             <Link
@@ -190,15 +221,15 @@ export default function HSEOverviewPage() {
             </Link>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Desktop Table View */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-left text-[13px]">
               <thead>
-                <tr className="border-b border-[#E7E5DE] text-[#7A8178] text-[12px] uppercase">
+                <tr className="border-b border-[#E7E5DE] text-[#7A8178] text-[11px] uppercase">
                   <th className="pb-2 font-semibold">Timestamp</th>
                   <th className="pb-2 font-semibold">Worker</th>
                   <th className="pb-2 font-semibold">Badge</th>
                   <th className="pb-2 font-semibold">Dose</th>
-                  <th className="pb-2 font-semibold">8h TWA</th>
                   <th className="pb-2 font-semibold">Status</th>
                 </tr>
               </thead>
@@ -207,26 +238,21 @@ export default function HSEOverviewPage() {
                   const r = s.exposureResult;
                   return (
                     <tr key={s.id} className="hover:bg-[#FAFBF9]">
-                      <td className="py-2.5 text-[#596158] font-mono text-[12px]">
+                      <td className="py-2 text-[#596158] font-mono text-[12px]">
                         {formatDateTime(s.capturedAt)}
                       </td>
-                      <td className="py-2.5 font-semibold text-[#263026]">
+                      <td className="py-2 font-semibold text-[#263026]">
                         {s.workerId}
                       </td>
-                      <td className="py-2.5 text-[#596158] font-mono">
+                      <td className="py-2 text-[#596158] font-mono">
                         {s.dosimeterId}
                       </td>
-                      <td className="py-2.5 font-bold text-[#263026] font-mono">
+                      <td className="py-2 font-bold text-[#263026] font-mono">
                         {r?.estimatedDose !== null && r?.estimatedDose !== undefined
                           ? `${formatDose(r.estimatedDose)} ${r.doseUnit}`
                           : 'Unverified'}
                       </td>
-                      <td className="py-2.5 text-[#596158] font-mono">
-                        {r?.estimatedTwa !== null && r?.estimatedTwa !== undefined
-                          ? `${formatDose(r.estimatedTwa)} ppm`
-                          : '—'}
-                      </td>
-                      <td className="py-2.5">
+                      <td className="py-2">
                         <span className={`gov-badge ${
                           r?.riskStatus === RiskStatus.NORMAL
                             ? 'gov-badge-normal'
@@ -235,7 +261,7 @@ export default function HSEOverviewPage() {
                             : r?.riskStatus === RiskStatus.HIGH
                             ? 'gov-badge-high'
                             : 'gov-badge-critical'
-                        } text-[11px]`}>
+                        } text-[10px]`}>
                           {r?.riskStatus || 'UNVERIFIED'}
                         </span>
                       </td>
@@ -246,19 +272,99 @@ export default function HSEOverviewPage() {
             </table>
           </div>
 
-          <div className="pt-2 border-t border-[#E7E5DE] flex justify-end">
-            <Link
-              href="/hse/technical"
-              className="text-[13px] text-[#5C822D] font-semibold hover:underline flex items-center gap-1"
-            >
-              <span>Inspect Metrology Calibration Space</span>
-              <ChevronRight size={14} />
-            </Link>
+          {/* Mobile Stacked Card View */}
+          <div className="sm:hidden divide-y divide-[#E7E5DE]">
+            {recentScans.map(s => {
+              const r = s.exposureResult;
+              return (
+                <div key={s.id} className="py-2.5 flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="font-bold text-[13px] text-[#263026] truncate">
+                      {s.workerId} · <span className="font-mono text-[#596158] font-normal">{s.dosimeterId}</span>
+                    </div>
+                    <div className="text-[11px] text-[#7A8178] font-mono">
+                      {formatDateTime(s.capturedAt)}
+                    </div>
+                  </div>
+
+                  <div className="text-right flex-shrink-0">
+                    <div className="font-bold text-[14px] text-[#263026] font-mono">
+                      {r?.estimatedDose !== null && r?.estimatedDose !== undefined
+                        ? `${formatDose(r.estimatedDose)} ppm·h`
+                        : '—'}
+                    </div>
+                    <span className={`gov-badge ${
+                      r?.riskStatus === RiskStatus.NORMAL
+                        ? 'gov-badge-normal'
+                        : r?.riskStatus === RiskStatus.ELEVATED
+                        ? 'gov-badge-elevated'
+                        : r?.riskStatus === RiskStatus.HIGH
+                        ? 'gov-badge-high'
+                        : 'gov-badge-critical'
+                    } text-[9px]`}>
+                      {r?.riskStatus || 'UNVERIFIED'}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
+
         </div>
 
+      </div>
+
+      {/* TIER 3: ADVANCED TELEMETRY & SCIENTIFIC PROVENANCE (Behind Progressive Disclosure Accordion) */}
+      <div className="gov-card overflow-hidden">
+        <button
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="w-full p-4 bg-[#FAFBF9] hover:bg-[#F0EFE9] flex items-center justify-between text-left text-[13px] font-semibold text-[#263026] transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Cpu className="w-4 h-4 text-[#5C822D]" />
+            <span>Advanced Metrology & Calibration Standards</span>
+          </div>
+          <ChevronDown className={`w-4 h-4 text-[#7A8178] transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+        </button>
+
+        {showAdvanced && (
+          <div className="p-4 sm:p-5 border-t border-[#E7E5DE] space-y-4 text-[12px] sm:text-[13px] animate-in fade-in duration-150">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="bg-[#FAFBF9] p-3 rounded-lg border border-[#E7E5DE] space-y-1">
+                <span className="font-bold text-[#263026] block">Bradford Adaptation</span>
+                <p className="text-[#596158] text-[11px] leading-relaxed">
+                  Normalizes mixed fluorescent and outdoor daylight spectra to standard ISO/CIE D65 using 4-patch fiducial bar.
+                </p>
+              </div>
+
+              <div className="bg-[#FAFBF9] p-3 rounded-lg border border-[#E7E5DE] space-y-1">
+                <span className="font-bold text-[#263026] block">Chemosensor Kinetic Domain</span>
+                <p className="text-[#596158] text-[11px] leading-relaxed">
+                  Linear reaction interval 0.0 – 30.0 ppm·h with Cu-PAN & Bismuth(III) solid matrix substrate.
+                </p>
+              </div>
+
+              <div className="bg-[#FAFBF9] p-3 rounded-lg border border-[#E7E5DE] space-y-1">
+                <span className="font-bold text-[#263026] block">Regulatory Benchmark</span>
+                <p className="text-[#596158] text-[11px] leading-relaxed">
+                  Calibrated to OSHA PEL (10 ppm 8h TWA) and Critical Ceiling (20 ppm·h evacuation threshold).
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <Link
+                href="/hse/technical"
+                className="text-[12px] text-[#5C822D] font-semibold hover:underline flex items-center gap-1"
+              >
+                <span>Open Full Metrology Inspector →</span>
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
 
     </div>
   );
 }
+

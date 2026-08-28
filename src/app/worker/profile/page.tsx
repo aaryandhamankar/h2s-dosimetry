@@ -2,16 +2,27 @@
 
 import { useAppStore } from '@/stores/app-store';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { 
   LogOut, 
   RotateCcw, 
   Layers, 
   CheckCircle2,
+  Edit3,
+  X,
+  Save,
+  User,
 } from 'lucide-react';
 
 export default function WorkerProfilePage() {
-  const { currentUser, logout, resetDemo, activeDosimeter } = useAppStore();
+  const { currentUser, logout, resetDemo, activeDosimeter, updateUserProfile } = useAppStore();
   const router = useRouter();
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editName, setEditName] = useState(currentUser?.displayName || 'Rajesh Kumar');
+  const [editDept, setEditDept] = useState(currentUser?.department || 'Operations');
+  const [editSite, setEditSite] = useState(currentUser?.site || 'Refinery Zone A');
+  const [editCode, setEditCode] = useState(currentUser?.workerCode || 'W-001');
 
   const handleLogout = () => {
     logout();
@@ -25,16 +36,43 @@ export default function WorkerProfilePage() {
     }
   };
 
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateUserProfile({
+      displayName: editName,
+      department: editDept,
+      site: editSite,
+      workerCode: editCode,
+    });
+    setEditModalOpen(false);
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
       
       {/* Top Header */}
-      <div className="border-b border-[#E7E5DE] pb-3 sm:pb-4">
-        <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
-          Personnel Dossier
-        </span>
-        <h1 className="text-[18px] sm:text-[22px] font-bold text-[#263026]">Operator Profile & Hardware Specs</h1>
-        <p className="text-[13px] sm:text-[14px] text-[#596158]">Personnel identification credentials and active sensor cartridge specifications</p>
+      <div className="border-b border-[#E7E5DE] pb-3 sm:pb-4 flex items-center justify-between">
+        <div>
+          <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
+            Personnel Dossier
+          </span>
+          <h1 className="text-[18px] sm:text-[22px] font-bold text-[#263026]">Operator Profile & Hardware Specs</h1>
+          <p className="text-[13px] sm:text-[14px] text-[#596158]">Credentials and active sensor cartridge specifications</p>
+        </div>
+
+        <button
+          onClick={() => {
+            setEditName(currentUser?.displayName || 'Rajesh Kumar');
+            setEditDept(currentUser?.department || 'Operations');
+            setEditSite(currentUser?.site || 'Refinery Zone A');
+            setEditCode(currentUser?.workerCode || 'W-001');
+            setEditModalOpen(true);
+          }}
+          className="gov-btn-secondary text-[12px] h-9 px-3 flex items-center gap-1.5"
+        >
+          <Edit3 size={13} className="text-[#5C822D]" />
+          <span>Edit Profile</span>
+        </button>
       </div>
 
       {/* Operator Identity Card */}
@@ -65,7 +103,7 @@ export default function WorkerProfilePage() {
           </div>
           <div className="bg-[#FAFBF9] p-3 sm:p-3.5 rounded-md border border-[#E7E5DE]">
             <span className="text-[#7A8178] text-[10px] sm:text-[11px] uppercase font-bold block">Refinery Site</span>
-            <span className="font-bold text-[#263026] text-[14px] sm:text-[15px] mt-0.5 block">MRPL Zone A Complex</span>
+            <span className="font-bold text-[#263026] text-[14px] sm:text-[15px] mt-0.5 block">{currentUser?.site || 'Refinery Zone A'}</span>
           </div>
         </div>
       </div>
@@ -120,6 +158,93 @@ export default function WorkerProfilePage() {
         </div>
       </div>
 
+      {/* EDIT PROFILE MODAL */}
+      {editModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-2xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-md w-full shadow-2xl border border-[#E7E5DE] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            
+            <div className="p-4 border-b border-[#E7E5DE] flex items-center justify-between bg-[#FAFBF9]">
+              <div className="flex items-center gap-2 font-bold text-[15px] text-[#263026]">
+                <Edit3 className="w-4 h-4 text-[#5C822D]" />
+                <span>Edit Profile Details</span>
+              </div>
+              <button 
+                onClick={() => setEditModalOpen(false)}
+                className="text-[#7A8178] hover:text-[#263026] p-1 rounded hover:bg-[#F0EFE9]"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProfile} className="p-4 sm:p-5 space-y-3.5 text-[13px]">
+              <div>
+                <label className="font-semibold text-[#263026] block mb-1">Full Name:</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full p-2.5 border border-[#D5D2C9] rounded-md bg-white text-[#263026] focus:outline-2 focus:outline-[#5C822D]"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-[#263026] block mb-1">Worker Code:</label>
+                  <input
+                    type="text"
+                    value={editCode}
+                    onChange={(e) => setEditCode(e.target.value)}
+                    className="w-full p-2.5 border border-[#D5D2C9] rounded-md bg-white text-[#263026] font-mono focus:outline-2 focus:outline-[#5C822D]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-[#263026] block mb-1">Department:</label>
+                  <input
+                    type="text"
+                    value={editDept}
+                    onChange={(e) => setEditDept(e.target.value)}
+                    className="w-full p-2.5 border border-[#D5D2C9] rounded-md bg-white text-[#263026] focus:outline-2 focus:outline-[#5C822D]"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-semibold text-[#263026] block mb-1">Assigned Plant Work Area:</label>
+                <input
+                  type="text"
+                  value={editSite}
+                  onChange={(e) => setEditSite(e.target.value)}
+                  className="w-full p-2.5 border border-[#D5D2C9] rounded-md bg-white text-[#263026] focus:outline-2 focus:outline-[#5C822D]"
+                  required
+                />
+              </div>
+
+              <div className="pt-3 border-t border-[#E7E5DE] flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditModalOpen(false)}
+                  className="gov-btn-secondary text-[12px] h-9 px-3"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="gov-btn-primary text-[12px] h-9 px-4 font-semibold flex items-center gap-1.5"
+                >
+                  <Save size={14} />
+                  <span>Save Profile</span>
+                </button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
+

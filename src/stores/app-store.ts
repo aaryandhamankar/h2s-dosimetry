@@ -42,6 +42,7 @@ export interface AppState {
   addScan: (scan: Scan) => void;
   addAlert: (alert: Alert) => void;
   acknowledgeAlert: (alertId: string, userId: string) => void;
+  updateUserProfile: (updates: Partial<User>) => void;
   
   toggleDemoMode: () => void;
   toggleDemoPanel: () => void;
@@ -185,6 +186,17 @@ export const useAppStore = create<AppState>()(
               : a
           ),
         }));
+      },
+      
+      updateUserProfile: (updates: Partial<User>) => {
+        set(state => {
+          if (!state.currentUser) return state;
+          const updatedUser = { ...state.currentUser, ...updates };
+          return {
+            currentUser: updatedUser,
+            workers: state.workers.map(w => w.id === updatedUser.id ? updatedUser : w),
+          };
+        });
       },
       
       toggleDemoMode: () => set(state => ({ isDemoMode: !state.isDemoMode })),
