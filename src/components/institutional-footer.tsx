@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { PhoneCall, CheckCircle2, Sparkles, X, Award, Beaker, Code2, Users2, Cpu, Compass } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+import mrplLogo from '../../public/mrpl-logo.svg';
 
 const TEAM_MEMBERS = [
   {
@@ -260,9 +262,8 @@ export function InstitutionalFooter() {
         <div className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="h-11 flex-shrink-0 flex items-center justify-center bg-white rounded-lg p-1 border border-white/20 shadow-xs">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src="/mrpl-logo.png" 
+              <Image 
+                src={mrplLogo} 
                 alt="ONGC MRPL Logo" 
                 className="h-9 w-auto object-contain rounded-md"
               />

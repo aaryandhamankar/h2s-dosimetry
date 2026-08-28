@@ -14,6 +14,8 @@ import {
   Layers, 
   FileCheck,
 } from 'lucide-react';
+import Image from 'next/image';
+import mrplLogo from '../../public/mrpl-logo.svg';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -48,9 +50,8 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E7E5DE] pb-6">
             <div className="flex items-start gap-4">
               <div className="h-13 flex-shrink-0 flex items-center justify-center p-1.5 bg-white rounded-lg border border-[#E7E5DE] shadow-xs">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
-                  src="/mrpl-logo.png" 
+              <Image 
+                  src={mrplLogo} 
                   alt="ONGC MRPL Logo" 
                   className="h-10 w-auto object-contain rounded-md"
                 />

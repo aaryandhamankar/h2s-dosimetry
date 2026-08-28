@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import { AccessibilityBar } from './accessibility-bar';
 import { UniversalSearch } from './universal-search';
+import Image from 'next/image';
+import mrplLogo from '../../public/mrpl-logo.svg';
 
 export function PortalHeaderWrapper() {
   const pathname = usePathname();
@@ -28,9 +30,8 @@ export function PortalHeaderWrapper() {
           {/* Brand Anchor: Official ONGC MRPL Logo & Institutional Identity */}
           <Link href="/" className="flex items-center gap-3.5 group flex-shrink-0">
             <div className="h-12 flex-shrink-0 flex items-center justify-center p-1 bg-white rounded-lg border border-[#E7E5DE] shadow-xs group-hover:border-[#5C822D] group-hover:shadow-sm transition-all overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src="/mrpl-logo.png" 
+              <Image 
+                src={mrplLogo} 
                 alt="MRPL ONGC Logo" 
                 className="h-10 w-auto object-contain rounded-md block"
               />

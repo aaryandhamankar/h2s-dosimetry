@@ -18,6 +18,8 @@ import { useState, Suspense } from 'react';
 import { formatDateTime, formatDose, getValidityLabel } from '@/lib/utils';
 import { ValidityStatus, RiskStatus } from '@/types';
 import Link from 'next/link';
+import Image from 'next/image';
+import mrplLogo from '../../../../public/mrpl-logo.svg';
 
 function ResultContent() {
   const searchParams = useSearchParams();
@@ -99,9 +101,8 @@ function ResultContent() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E7E5DE] pb-5">
           <div className="flex items-center gap-3">
             <div className="h-11 flex-shrink-0 flex items-center justify-center p-1 bg-white rounded-lg border border-[#E7E5DE] shadow-xs">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src="/mrpl-logo.png" 
+              <Image 
+                src={mrplLogo} 
                 alt="MRPL Logo" 
                 className="h-9 w-auto object-contain rounded-md"
               />
