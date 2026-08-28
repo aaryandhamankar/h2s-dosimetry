@@ -360,7 +360,6 @@ export function InstitutionalFooter() {
           <button
             onClick={() => {
               setEasterEggOpen(true);
-              triggerCelebration();
             }}
             className="group inline-flex items-center gap-2 text-[11px] text-[#A7D7C1] hover:text-white bg-white/5 hover:bg-white/15 px-4 py-1.5 rounded-full border border-white/10 hover:border-[#A7D7C1] transition-all cursor-pointer shadow-xs hover:shadow-sm"
             title="Click to reveal Hackathon 2026 Engineering Directorate Dossier (or press Shift+H)"
