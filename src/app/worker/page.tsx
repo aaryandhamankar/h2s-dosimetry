@@ -22,57 +22,7 @@ import {
 } from 'lucide-react';
 import { DemoScenario, ProcessingStatus, ShiftStatus } from '@/types';
 import { formatTime } from '@/lib/utils';
-
-const scenarios = [
-  { 
-    id: DemoScenario.NORMAL, 
-    title: 'Normal Shift (3.2 ppm·h)', 
-    badge: 'NORMAL',
-    badgeClass: 'gov-badge-normal',
-    colorHex: '#F2EADB',
-    desc: 'Safe background baseline level.',
-  },
-  { 
-    id: DemoScenario.ELEVATED, 
-    title: 'Elevated (12.4 ppm·h)', 
-    badge: 'ELEVATED',
-    badgeClass: 'gov-badge-elevated',
-    colorHex: '#BFA48A',
-    desc: 'Moderate CuS/Bi₂S₃ reaction. Caution advised.',
-  },
-  { 
-    id: DemoScenario.HIGH, 
-    title: 'High Exposure (18.6 ppm·h)', 
-    badge: 'HIGH',
-    badgeClass: 'gov-badge-high',
-    colorHex: '#8C6D53',
-    desc: 'Near 10 ppm 8h TWA limit. Check PPE.',
-  },
-  { 
-    id: DemoScenario.CRITICAL, 
-    title: 'Critical Alarm (24.8 ppm·h)', 
-    badge: 'CRITICAL',
-    badgeClass: 'gov-badge-critical',
-    colorHex: '#4A3222',
-    desc: 'Exceeds ceiling. Evacuation required.',
-  },
-  { 
-    id: DemoScenario.INVALID, 
-    title: 'Invalid (Glare / Blur)', 
-    badge: 'INVALID',
-    badgeClass: 'gov-badge-neutral',
-    colorHex: '#E2E8F0',
-    desc: 'Quality gate refuses invalid optical capture.',
-  },
-  { 
-    id: DemoScenario.OUT_OF_RANGE, 
-    title: 'Out of Range (>30 ppm·h)', 
-    badge: 'OUT OF RANGE',
-    badgeClass: 'gov-badge-neutral',
-    colorHex: '#CBD5E1',
-    desc: 'Sensor saturated. Flagged for GC lab analysis.',
-  },
-];
+import { TRANSLATIONS } from '@/lib/i18n';
 
 const STAGE_LABELS: Record<ProcessingStatus, string> = {
   [ProcessingStatus.CAPTURED]: 'Photo Captured',
@@ -98,8 +48,62 @@ export default function WorkerHomePage() {
     addScan, 
     startShift, 
     endShift, 
-    updateUserProfile 
+    updateUserProfile,
+    language
   } = useAppStore();
+
+  const t = TRANSLATIONS[language];
+
+  const scenarios = [
+    { 
+      id: DemoScenario.NORMAL, 
+      title: language === 'hi' ? 'सामान्य शिफ्ट (3.2 ppm·h)' : 'Normal Shift (3.2 ppm·h)', 
+      badge: language === 'hi' ? 'सामान्य' : 'NORMAL',
+      badgeClass: 'gov-badge-normal',
+      colorHex: '#F2EADB',
+      desc: language === 'hi' ? 'सुरक्षित पृष्ठभूमि स्तर।' : 'Safe background baseline level.',
+    },
+    { 
+      id: DemoScenario.ELEVATED, 
+      title: language === 'hi' ? 'मध्यम स्तर (12.4 ppm·h)' : 'Elevated (12.4 ppm·h)', 
+      badge: language === 'hi' ? 'मध्यम' : 'ELEVATED',
+      badgeClass: 'gov-badge-elevated',
+      colorHex: '#BFA48A',
+      desc: language === 'hi' ? 'CuS/Bi₂S₃ मध्यम प्रतिक्रिया। सावधानी अपेक्षित।' : 'Moderate CuS/Bi₂S₃ reaction. Caution advised.',
+    },
+    { 
+      id: DemoScenario.HIGH, 
+      title: language === 'hi' ? 'उच्च एक्सपोजर (18.6 ppm·h)' : 'High Exposure (18.6 ppm·h)', 
+      badge: language === 'hi' ? 'उच्च' : 'HIGH',
+      badgeClass: 'gov-badge-high',
+      colorHex: '#8C6D53',
+      desc: language === 'hi' ? '10 ppm 8h TWA सीमा के निकट। PPE जांचें।' : 'Near 10 ppm 8h TWA limit. Check PPE.',
+    },
+    { 
+      id: DemoScenario.CRITICAL, 
+      title: language === 'hi' ? 'गंभीर अलार्म (24.8 ppm·h)' : 'Critical Alarm (24.8 ppm·h)', 
+      badge: language === 'hi' ? 'गंभीर' : 'CRITICAL',
+      badgeClass: 'gov-badge-critical',
+      colorHex: '#4A3222',
+      desc: language === 'hi' ? 'सीमा से अधिक। तत्काल निकासी आवश्यक।' : 'Exceeds ceiling. Evacuation required.',
+    },
+    { 
+      id: DemoScenario.INVALID, 
+      title: language === 'hi' ? 'अमान्य (चमक / धुंधला)' : 'Invalid (Glare / Blur)', 
+      badge: language === 'hi' ? 'अमान्य' : 'INVALID',
+      badgeClass: 'gov-badge-neutral',
+      colorHex: '#E2E8F0',
+      desc: language === 'hi' ? 'अमान्य फोटो गुणवत्ता अस्वीकृत।' : 'Quality gate refuses invalid optical capture.',
+    },
+    { 
+      id: DemoScenario.OUT_OF_RANGE, 
+      title: language === 'hi' ? 'सीमा से बाहर (>30 ppm·h)' : 'Out of Range (>30 ppm·h)', 
+      badge: language === 'hi' ? 'सीमा पार' : 'OUT OF RANGE',
+      badgeClass: 'gov-badge-neutral',
+      colorHex: '#CBD5E1',
+      desc: language === 'hi' ? 'सेंसर संतृप्त। प्रयोगशाला विश्लेषण आवश्यक।' : 'Sensor saturated. Flagged for GC lab analysis.',
+    },
+  ];
 
   // Scanner state
   const [processing, setProcessing] = useState(false);
@@ -384,29 +388,29 @@ export default function WorkerHomePage() {
                 setEditModalOpen(true);
               }}
               className="p-2 sm:px-3 sm:py-1.5 rounded-md bg-[#F7F6F1] hover:bg-[#F0EFE9] border border-[#E7E5DE] text-[#263026] text-[12px] font-semibold flex items-center gap-1.5 transition-colors"
-              title="Edit Profile"
+              title={t.editProfile}
             >
               <Edit3 size={14} className="text-[#5C822D]" />
-              <span className="hidden sm:inline">Edit Profile</span>
+              <span className="hidden sm:inline">{t.editProfile}</span>
             </button>
 
             {activeShift?.status === ShiftStatus.ACTIVE ? (
               <button
                 onClick={() => endShift()}
                 className="gov-btn-danger text-[11px] sm:text-[12px] h-8 px-2.5"
-                title="End Current Shift"
+                title={language === 'hi' ? 'शिफ्ट समाप्त करें' : 'End Current Shift'}
               >
                 <Square size={12} />
-                <span className="hidden xs:inline">End Shift</span>
+                <span className="hidden xs:inline">{language === 'hi' ? 'शिफ्ट समाप्त करें' : 'End Shift'}</span>
               </button>
             ) : (
               <button
                 onClick={() => startShift()}
                 className="gov-btn-primary text-[11px] sm:text-[12px] h-8 px-2.5"
-                title="Start New Shift"
+                title={language === 'hi' ? 'नई शिफ्ट प्रारंभ करें' : 'Start New Shift'}
               >
                 <Play size={12} />
-                <span className="hidden xs:inline">Start Shift</span>
+                <span className="hidden xs:inline">{language === 'hi' ? 'शिफ्ट प्रारंभ करें' : 'Start Shift'}</span>
               </button>
             )}
           </div>
@@ -421,10 +425,10 @@ export default function WorkerHomePage() {
           <div>
             <h2 className="text-[16px] sm:text-[18px] font-bold text-[#263026] flex items-center gap-2">
               <Camera className="w-5 h-5 text-[#5C822D]" />
-              <span>Optical Wristband Scanner</span>
+              <span>{language === 'hi' ? 'ऑप्टिकल रिस्टबैंड स्कैनर' : 'Optical Wristband Scanner'}</span>
             </h2>
             <p className="text-[12px] sm:text-[13px] text-[#596158]">
-              Align wristband badge in viewfinder under ambient refinery lighting
+              {t.tapToCapture}
             </p>
           </div>
           <span className="gov-badge gov-badge-normal text-[10px] sm:text-[11px] hidden sm:inline-flex">
@@ -450,7 +454,7 @@ export default function WorkerHomePage() {
             {/* Top 4-Patch Calibration Bar Target */}
             <div className="flex items-center justify-center">
               <div className="flex items-center gap-1 sm:gap-1.5 bg-black/80 backdrop-blur-xs px-2.5 py-1 rounded-md border border-white/30 text-white shadow-xs">
-                <span className="text-[9px] font-bold font-mono tracking-wider text-[#A7D7C1] mr-1">CALIBRATION:</span>
+                <span className="text-[9px] font-bold font-mono tracking-wider text-[#A7D7C1] mr-1">{language === 'hi' ? 'अंशांकन:' : 'CALIBRATION:'}</span>
                 <span className="w-4 sm:w-5 h-3 sm:h-3.5 bg-white border border-white/80 rounded-2xs" title="White (100)" />
                 <span className="w-4 sm:w-5 h-3 sm:h-3.5 bg-[#7F7F7F] border border-white/50 rounded-2xs" title="Gray (50)" />
                 <span className="w-4 sm:w-5 h-3 sm:h-3.5 bg-[#00A3E0] border border-white/50 rounded-2xs" title="Cyan" />
@@ -470,7 +474,7 @@ export default function WorkerHomePage() {
             </div>
 
             <div className="text-center text-[10px] text-white/90 font-mono bg-black/75 py-0.5 px-2 rounded mx-auto">
-              ALIGN SENSOR SPOT INSIDE RETICLE
+              {language === 'hi' ? 'सेंसर को रेटिकल के अंदर रखें' : 'ALIGN SENSOR SPOT INSIDE RETICLE'}
             </div>
           </div>
 
@@ -479,14 +483,14 @@ export default function WorkerHomePage() {
             <div className="p-4 text-center text-white space-y-2 z-0">
               <VideoOff className="w-8 h-8 text-white/40 mx-auto" />
               <p className="text-[12px] text-white/80 max-w-xs mx-auto">
-                {cameraError || 'Camera viewfinder offline. Click button below to capture or use test samples.'}
+                {cameraError || (language === 'hi' ? 'कैमरा व्यूफ़ाइंडर ऑफ़लाइन है। नीचे दिए गए बटन पर क्लिक करें या टेस्ट नमूने चुनें।' : 'Camera viewfinder offline. Click button below to capture or use test samples.')}
               </p>
               <button
                 onClick={startCamera}
                 className="gov-btn-secondary text-[11px] h-7 px-3 text-white bg-white/10 hover:bg-white/20 border-white/30"
               >
                 <RefreshCw size={12} />
-                <span>Retry Camera</span>
+                <span>{language === 'hi' ? 'कैमरा पुनः प्रयास करें' : 'Retry Camera'}</span>
               </button>
             </div>
           )}
@@ -499,14 +503,14 @@ export default function WorkerHomePage() {
             className="gov-btn-primary w-full h-12 sm:h-13 text-[15px] sm:text-[16px] font-bold shadow-md hover:shadow-lg transition-all justify-center"
           >
             <Camera className="w-5 h-5" />
-            <span>CAPTURE BADGE & GET READING</span>
+            <span>{t.captureBadge}</span>
           </button>
 
           {/* Upload Fallback Link */}
           <div className="text-center pt-0.5">
             <label className="text-[12px] text-[#596158] hover:text-[#5C822D] hover:underline cursor-pointer inline-flex items-center gap-1.5 p-1">
               <Upload size={13} className="text-[#5C822D]" />
-              <span>Or upload badge photo from device gallery</span>
+              <span>{t.useFileUpload}</span>
               <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
             </label>
           </div>
@@ -514,12 +518,12 @@ export default function WorkerHomePage() {
       </div>
 
       {/* 3. ONE-CLICK CALIBRATED DEMO SAMPLES (Fast Field Testing) */}
-      <div className="space-y-2.5">
-        <div className="flex items-center justify-between">
-          <h3 className="text-[13px] sm:text-[14px] font-bold text-[#263026] uppercase tracking-wider">
-            Calibrated Chemical Test Samples:
-          </h3>
-          <span className="text-[11px] text-[#7A8178]">1-Tap Instant Test</span>
+      <div className="gov-card p-3.5 sm:p-6 space-y-3">
+        <div className="flex items-center justify-between border-b border-[#E7E5DE] pb-2">
+          <span className="text-[11px] sm:text-[12px] font-bold text-[#7A8178] uppercase tracking-wider">
+            {t.selectTestSample}
+          </span>
+          <span className="text-[11px] text-[#5C822D] font-mono">1-Tap Verification</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">

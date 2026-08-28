@@ -1,17 +1,20 @@
 'use client';
 
 import { useAppStore } from '@/stores/app-store';
-import { Home, Camera, History, User } from 'lucide-react';
+import { TRANSLATIONS } from '@/lib/i18n';
+import { Camera, History } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 export default function WorkerLayout({ children }: { children: React.ReactNode }) {
-  const { currentUser } = useAppStore();
+  const { currentUser, language } = useAppStore();
   const pathname = usePathname();
 
+  const t = TRANSLATIONS[language];
+
   const navItems = [
-    { name: 'Scan & Profile', href: '/worker', icon: Camera },
-    { name: 'History & Details', href: '/worker/history', icon: History },
+    { name: t.navScan, href: '/worker', icon: Camera },
+    { name: t.navHistory, href: '/worker/history', icon: History },
   ];
 
   return (
@@ -20,9 +23,9 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
       <div className="bg-white border-b border-[#E7E5DE] px-3 sm:px-8 py-2 sm:py-2.5 shadow-2xs">
         <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 sm:gap-2 text-[12px] sm:text-[13px] truncate">
-            <Link href="/" className="text-[#596158] hover:text-[#5C822D] hover:underline">Home</Link>
+            <Link href="/" className="text-[#596158] hover:text-[#5C822D] hover:underline">{t.navHome}</Link>
             <span className="text-[#D5D2C9]">/</span>
-            <span className="font-semibold text-[#263026] truncate">Worker</span>
+            <span className="font-semibold text-[#263026] truncate">{t.navWorker}</span>
           </div>
 
           <div className="flex items-center gap-2 text-[11px] sm:text-[13px] flex-shrink-0">
@@ -71,3 +74,4 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
     </div>
   );
 }
+

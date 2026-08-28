@@ -1,6 +1,7 @@
 'use client';
 
 import { useAppStore } from '@/stores/app-store';
+import { TRANSLATIONS } from '@/lib/i18n';
 import { 
   Activity, 
   AlertTriangle, 
@@ -14,19 +15,21 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
-const NAV_ITEMS = [
-  { label: 'Overview', href: '/hse', icon: Activity },
-  { label: 'Roster', href: '/hse/workers', icon: Users },
-  { label: 'Trends', href: '/hse/exposure', icon: TrendingUp },
-  { label: 'Alerts', href: '/hse/alerts', icon: AlertTriangle },
-  { label: 'Metrology', href: '/hse/technical', icon: Cpu },
-];
-
 export default function HSELayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { alerts } = useAppStore();
+  const { alerts, language } = useAppStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  const t = TRANSLATIONS[language];
+
+  const navItems = [
+    { label: t.navOverview, href: '/hse', icon: Activity },
+    { label: t.navRoster, href: '/hse/workers', icon: Users },
+    { label: t.navTrends, href: '/hse/exposure', icon: TrendingUp },
+    { label: t.navAlerts, href: '/hse/alerts', icon: AlertTriangle },
+    { label: t.navMetrology, href: '/hse/technical', icon: Cpu },
+  ];
 
   useEffect(() => {
     setMounted(true);
@@ -35,7 +38,7 @@ export default function HSELayout({ children }: { children: React.ReactNode }) {
   if (!mounted) {
     return (
       <div className="flex-1 flex items-center justify-center font-sans text-[13px] text-[#7A8178]">
-        Loading Safety Dashboard...
+        {language === 'hi' ? 'सुरक्षा डैशबोर्ड लोड हो रहा है...' : 'Loading Safety Dashboard...'}
       </div>
     );
   }
@@ -59,15 +62,15 @@ export default function HSELayout({ children }: { children: React.ReactNode }) {
             </button>
 
             <div className="flex items-center gap-1.5 sm:gap-2 text-[12px] sm:text-[13px] truncate">
-              <Link href="/" className="text-[#596158] hover:text-[#5C822D] hover:underline">Home</Link>
+              <Link href="/" className="text-[#596158] hover:text-[#5C822D] hover:underline">{t.navHome}</Link>
               <span className="text-[#D5D2C9]">/</span>
-              <span className="font-semibold text-[#263026] truncate">Dashboard</span>
+              <span className="font-semibold text-[#263026] truncate">{t.navDashboard}</span>
             </div>
           </div>
 
           {/* Desktop Nav Items */}
           <div className="hidden lg:flex items-center gap-1">
-            {NAV_ITEMS.map(item => {
+            {navItems.map(item => {
               const isActive = pathname === item.href || (item.href !== '/hse' && pathname.startsWith(item.href));
               const Icon = item.icon;
               return (
@@ -84,7 +87,7 @@ export default function HSELayout({ children }: { children: React.ReactNode }) {
                 >
                   <Icon size={15} />
                   <span>{item.label}</span>
-                  {item.label === 'Alerts' && openAlerts > 0 && (
+                  {(item.href === '/hse/alerts') && openAlerts > 0 && (
                     <span className="ml-1 bg-[#A94442] text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">
                       {openAlerts}
                     </span>
@@ -98,7 +101,7 @@ export default function HSELayout({ children }: { children: React.ReactNode }) {
 
         {/* Mobile Horizontal Quick-Tab Strip */}
         <div className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 bg-[#FAFBF9] border-t border-[#E7E5DE] overflow-x-auto no-scrollbar text-[12px]">
-          {NAV_ITEMS.map(item => {
+          {navItems.map(item => {
             const isActive = pathname === item.href || (item.href !== '/hse' && pathname.startsWith(item.href));
             const Icon = item.icon;
             return (
@@ -115,7 +118,7 @@ export default function HSELayout({ children }: { children: React.ReactNode }) {
               >
                 <Icon size={13} />
                 <span>{item.label}</span>
-                {item.label === 'Alerts' && openAlerts > 0 && (
+                {(item.href === '/hse/alerts') && openAlerts > 0 && (
                   <span className={`text-[10px] font-bold px-1 rounded-full ${isActive ? 'bg-white text-[#A94442]' : 'bg-[#A94442] text-white'}`}>
                     {openAlerts}
                   </span>
@@ -132,14 +135,16 @@ export default function HSELayout({ children }: { children: React.ReactNode }) {
           <div className="w-72 max-w-[85vw] bg-white border-r border-[#E7E5DE] p-5 flex flex-col justify-between shadow-2xl animate-in slide-in-from-left duration-200">
             <div className="space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-[#E7E5DE]">
-                <span className="font-bold text-[15px] text-[#263026]">Dashboard Sections</span>
+                <span className="font-bold text-[15px] text-[#263026]">
+                  {language === 'hi' ? 'डैशबोर्ड अनुभाग' : 'Dashboard Sections'}
+                </span>
                 <button onClick={() => setSidebarOpen(false)} className="text-[#7A8178] p-1 rounded hover:bg-[#F0EFE9]">
                   <X size={20} />
                 </button>
               </div>
 
               <div className="space-y-1">
-                {NAV_ITEMS.map(item => {
+                {navItems.map(item => {
                   const isActive = pathname === item.href || (item.href !== '/hse' && pathname.startsWith(item.href));
                   const Icon = item.icon;
                   return (
@@ -159,7 +164,7 @@ export default function HSELayout({ children }: { children: React.ReactNode }) {
                         <Icon size={16} />
                         <span>{item.label}</span>
                       </div>
-                      {item.label === 'Alerts' && openAlerts > 0 && (
+                      {(item.href === '/hse/alerts') && openAlerts > 0 && (
                         <span className="bg-[#A94442] text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full">
                           {openAlerts}
                         </span>
@@ -171,7 +176,7 @@ export default function HSELayout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="pt-4 border-t border-[#E7E5DE] text-[12px] text-[#7A8178]">
-              MRPL Safety Directorate · Zone A
+              {language === 'hi' ? 'एमआरपीएल सुरक्षा निदेशालय · ज़ोन ए' : 'MRPL Safety Directorate · Zone A'}
             </div>
           </div>
           <div className="flex-1" onClick={() => setSidebarOpen(false)} />
@@ -186,3 +191,4 @@ export default function HSELayout({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+

@@ -15,6 +15,8 @@ import {
 } from '@/types';
 import { getDemoScans, getDemoAlerts, DEMO_WORKERS, DEMO_DOSIMETERS, DEMO_SHIFTS, HSE_USER } from '@/data/demo-data';
 
+import { Language } from '@/lib/i18n';
+
 export interface AppState {
   currentUser: User | null;
   isAuthenticated: boolean;
@@ -30,6 +32,15 @@ export interface AppState {
   
   isDemoMode: boolean;
   showDemoPanel: boolean;
+
+  language: Language;
+  fontSize: 'sm' | 'md' | 'lg';
+  highContrast: boolean;
+  
+  setLanguage: (lang: Language) => void;
+  setFontSize: (size: 'sm' | 'md' | 'lg') => void;
+  setHighContrast: (val: boolean) => void;
+  toggleHighContrast: () => void;
   
   login: (user: User, role?: string) => void;
   logout: () => void;
@@ -67,6 +78,15 @@ export const useAppStore = create<AppState>()(
       
       isDemoMode: true,
       showDemoPanel: false,
+
+      language: 'en',
+      fontSize: 'md',
+      highContrast: false,
+
+      setLanguage: (lang: Language) => set({ language: lang }),
+      setFontSize: (size: 'sm' | 'md' | 'lg') => set({ fontSize: size }),
+      setHighContrast: (val: boolean) => set({ highContrast: val }),
+      toggleHighContrast: () => set(state => ({ highContrast: !state.highContrast })),
       
       login: (user: User) => {
         set({

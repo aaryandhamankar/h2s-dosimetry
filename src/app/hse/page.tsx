@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAppStore } from '@/stores/app-store';
 import { RiskStatus, AlertStatus, ValidityStatus } from '@/types';
+import { TRANSLATIONS } from '@/lib/i18n';
 import {
   Printer,
   ChevronRight,
@@ -20,16 +21,18 @@ import Link from 'next/link';
 import { formatDose, formatDateTime } from '@/lib/utils';
 
 export default function HSEOverviewPage() {
-  const { scans, alerts } = useAppStore();
+  const { scans, alerts, language } = useAppStore();
   const [mounted, setMounted] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const t = TRANSLATIONS[language];
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   if (!mounted) {
-    return <div className="text-[13px] text-[#7A8178]">Loading safety dashboard...</div>;
+    return <div className="text-[13px] text-[#7A8178]">{language === 'hi' ? 'सुरक्षा डैशबोर्ड लोड हो रहा है...' : 'Loading safety dashboard...'}</div>;
   }
 
   const validScans = scans.filter(s => s.exposureResult?.validityStatus === ValidityStatus.VALID);
@@ -55,13 +58,13 @@ export default function HSEOverviewPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7E5DE] pb-3 sm:pb-4">
         <div>
           <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
-            Supervisory Command Center
+            {language === 'hi' ? 'पर्यवेक्षी कमांड सेंटर' : 'Supervisory Command Center'}
           </span>
           <h1 className="text-[18px] sm:text-[24px] font-bold text-[#263026]">
-            Plant Safety & Exposure Dashboard
+            {t.dashboardTitle}
           </h1>
           <p className="text-[12px] sm:text-[14px] text-[#596158] mt-0.5">
-            Refinery Zone A · Gas Dosimetry Surveillance
+            {language === 'hi' ? 'रिफाइनरी ज़ोन ए · गैस डोसीमेट्री निगरानी' : 'Refinery Zone A · Gas Dosimetry Surveillance'}
           </p>
         </div>
 
@@ -71,7 +74,7 @@ export default function HSEOverviewPage() {
             className="gov-btn-secondary text-[12px] sm:text-[13px] h-9"
           >
             <Printer size={14} />
-            <span>Print Report</span>
+            <span>{language === 'hi' ? 'रिपोर्ट प्रिंट करें' : 'Print Report'}</span>
           </button>
         </div>
       </div>
@@ -83,10 +86,14 @@ export default function HSEOverviewPage() {
             <AlertTriangle className="w-5 h-5 flex-shrink-0 animate-pulse" />
             <div>
               <strong className="text-[14px] block">
-                {openAlerts.length} Unacknowledged Safety Limit Alert{openAlerts.length > 1 ? 's' : ''}
+                {language === 'hi'
+                  ? `${openAlerts.length} अपुष्ट सुरक्षा सीमा अलर्ट`
+                  : `${openAlerts.length} Unacknowledged Safety Limit Alert${openAlerts.length > 1 ? 's' : ''}`}
               </strong>
               <span className="text-[12px] text-[#A94442]/90">
-                Personnel dosimeter threshold exceedances require supervisory triage.
+                {language === 'hi'
+                  ? 'कर्मचारी डोसीमीटर सीमा उल्लंघन पर पर्यवेक्षी कार्रवाई की आवश्यकता है।'
+                  : 'Personnel dosimeter threshold exceedances require supervisory triage.'}
               </span>
             </div>
           </div>
@@ -95,7 +102,7 @@ export default function HSEOverviewPage() {
             href="/hse/alerts"
             className="gov-btn-primary bg-[#A94442] hover:bg-[#8F3331] text-white text-[12px] sm:text-[13px] h-8 px-3.5 self-start sm:self-auto shadow-xs"
           >
-            <span>Review & Acknowledge →</span>
+            <span>{language === 'hi' ? 'समीक्षा व स्वीकार करें →' : 'Review & Acknowledge →'}</span>
           </Link>
         </div>
       )}
@@ -105,49 +112,49 @@ export default function HSEOverviewPage() {
         
         <div className="gov-card p-3.5 sm:p-5 space-y-1">
           <span className="text-[10px] sm:text-[11px] text-[#7A8178] font-bold uppercase tracking-wider block truncate">
-            Monitored Staff
+            {t.monitoredStaff}
           </span>
           <div className="text-[24px] sm:text-[30px] font-bold text-[#263026] font-mono leading-none">
             {uniqueWorkers || 5}
           </div>
           <span className="text-[11px] sm:text-[12px] text-[#596158] block truncate pt-0.5">
-            Active in Zone A
+            {language === 'hi' ? 'ज़ोन ए में सक्रिय' : 'Active in Zone A'}
           </span>
         </div>
 
         <div className="gov-card p-3.5 sm:p-5 space-y-1">
           <span className="text-[10px] sm:text-[11px] text-[#7A8178] font-bold uppercase tracking-wider block truncate">
-            Total Scans Logged
+            {t.totalScans}
           </span>
           <div className="text-[24px] sm:text-[30px] font-bold text-[#5C822D] font-mono leading-none">
             {scans.length}
           </div>
           <span className="text-[11px] sm:text-[12px] text-[#35551F] font-semibold block truncate pt-0.5">
-            {validScans.length} Valid ({((validScans.length / Math.max(1, scans.length)) * 100).toFixed(0)}%)
+            {validScans.length} {language === 'hi' ? 'वैध' : 'Valid'} ({((validScans.length / Math.max(1, scans.length)) * 100).toFixed(0)}%)
           </span>
         </div>
 
         <div className="gov-card p-3.5 sm:p-5 space-y-1">
           <span className="text-[10px] sm:text-[11px] text-[#7A8178] font-bold uppercase tracking-wider block truncate">
-            Exceedance (&gt;10 ppm)
+            {t.exceedances}
           </span>
           <div className={`text-[24px] sm:text-[30px] font-bold font-mono leading-none ${riskCounts.high + riskCounts.critical > 0 ? 'text-[#A94442]' : 'text-[#263026]'}`}>
             {riskCounts.high + riskCounts.critical}
           </div>
           <span className="text-[11px] sm:text-[12px] text-[#A94442] font-semibold block truncate pt-0.5">
-            {riskCounts.critical} Critical (&gt;20 ppm·h)
+            {riskCounts.critical} {language === 'hi' ? 'गंभीर (>20 ppm·h)' : 'Critical (>20 ppm·h)'}
           </span>
         </div>
 
         <div className="gov-card p-3.5 sm:p-5 space-y-1">
           <span className="text-[10px] sm:text-[11px] text-[#7A8178] font-bold uppercase tracking-wider block truncate">
-            Open Alerts
+            {t.activeAlerts}
           </span>
           <div className={`text-[24px] sm:text-[30px] font-bold font-mono leading-none ${openAlerts.length > 0 ? 'text-[#C96B32]' : 'text-[#5C822D]'}`}>
             {openAlerts.length}
           </div>
           <span className="text-[11px] sm:text-[12px] text-[#596158] block truncate pt-0.5">
-            {openAlerts.length > 0 ? 'Requires Action' : 'All Clear'}
+            {openAlerts.length > 0 ? (language === 'hi' ? 'कार्रवाई आवश्यक' : 'Requires Action') : (language === 'hi' ? 'सभी सामान्य' : 'All Clear')}
           </span>
         </div>
 

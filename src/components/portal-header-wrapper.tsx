@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAppStore } from '@/stores/app-store';
+import { TRANSLATIONS } from '@/lib/i18n';
 import { 
   Search, 
   User, 
@@ -15,16 +17,19 @@ import { UniversalSearch } from './universal-search';
 import Image from 'next/image';
 import mrplLogo from '../../public/mrpl-logo.png';
 
-const NAV_LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/worker', label: 'Worker' },
-  { href: '/hse', label: 'Dashboard' },
-];
-
 export function PortalHeaderWrapper() {
   const pathname = usePathname();
+  const { language } = useAppStore();
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const t = TRANSLATIONS[language];
+
+  const navLinks = [
+    { href: '/', label: t.navHome },
+    { href: '/worker', label: t.navWorker },
+    { href: '/hse', label: t.navDashboard },
+  ];
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-[#E7E5DE] shadow-2xs">
@@ -49,12 +54,18 @@ export function PortalHeaderWrapper() {
 
             <div className="flex flex-col justify-center min-w-0">
               <span className="font-bold text-[13px] sm:text-[16px] text-[#263026] leading-tight tracking-tight truncate">
-                <span className="hidden sm:inline">Mangalore Refinery and Petrochemicals Limited</span>
-                <span className="sm:hidden">MRPL Dosimetry</span>
+                <span className="hidden sm:inline">
+                  {language === 'hi' ? 'मंगलूर रिफाइनरी एंड पेट्रोकेमिकल्स लिमिटेड' : 'Mangalore Refinery and Petrochemicals Limited'}
+                </span>
+                <span className="sm:hidden">
+                  {language === 'hi' ? 'एमआरपीएल डोसीमेट्री' : 'MRPL Dosimetry'}
+                </span>
               </span>
               <span className="text-[11px] sm:text-[12px] text-[#596158] leading-tight truncate">
-                <span className="hidden md:inline">A Subsidiary of ONGC Limited · </span>
-                <span>Gas Dosimetry Portal</span>
+                <span className="hidden md:inline">
+                  {language === 'hi' ? 'ओएनजीसी लिमिटेड की एक सहायक कंपनी · ' : 'A Subsidiary of ONGC Limited · '}
+                </span>
+                <span>{language === 'hi' ? 'गैस डोसीमेट्री पोर्टल' : 'Gas Dosimetry Portal'}</span>
               </span>
             </div>
           </Link>
@@ -70,14 +81,14 @@ export function PortalHeaderWrapper() {
               aria-label="Search Portal"
             >
               <Search size={15} className="text-[#5C822D]" />
-              <span className="hidden md:inline">Search</span>
+              <span className="hidden md:inline">{language === 'hi' ? 'खोजें' : 'Search'}</span>
               <kbd className="bg-white px-1 py-0.2 rounded border border-[#E7E5DE] text-[10px] font-mono text-[#7A8178] hidden lg:inline">/</kbd>
             </button>
 
             {/* Plant Status Indicator */}
             <div className="hidden lg:flex items-center gap-2 bg-[#EEF3E7] px-3 py-1.5 rounded-md border border-[#C8DEC0] text-[12px] text-[#35551F] font-semibold">
               <span className="w-2 h-2 rounded-full bg-[#5C822D] animate-pulse" />
-              <span>Zone A Operational</span>
+              <span>{language === 'hi' ? 'ज़ोन ए सक्रिय' : 'Zone A Operational'}</span>
             </div>
 
             {/* Desktop Portal View Switcher */}
@@ -92,7 +103,7 @@ export function PortalHeaderWrapper() {
                   }`}
                 >
                   <User size={13} />
-                  <span>Worker</span>
+                  <span>{t.navWorker}</span>
                 </Link>
                 <Link
                   href="/hse"
@@ -103,7 +114,7 @@ export function PortalHeaderWrapper() {
                   }`}
                 >
                   <ShieldCheck size={13} />
-                  <span>Dashboard</span>
+                  <span>{t.navDashboard}</span>
                 </Link>
               </div>
             )}
@@ -124,7 +135,7 @@ export function PortalHeaderWrapper() {
       {/* Desktop Main Institutional Navigation Bar */}
       <div className="hidden sm:block bg-[#FAFBF9] border-t border-[#E7E5DE] text-[13px] font-semibold text-[#596158]">
         <div className="max-w-[1200px] mx-auto px-8 flex items-center gap-2 py-1.5">
-          {NAV_LINKS.map((link) => {
+          {navLinks.map((link) => {
             const isActive = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
             return (
               <Link
@@ -145,9 +156,9 @@ export function PortalHeaderWrapper() {
       {mobileMenuOpen && (
         <div className="sm:hidden bg-[#FAFBF9] border-t border-[#E7E5DE] px-4 py-3 space-y-1 shadow-lg animate-in fade-in duration-150">
           <div className="text-[10px] font-bold uppercase tracking-wider text-[#7A8178] px-2 pb-1 border-b border-[#E7E5DE]">
-            Main Sections
+            {language === 'hi' ? 'मुख्य अनुभाग' : 'Main Sections'}
           </div>
-          {NAV_LINKS.map((link) => {
+          {navLinks.map((link) => {
             const isActive = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
             return (
               <Link
@@ -176,3 +187,4 @@ export function PortalHeaderWrapper() {
     </header>
   );
 }
+

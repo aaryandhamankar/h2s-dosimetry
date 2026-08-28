@@ -19,6 +19,7 @@ import {
 import { useState, Suspense } from 'react';
 import { formatDateTime, formatDose, getValidityLabel } from '@/lib/utils';
 import { ValidityStatus, RiskStatus } from '@/types';
+import { TRANSLATIONS } from '@/lib/i18n';
 import Link from 'next/link';
 import Image from 'next/image';
 import mrplLogo from '../../../../public/mrpl-logo.png';
@@ -26,16 +27,18 @@ import mrplLogo from '../../../../public/mrpl-logo.png';
 function ResultContent() {
   const searchParams = useSearchParams();
   const scanId = searchParams.get('scanId');
-  const { scans } = useAppStore();
+  const { scans, language } = useAppStore();
   const scan = scans.find(s => s.id === scanId) || scans[0];
   const [showTechnical, setShowTechnical] = useState(false);
+
+  const t = TRANSLATIONS[language];
 
   if (!scan) {
     return (
       <div className="gov-card p-6 sm:p-8 text-center space-y-4 max-w-lg mx-auto my-6">
-        <p className="text-[#596158]">No exposure measurement record was found.</p>
+        <p className="text-[#596158]">{language === 'hi' ? 'कोई एक्सपोजर रिकॉर्ड नहीं मिला।' : 'No exposure measurement record was found.'}</p>
         <Link href="/worker" className="gov-btn-primary text-xs">
-          Return to Scanner
+          {language === 'hi' ? 'स्कैनर पर लौटें' : 'Return to Scanner'}
         </Link>
       </div>
     );
@@ -45,58 +48,58 @@ function ResultContent() {
   const isInvalid = res?.validityStatus === ValidityStatus.INVALID_IMAGE || res?.validityStatus === ValidityStatus.PROCESSING_ERROR;
   const isOor = res?.validityStatus === ValidityStatus.OUT_OF_RANGE;
 
-  let actionTitle = 'Normal Procedure';
-  let actionText = 'Cumulative H₂S exposure is within safe permissible workplace limits. Continue normal operations.';
+  let actionTitle: string = language === 'hi' ? 'सामान्य प्रक्रिया' : 'Normal Procedure';
+  let actionText: string = t.actionNormal;
   let bannerClass = 'bg-[#EEF3E7] border-[#C8DEC0] text-[#35551F]';
   let statusBadge = (
     <span className="gov-badge gov-badge-normal text-[12px] sm:text-[13px] py-1 px-3">
-      <CheckCircle2 className="w-4 h-4" /> Normal Exposure
+      <CheckCircle2 className="w-4 h-4" /> {t.riskNormal}
     </span>
   );
 
   if (res?.riskStatus === RiskStatus.ELEVATED) {
-    actionTitle = 'Caution Advised — Notify Supervisor';
-    actionText = 'Exposure is elevated above baseline. Review local area ventilation and inform shift lead.';
+    actionTitle = language === 'hi' ? 'सावधानी अपेक्षित — पर्यवेक्षक को सूचित करें' : 'Caution Advised — Notify Supervisor';
+    actionText = t.actionElevated;
     bannerClass = 'bg-[#FAEFE7] border-[#F3D5C0] text-[#C96B32]';
     statusBadge = (
       <span className="gov-badge gov-badge-elevated text-[12px] sm:text-[13px] py-1 px-3">
-        <AlertTriangle className="w-4 h-4" /> Elevated Level
+        <AlertTriangle className="w-4 h-4" /> {t.riskElevated}
       </span>
     );
   } else if (res?.riskStatus === RiskStatus.HIGH) {
-    actionTitle = 'Action Required — Inspect PPE';
-    actionText = 'Approaching occupational limit. Verify respirator seal and prepare to exit work zone.';
+    actionTitle = language === 'hi' ? 'अनिवार्य कार्रवाई — पीपीई जांचें' : 'Action Required — Inspect PPE';
+    actionText = t.actionHigh;
     bannerClass = 'bg-[#FAEFE7] border-[#F3D5C0] text-[#D47A32]';
     statusBadge = (
       <span className="gov-badge gov-badge-high text-[12px] sm:text-[13px] py-1 px-3">
-        <AlertTriangle className="w-4 h-4" /> High Exposure
+        <AlertTriangle className="w-4 h-4" /> {t.riskHigh}
       </span>
     );
   } else if (res?.riskStatus === RiskStatus.CRITICAL) {
-    actionTitle = 'MANDATORY SAFETY ACTION: EVACUATE';
-    actionText = 'CRITICAL LIMIT EXCEEDED: Evacuate the area immediately. Warn nearby personnel and report to the HSE emergency muster point.';
+    actionTitle = language === 'hi' ? 'अनिवार्य सुरक्षा कार्रवाई: तत्काल निकासी' : 'MANDATORY SAFETY ACTION: EVACUATE';
+    actionText = t.actionCritical;
     bannerClass = 'bg-[#F7EAEA] border-[#F0C4C4] text-[#A94442] font-semibold';
     statusBadge = (
       <span className="gov-badge gov-badge-critical text-[12px] sm:text-[13px] py-1 px-3 animate-pulse">
-        <ShieldAlert className="w-4 h-4" /> Critical Alarm
+        <ShieldAlert className="w-4 h-4" /> {t.riskCritical}
       </span>
     );
   } else if (isInvalid) {
-    actionTitle = 'Reading Invalid — Retake Photo';
-    actionText = 'Image could not be validated due to glare or blur. Hold camera steady over the 4-patch calibration bar and scan again.';
+    actionTitle = language === 'hi' ? 'अमान्य रीडिंग — पुनः फोटो लें' : 'Reading Invalid — Retake Photo';
+    actionText = language === 'hi' ? 'चमक या धुंधलेपन के कारण फोटो सत्यापित नहीं हो सकी। 4-बिंदु कैलिब्रेशन बार पर स्थिर रखें और पुनः स्कैन करें।' : 'Image could not be validated due to glare or blur. Hold camera steady over the 4-patch calibration bar and scan again.';
     bannerClass = 'bg-[#F0EFE9] border-[#E7E5DE] text-[#596158]';
     statusBadge = (
       <span className="gov-badge gov-badge-neutral text-[12px] sm:text-[13px] py-1 px-3">
-        <XCircle className="w-4 h-4" /> Invalid Capture
+        <XCircle className="w-4 h-4" /> {t.validityInvalid}
       </span>
     );
   } else if (isOor) {
-    actionTitle = 'Sensor Saturation Detected';
-    actionText = 'Sensor signal exceeds the 30.0 ppm·h calibrated range. Report to the HSE laboratory for gas chromatography testing.';
+    actionTitle = language === 'hi' ? 'सेंसर संतृप्ति का पता चला' : 'Sensor Saturation Detected';
+    actionText = language === 'hi' ? 'सेंसर सिग्नल 30.0 ppm·h कैलिब्रेटेड सीमा से अधिक है। गैस क्रोमैटोग्राफी परीक्षण के लिए प्रयोगशाला से संपर्क करें।' : 'Sensor signal exceeds the 30.0 ppm·h calibrated range. Report to the HSE laboratory for gas chromatography testing.';
     bannerClass = 'bg-[#F0EFE9] border-[#E7E5DE] text-[#596158]';
     statusBadge = (
       <span className="gov-badge gov-badge-neutral text-[12px] sm:text-[13px] py-1 px-3">
-        <AlertTriangle className="w-4 h-4" /> Out of Range
+        <AlertTriangle className="w-4 h-4" /> {language === 'hi' ? 'सीमा पार' : 'Out of Range'}
       </span>
     );
   }

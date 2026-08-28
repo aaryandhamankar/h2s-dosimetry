@@ -263,3 +263,145 @@ a.disabled {
     scroll-behavior: auto !important;
   }
 }
+
+/* =========================================================================
+   ACCESSIBILITY SCALING & HIGH CONTRAST MODES
+   ========================================================================= */
+
+/* Font Size Scaling */
+html.font-scale-sm {
+  font-size: 14px;
+}
+html.font-scale-sm body {
+  font-size: 13px;
+}
+html.font-scale-md {
+  font-size: 16px;
+}
+html.font-scale-lg {
+  font-size: 18px;
+}
+html.font-scale-lg body {
+  font-size: 17px;
+}
+html.font-scale-lg h1 {
+  font-size: 1.25em !important;
+}
+html.font-scale-lg h2 {
+  font-size: 1.2em !important;
+}
+
+/* High Contrast Mode (WCAG AAA Compliance) */
+html.high-contrast {
+  --bg-canvas: #000000;
+  --bg-surface: #000000;
+  --bg-surface-soft: #121212;
+  --border-warm: #FFFFFF;
+  --border-strong: #FFFFFF;
+  --text-primary: #FFFFFF;
+  --text-secondary: #FFFF00;
+  --text-muted: #FFFFFF;
+  --brand-green: #00FF00;
+  --brand-dark-green: #00CC00;
+  --accent-terracotta: #FF9900;
+}
+
+html.high-contrast body {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+}
+
+html.high-contrast .gov-card,
+html.high-contrast .gov-card-soft {
+  background-color: #000000 !important;
+  border: 2px solid #FFFFFF !important;
+  color: #FFFFFF !important;
+}
+
+html.high-contrast .gov-card * {
+  border-color: #FFFFFF !important;
+}
+
+html.high-contrast .gov-btn-primary {
+  background-color: #00FF00 !important;
+  color: #000000 !important;
+  border: 2px solid #FFFFFF !important;
+  font-weight: 800 !important;
+}
+
+html.high-contrast .gov-btn-secondary {
+  background-color: #000000 !important;
+  color: #FFFF00 !important;
+  border: 2px solid #FFFF00 !important;
+  font-weight: 800 !important;
+}
+
+html.high-contrast .gov-btn-danger {
+  background-color: #FF0000 !important;
+  color: #FFFFFF !important;
+  border: 2px solid #FFFFFF !important;
+  font-weight: 800 !important;
+}
+
+html.high-contrast .gov-btn-warning {
+  background-color: #FF9900 !important;
+  color: #000000 !important;
+  border: 2px solid #FFFFFF !important;
+  font-weight: 800 !important;
+}
+
+html.high-contrast .gov-badge {
+  border: 2px solid #FFFFFF !important;
+  font-weight: 800 !important;
+}
+
+html.high-contrast .gov-badge-normal {
+  background-color: #000000 !important;
+  color: #00FF00 !important;
+  border-color: #00FF00 !important;
+}
+
+html.high-contrast .gov-badge-elevated {
+  background-color: #000000 !important;
+  color: #FFFF00 !important;
+  border-color: #FFFF00 !important;
+}
+
+html.high-contrast .gov-badge-high {
+  background-color: #000000 !important;
+  color: #FF9900 !important;
+  border-color: #FF9900 !important;
+}
+
+html.high-contrast .gov-badge-critical {
+  background-color: #000000 !important;
+  color: #FF0000 !important;
+  border-color: #FF0000 !important;
+}
+
+html.high-contrast input,
+html.high-contrast select,
+html.high-contrast textarea {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+  border: 2px solid #FFFFFF !important;
+}
+
+html.high-contrast header,
+html.high-contrast footer,
+html.high-contrast nav,
+html.high-contrast .bg-white,
+html.high-contrast .bg-\[\#FAFBF9\],
+html.high-contrast .bg-\[\#F0EFE9\],
+html.high-contrast .bg-\[\#F7F6F1\] {
+  background-color: #000000 !important;
+  border-color: #FFFFFF !important;
+  color: #FFFFFF !important;
+}
+
+html.high-contrast .text-\[\#263026\],
+html.high-contrast .text-\[\#596158\],
+html.high-contrast .text-\[\#7A8178\] {
+  color: #FFFFFF !important;
+}
+

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { formatDateTime, formatDose } from '@/lib/utils';
 import { ValidityStatus, RiskStatus, ShiftStatus } from '@/types';
+import { TRANSLATIONS } from '@/lib/i18n';
 import { useState } from 'react';
 import Link from 'next/link';
 
@@ -27,8 +28,11 @@ export default function HistoryPage() {
     currentUser, 
     activeShift, 
     activeDosimeter, 
-    updateUserProfile 
+    updateUserProfile,
+    language 
   } = useAppStore();
+
+  const t = TRANSLATIONS[language];
 
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editName, setEditName] = useState(currentUser?.displayName || 'Rajesh Kumar');
@@ -54,10 +58,10 @@ export default function HistoryPage() {
   };
 
   const getActionSummary = (status?: RiskStatus) => {
-    if (status === RiskStatus.CRITICAL) return 'Evacuate area immediately & report to muster point';
-    if (status === RiskStatus.HIGH) return 'Action required: verify PPE and notify shift lead';
-    if (status === RiskStatus.ELEVATED) return 'Caution advised: check area ventilation';
-    return 'Normal operations: within safe permissible limit';
+    if (status === RiskStatus.CRITICAL) return t.actionCritical;
+    if (status === RiskStatus.HIGH) return t.actionHigh;
+    if (status === RiskStatus.ELEVATED) return t.actionElevated;
+    return t.actionNormal;
   };
 
   return (
@@ -68,7 +72,7 @@ export default function HistoryPage() {
         <div className="gov-card p-4 sm:p-6 border-2 border-[#5C822D]/30 space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between border-b border-[#E7E5DE] pb-2.5">
             <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider flex items-center gap-1.5">
-              <Clock className="w-4 h-4" /> Latest Exposure Reading (Last Scan)
+              <Clock className="w-4 h-4" /> {t.lastScanTitle}
             </span>
             <span className="text-[11px] sm:text-[12px] text-[#7A8178]">
               {formatDateTime(latestScan.capturedAt)}

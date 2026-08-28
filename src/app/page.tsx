@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/stores/app-store';
 import { DEMO_WORKERS, HSE_USER } from '@/data/demo-workers';
+import { TRANSLATIONS } from '@/lib/i18n';
 import { 
   User, 
   ShieldCheck, 
@@ -21,9 +22,11 @@ import mrplLogo from '../../public/mrpl-logo.png';
 
 export default function LandingPage() {
   const router = useRouter();
-  const { login, initializeDemoData } = useAppStore();
+  const { login, initializeDemoData, language } = useAppStore();
   const [selectedPreviewDose, setSelectedPreviewDose] = useState<number>(3.2);
   const [showSpecs, setShowSpecs] = useState<boolean>(false);
+
+  const t = TRANSLATIONS[language];
 
   const handleWorkerLogin = () => {
     initializeDemoData();
@@ -64,13 +67,13 @@ export default function LandingPage() {
               </div>
               <div className="space-y-0.5 sm:space-y-1 min-w-0">
                 <span className="text-[10px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
-                  ONGC · MRPL Directorate of HSE
+                  {t.homeBadge}
                 </span>
                 <h1 className="text-[18px] sm:text-[28px] font-bold text-[#263026] leading-tight">
-                  H₂S Exposure Dosimeter Platform
+                  {t.homeTitle}
                 </h1>
                 <p className="text-[12px] sm:text-[15px] text-[#596158] leading-relaxed">
-                  Passive colorimetric wristband verification system for refinery plant operators and safety monitoring.
+                  {t.homeDescription}
                 </p>
               </div>
             </div>
@@ -94,9 +97,9 @@ export default function LandingPage() {
                   <User className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[11px] uppercase tracking-wider text-white/80 font-bold">Field Operator</div>
-                  <div className="text-[15px] sm:text-[17px] font-bold leading-tight truncate">Worker Terminal</div>
-                  <div className="text-[11px] sm:text-[12px] text-white/85 truncate">Scan wristband & view shift reading</div>
+                  <div className="text-[11px] uppercase tracking-wider text-white/80 font-bold">{language === 'hi' ? 'फ़ील्ड ऑपरेटर' : 'Field Operator'}</div>
+                  <div className="text-[15px] sm:text-[17px] font-bold leading-tight truncate">{t.enterWorker}</div>
+                  <div className="text-[11px] sm:text-[12px] text-white/85 truncate">{t.enterWorkerSub}</div>
                 </div>
               </div>
               <ArrowRight className="w-5 h-5 text-white/80 group-hover:translate-x-1 transition-transform flex-shrink-0" />
@@ -111,9 +114,9 @@ export default function LandingPage() {
                   <ShieldCheck className="w-5 sm:w-6 h-5 sm:h-6" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[11px] uppercase tracking-wider text-[#5C822D] font-bold">Safety Officer</div>
-                  <div className="text-[15px] sm:text-[17px] font-bold leading-tight truncate">HSE Dashboard</div>
-                  <div className="text-[11px] sm:text-[12px] text-[#596158] truncate">Plant telemetry, alerts & analytics</div>
+                  <div className="text-[11px] uppercase tracking-wider text-[#5C822D] font-bold">{language === 'hi' ? 'सुरक्षा अधिकारी' : 'Safety Officer'}</div>
+                  <div className="text-[15px] sm:text-[17px] font-bold leading-tight truncate">{t.openDashboard}</div>
+                  <div className="text-[11px] sm:text-[12px] text-[#596158] truncate">{t.openDashboardSub}</div>
                 </div>
               </div>
               <ArrowRight className="w-5 h-5 text-[#5C822D] group-hover:translate-x-1 transition-transform flex-shrink-0" />
@@ -127,20 +130,20 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <div>
                 <h2 className="text-[14px] sm:text-[16px] font-bold text-[#263026] flex items-center gap-1.5">
-                  <Layers className="w-4 h-4 text-[#5C822D]" /> Wearable Dosimeter Wristband
+                  <Layers className="w-4 h-4 text-[#5C822D]" /> {t.schematicTitle}
                 </h2>
                 <p className="text-[11px] sm:text-[12px] text-[#596158]">
-                  4-patch optical reference bar with lead-free colorimetric chemosensor
+                  {t.schematicSubtitle}
                 </p>
               </div>
 
               {/* Exposure Simulator Pills */}
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[11px] text-[#7A8178] font-bold mr-0.5">Simulate:</span>
+                <span className="text-[11px] text-[#7A8178] font-bold mr-0.5">{language === 'hi' ? 'अनुकरण:' : 'Simulate:'}</span>
                 {[
-                  { label: 'Normal (3.2)', val: 3.2 },
-                  { label: 'Elevated (12.4)', val: 12.4 },
-                  { label: 'Critical (24.8)', val: 24.8 },
+                  { label: t.normalDemo, val: 3.2 },
+                  { label: t.elevatedDemo, val: 12.4 },
+                  { label: t.criticalDemo, val: 24.8 },
                 ].map(p => (
                   <button
                     key={p.val}
@@ -192,7 +195,7 @@ export default function LandingPage() {
                       <span className="opacity-80">Sulfide</span>
                     </div>
                     <div className="text-[11px] sm:text-[12px] text-[#596158] font-mono leading-tight">
-                      <div>Dose: <strong className="text-[#263026] text-[12px] sm:text-[14px]">{selectedPreviewDose} ppm·h</strong></div>
+                      <div>{language === 'hi' ? 'खुराक:' : 'Dose:'} <strong className="text-[#263026] text-[12px] sm:text-[14px]">{selectedPreviewDose} ppm·h</strong></div>
                       <div className="text-[9px] sm:text-[10px] text-[#5C822D]">Cu-PAN + Bi³⁺</div>
                     </div>
                   </div>
@@ -222,7 +225,7 @@ export default function LandingPage() {
                 >
                   <span className="flex items-center gap-1">
                     <Sparkles className="w-3.5 h-3.5 text-[#5C822D]" />
-                    <span>Technical & Chemical Specifications</span>
+                    <span>{t.techSpecs}</span>
                   </span>
                   <ChevronDown className={`w-4 h-4 transition-transform ${showSpecs ? 'rotate-180' : ''}`} />
                 </button>
@@ -230,19 +233,19 @@ export default function LandingPage() {
                 {showSpecs && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pt-2.5 text-[11px] sm:text-[12px] text-[#596158] animate-in fade-in duration-200">
                     <div className="bg-[#FAFBF9] p-2.5 rounded border border-[#E7E5DE]">
-                      <span className="text-[#7A8178] text-[9px] sm:text-[10px] uppercase font-bold block">Chemosensor</span>
+                      <span className="text-[#7A8178] text-[9px] sm:text-[10px] uppercase font-bold block">{t.reagentMatrix}</span>
                       <strong className="text-[#263026]">Cu-PAN & Bi(III)</strong>
                     </div>
                     <div className="bg-[#FAFBF9] p-2.5 rounded border border-[#E7E5DE]">
-                      <span className="text-[#7A8178] text-[9px] sm:text-[10px] uppercase font-bold block">Reaction Matrix</span>
+                      <span className="text-[#7A8178] text-[9px] sm:text-[10px] uppercase font-bold block">{language === 'hi' ? 'प्रतिक्रिया' : 'Reaction'}</span>
                       <span className="font-mono text-[10px] sm:text-[11px]">CuS / Bi₂S₃↓</span>
                     </div>
                     <div className="bg-[#FAFBF9] p-2.5 rounded border border-[#E7E5DE]">
-                      <span className="text-[#7A8178] text-[9px] sm:text-[10px] uppercase font-bold block">Eco-Safety</span>
+                      <span className="text-[#7A8178] text-[9px] sm:text-[10px] uppercase font-bold block">{language === 'hi' ? 'पर्यावरण सुरक्षा' : 'Eco-Safety'}</span>
                       <span className="text-[#5C822D] font-bold">100% Lead-Free</span>
                     </div>
                     <div className="bg-[#FAFBF9] p-2.5 rounded border border-[#E7E5DE]">
-                      <span className="text-[#7A8178] text-[9px] sm:text-[10px] uppercase font-bold block">Colorimetry</span>
+                      <span className="text-[#7A8178] text-[9px] sm:text-[10px] uppercase font-bold block">{language === 'hi' ? 'वर्णमिति' : 'Colorimetry'}</span>
                       <span className="text-[#5C822D] font-bold">Bradford D65</span>
                     </div>
                   </div>
@@ -256,34 +259,40 @@ export default function LandingPage() {
         {/* 3-Step Simple SOP Guide */}
         <div className="gov-card p-4 sm:p-6 space-y-3 sm:space-y-4">
           <h3 className="text-[14px] sm:text-[15px] font-bold text-[#263026] uppercase tracking-wider">
-            Standard Field Operating Procedure (SOP)
+            {language === 'hi' ? 'मानक संचालन प्रक्रिया (SOP)' : 'Standard Field Operating Procedure (SOP)'}
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[13px] text-[#596158]">
             <div className="p-3.5 bg-[#FAFBF9] border border-[#E7E5DE] rounded-lg space-y-1.5">
               <div className="font-bold text-[#263026] flex items-center gap-2 text-[13px] sm:text-[14px]">
-                <Clock className="w-4 h-4 text-[#5C822D]" /> 1. Start Shift
+                <Clock className="w-4 h-4 text-[#5C822D]" /> 1. {language === 'hi' ? 'शिफ्ट प्रारंभ करें' : 'Start Shift'}
               </div>
               <p className="text-[12px] sm:text-[13px] leading-relaxed">
-                Confirm your assigned wristband badge ID at the start of your shift.
+                {language === 'hi' 
+                  ? 'अपनी शिफ्ट की शुरुआत में अपने आवंटित रिस्टबैंड बैज आईडी की पुष्टि करें।' 
+                  : 'Confirm your assigned wristband badge ID at the start of your shift.'}
               </p>
             </div>
 
             <div className="p-3.5 bg-[#FAFBF9] border border-[#E7E5DE] rounded-lg space-y-1.5">
               <div className="font-bold text-[#263026] flex items-center gap-2 text-[13px] sm:text-[14px]">
-                <Camera className="w-4 h-4 text-[#5C822D]" /> 2. Optical Scan
+                <Camera className="w-4 h-4 text-[#5C822D]" /> 2. {language === 'hi' ? 'ऑप्टिकल स्कैन' : 'Optical Scan'}
               </div>
               <p className="text-[12px] sm:text-[13px] leading-relaxed">
-                Take a quick photo of the sensor badge using your phone camera.
+                {language === 'hi'
+                  ? 'अपने फोन कैमरे का उपयोग करके सेंसर बैज की त्वरित फोटो लें।'
+                  : 'Take a quick photo of the sensor badge using your phone camera.'}
               </p>
             </div>
 
             <div className="p-3.5 bg-[#FAFBF9] border border-[#E7E5DE] rounded-lg space-y-1.5">
               <div className="font-bold text-[#263026] flex items-center gap-2 text-[13px] sm:text-[14px]">
-                <FileCheck className="w-4 h-4 text-[#5C822D]" /> 3. Verified Result
+                <FileCheck className="w-4 h-4 text-[#5C822D]" /> 3. {language === 'hi' ? 'सत्यापित परिणाम' : 'Verified Result'}
               </div>
               <p className="text-[12px] sm:text-[13px] leading-relaxed">
-                Receive instant quantitative H₂S reading and safety guidance.
+                {language === 'hi'
+                  ? 'तुरंत सटीक H₂S रीडिंग और सुरक्षा मार्गदर्शन प्राप्त करें।'
+                  : 'Receive instant quantitative H₂S reading and safety guidance.'}
               </p>
             </div>
           </div>
@@ -293,4 +302,5 @@ export default function LandingPage() {
     </div>
   );
 }
+
 
