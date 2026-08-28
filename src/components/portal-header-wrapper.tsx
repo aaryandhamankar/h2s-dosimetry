@@ -7,11 +7,21 @@ import {
   Search, 
   User, 
   ShieldCheck, 
+  Menu, 
+  X,
 } from 'lucide-react';
 import { AccessibilityBar } from './accessibility-bar';
 import { UniversalSearch } from './universal-search';
 import Image from 'next/image';
 import mrplLogo from '../../public/mrpl-logo.png';
+
+const NAV_LINKS = [
+  { href: '/', label: 'Portal Home' },
+  { href: '/worker', label: 'Field Worker Terminal' },
+  { href: '/hse', label: 'HSE Command Center' },
+  { href: '/hse/exposure', label: 'Exposure Analytics' },
+  { href: '/hse/technical', label: 'Metrology & Provenance' },
+];
 
 export function PortalHeaderWrapper() {
   const pathname = usePathname();
@@ -51,7 +61,7 @@ export function PortalHeaderWrapper() {
             </div>
           </Link>
 
-          {/* Right Controls: Search, Zone Status, & Role Switcher */}
+          {/* Right Controls: Search, Zone Status, Role Switcher & Mobile Hamburger */}
           <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
             
             {/* Quick Search */}
@@ -72,7 +82,7 @@ export function PortalHeaderWrapper() {
               <span>Zone A Operational</span>
             </div>
 
-            {/* Desktop Portal View Switcher (Segmented Control) */}
+            {/* Desktop Portal View Switcher */}
             {pathname !== '/' && (
               <div className="hidden sm:flex items-center bg-[#F0EFE9] p-0.5 rounded-md border border-[#E7E5DE] text-[12px] font-semibold">
                 <Link
@@ -100,35 +110,68 @@ export function PortalHeaderWrapper() {
               </div>
             )}
 
-            {/* Mobile Mode Switcher Dropdown Toggle Button */}
-            {pathname !== '/' && (
-              <div className="sm:hidden flex items-center">
-                <Link
-                  href={pathname.startsWith('/worker') ? '/hse' : '/worker'}
-                  className="flex items-center gap-1 bg-[#EEF3E7] text-[#35551F] font-semibold text-[11px] px-2.5 py-1.5 rounded-md border border-[#C8DEC0]"
-                  title="Switch Role"
-                >
-                  {pathname.startsWith('/worker') ? (
-                    <>
-                      <ShieldCheck size={13} className="text-[#5C822D]" />
-                      <span>HSE</span>
-                    </>
-                  ) : (
-                    <>
-                      <User size={13} className="text-[#5C822D]" />
-                      <span>Worker</span>
-                    </>
-                  )}
-                </Link>
-              </div>
-            )}
+            {/* Mobile Hamburger Menu Toggle Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="sm:hidden flex items-center justify-center p-2 rounded-md bg-[#F7F6F1] border border-[#E7E5DE] text-[#263026] hover:bg-[#F0EFE9] transition-colors"
+              aria-label="Toggle Portal Menu"
+            >
+              {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
 
           </div>
-
         </div>
       </div>
 
-      {/* 3. Indian Tricolor Horizontal Accent Ribbon (4px Fixed Height) */}
+      {/* Desktop Main Institutional Navigation Bar */}
+      <div className="hidden sm:block bg-[#FAFBF9] border-t border-[#E7E5DE] text-[12px] font-semibold text-[#596158]">
+        <div className="max-w-[1200px] mx-auto px-8 flex items-center gap-1 py-1">
+          {NAV_LINKS.map((link, idx) => {
+            const isActive = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
+            return (
+              <div key={link.href} className="flex items-center gap-1">
+                {idx > 0 && <span className="text-[#D5D2C9]">•</span>}
+                <Link
+                  href={link.href}
+                  className={`px-3 py-1 rounded-md transition-colors whitespace-nowrap ${
+                    isActive ? 'bg-[#5C822D] text-white font-bold' : 'hover:text-[#263026] hover:bg-[#F0EFE9]'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Mobile Hamburger Dropdown Menu Drawer */}
+      {mobileMenuOpen && (
+        <div className="sm:hidden bg-[#FAFBF9] border-t border-[#E7E5DE] px-4 py-3 space-y-1 shadow-lg animate-in fade-in duration-150">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-[#7A8178] px-2 pb-1 border-b border-[#E7E5DE]">
+            Portal Navigation
+          </div>
+          {NAV_LINKS.map((link) => {
+            const isActive = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 rounded-md text-[13px] font-semibold transition-all ${
+                  isActive
+                    ? 'bg-[#5C822D] text-white font-bold'
+                    : 'text-[#263026] hover:bg-[#F0EFE9]'
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
+      {/* 3. Indian Tricolor Horizontal Accent Ribbon */}
       <div className="tricolor-ribbon" />
 
       {/* 4. Universal Search Dialog */}
