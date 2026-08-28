@@ -1,0 +1,222 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useAppStore } from '@/stores/app-store';
+import { DEMO_WORKERS } from '@/data/demo-workers';
+import { RiskStatus } from '@/types';
+import Link from 'next/link';
+import { formatDose, formatDateTime } from '@/lib/utils';
+
+export default function HSEWorkersPage() {
+  const { scans } = useAppStore();
+  const [mounted, setMounted] = useState(false);
+  const [selectedWorker, setSelectedWorker] = useState<string | null>(DEMO_WORKERS[0]?.id || null);
+
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!mounted) return <div className="text-[13px] text-[#7A8178]">Loading personnel directory...</div>;
+
+  const workerStats = DEMO_WORKERS.map(worker => {
+    const workerScans = scans.filter(s => s.workerId === worker.id);
+    const latestScan = workerScans.sort((a, b) =>
+      new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime()
+    )[0];
+
+    return {
+      ...worker,
+      totalScans: workerScans.length,
+      latestScan,
+      latestDose: latestScan?.exposureResult?.estimatedDose ?? null,
+      latestRisk: latestScan?.exposureResult?.riskStatus ?? null,
+      latestTime: latestScan?.capturedAt ?? null,
+    };
+  });
+
+  const selected = selectedWorker ? workerStats.find(w => w.id === selectedWorker) : workerStats[0];
+  const selectedScans = selectedWorker
+    ? scans.filter(s => s.workerId === selectedWorker).sort((a, b) =>
+        new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime()
+      )
+    : [];
+
+  return (
+    <div className="space-y-6">
+      
+      {/* Header */}
+      <div className="border-b border-[#E7E5DE] pb-4">
+        <span className="text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
+          Personnel Roster
+        </span>
+        <h1 className="text-[24px] font-bold text-[#263026]">MRPL Monitored Workforce Roster</h1>
+        <p className="text-[14px] text-[#596158]">Individual worker exposure records, assigned dosimeter cartridges, and shift compliance</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* Worker Roster Column */}
+        <div className="lg:col-span-5 gov-card overflow-hidden">
+          <div className="p-4 border-b border-[#E7E5DE] bg-[#FAFBF9] flex items-center justify-between text-[13px]">
+            <span className="font-bold text-[#263026] uppercase tracking-wider">
+              Assigned Personnel ({workerStats.length})
+            </span>
+            <span className="text-[#7A8178]">MRPL Zone A</span>
+          </div>
+
+          <div className="divide-y divide-[#E7E5DE]">
+            {workerStats.map(w => {
+              const isSelected = w.id === selectedWorker;
+              return (
+                <button
+                  key={w.id}
+                  onClick={() => setSelectedWorker(w.id)}
+                  className={`w-full p-4 flex items-center justify-between text-left transition-all ${
+                    isSelected
+                      ? 'bg-[#EEF3E7] border-l-4 border-[#5C822D]'
+                      : 'hover:bg-[#FAFBF9]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-md flex items-center justify-center font-bold text-[14px] ${
+                      isSelected ? 'bg-[#5C822D] text-white' : 'bg-[#F7F6F1] text-[#263026] border border-[#E7E5DE]'
+                    }`}>
+                      {w.displayName.split(' ').map(n => n[0]).join('')}
+                    </div>
+
+                    <div>
+                      <div className="font-bold text-[15px] text-[#263026]">{w.displayName}</div>
+                      <div className="text-[12px] text-[#596158]">
+                        {w.workerCode} · {w.department}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <div className="font-bold text-[14px] text-[#263026] font-mono">
+                      {w.latestDose !== null ? `${formatDose(w.latestDose)} ppm·h` : '—'}
+                    </div>
+                    <span className={`gov-badge ${
+                      w.latestRisk === RiskStatus.NORMAL
+                        ? 'gov-badge-normal'
+                        : w.latestRisk === RiskStatus.ELEVATED
+                        ? 'gov-badge-elevated'
+                        : w.latestRisk === RiskStatus.HIGH
+                        ? 'gov-badge-high'
+                        : 'gov-badge-critical'
+                    } text-[10px]`}>
+                      {w.latestRisk || 'NO DATA'}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Selected Worker Dossier Column */}
+        {selected && (
+          <div className="lg:col-span-7 space-y-6">
+            
+            {/* Worker Profile Card */}
+            <div className="gov-card p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-[#E7E5DE] pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-md bg-[#5C822D] text-white flex items-center justify-center font-bold text-[16px]">
+                    {selected.displayName.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div>
+                    <h2 className="text-[18px] font-bold text-[#263026]">{selected.displayName}</h2>
+                    <p className="text-[13px] text-[#596158]">
+                      ID: <strong>{selected.workerCode}</strong> · Unit: <strong>{selected.department}</strong>
+                    </p>
+                  </div>
+                </div>
+
+                <span className="gov-badge gov-badge-normal text-[12px]">
+                  ACTIVE ON SHIFT
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[13px]">
+                <div className="bg-[#FAFBF9] p-3.5 rounded border border-[#E7E5DE]">
+                  <span className="text-[#7A8178] text-[11px] uppercase font-bold block">Assigned Cartridge</span>
+                  <span className="font-bold text-[#263026] text-[15px] font-mono mt-0.5 block">
+                    {selected.latestScan?.dosimeterId || 'DOS-001'}
+                  </span>
+                </div>
+                <div className="bg-[#FAFBF9] p-3.5 rounded border border-[#E7E5DE]">
+                  <span className="text-[#7A8178] text-[11px] uppercase font-bold block">Total Shift Scans</span>
+                  <span className="font-bold text-[#263026] text-[15px] font-mono mt-0.5 block">
+                    {selected.totalScans}
+                  </span>
+                </div>
+                <div className="bg-[#FAFBF9] p-3.5 rounded border border-[#E7E5DE]">
+                  <span className="text-[#7A8178] text-[11px] uppercase font-bold block">Current Cumulative Dose</span>
+                  <span className="font-bold text-[#5C822D] text-[15px] font-mono mt-0.5 block">
+                    {selected.latestDose !== null ? `${formatDose(selected.latestDose)} ppm·h` : '0.0 ppm·h'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Individual Worker Scan History Ledger */}
+            <div className="gov-card overflow-hidden">
+              <div className="p-4 border-b border-[#E7E5DE] bg-[#FAFBF9] flex items-center justify-between text-[13px]">
+                <span className="font-bold text-[#263026] uppercase tracking-wider">
+                  Verified Scan Ledger ({selectedScans.length})
+                </span>
+                <span className="text-[#7A8178]">Lead-Free Cu-PAN / Bi(III)</span>
+              </div>
+
+              {selectedScans.length === 0 ? (
+                <div className="p-8 text-center text-[13px] text-[#7A8178]">
+                  No scans recorded for this operator yet.
+                </div>
+              ) : (
+                <div className="divide-y divide-[#E7E5DE]">
+                  {selectedScans.map(s => {
+                    const r = s.exposureResult;
+                    return (
+                      <div key={s.id} className="p-4 flex items-center justify-between hover:bg-[#FAFBF9]">
+                        <div className="space-y-0.5">
+                          <div className="font-bold text-[14px] text-[#263026]">
+                            {formatDateTime(s.capturedAt)}
+                          </div>
+                          <div className="text-[12px] text-[#596158] font-mono">
+                            Scan: {s.id.substring(0, 14)}... · Badge: {s.dosimeterId}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <div className="font-bold text-[15px] text-[#263026] font-mono">
+                              {r?.estimatedDose !== null && r?.estimatedDose !== undefined
+                                ? `${formatDose(r.estimatedDose)} ${r.doseUnit}`
+                                : 'Unverified'}
+                            </div>
+                            <div className="text-[11px] text-[#7A8178]">
+                              8h TWA: {r?.estimatedTwa !== null && r?.estimatedTwa !== undefined ? `${formatDose(r.estimatedTwa)} ppm` : '—'}
+                            </div>
+                          </div>
+
+                          <Link
+                            href={`/hse/technical?scanId=${s.id}`}
+                            className="gov-btn-secondary text-[12px] h-8 px-2.5"
+                          >
+                            Inspect
+                          </Link>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+          </div>
+        )}
+
+      </div>
+
+    </div>
+  );
+}

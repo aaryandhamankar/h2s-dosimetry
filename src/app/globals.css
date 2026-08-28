@@ -1,0 +1,205 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-canvas: #F7F6F1;
+    --bg-surface: #FFFFFF;
+    --bg-surface-soft: #F0EFE9;
+    --border-warm: #E7E5DE;
+    --border-strong: #D5D2C9;
+    --text-primary: #263026;
+    --text-secondary: #596158;
+    --text-muted: #7A8178;
+    --brand-green: #5C822D;
+    --brand-dark-green: #35551F;
+    --accent-terracotta: #C96B32;
+    --accent-gold: #B89B5E;
+  }
+
+  body {
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* 4px Indian Tricolor Accent Ribbon running 100% full viewport width */
+.tricolor-ribbon {
+  height: 4px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.tricolor-ribbon::before {
+  content: '';
+  flex: 1;
+  background-color: #FF9933; /* Saffron */
+}
+
+.tricolor-ribbon::after {
+  content: '';
+  flex: 1;
+  background-color: #138808; /* India Green */
+}
+
+.tricolor-ribbon-center {
+  flex: 1;
+  background-color: #FFFFFF;
+  border-top: 1px solid #E7E5DE;
+  border-bottom: 1px solid #E7E5DE;
+}
+
+/* Institutional Card Surfaces */
+.gov-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E7E5DE;
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+.gov-card-soft {
+  background-color: #F0EFE9;
+  border: 1px solid #E7E5DE;
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+/* Administrative Buttons */
+.gov-btn-primary {
+  background-color: #5C822D;
+  color: #FFFFFF;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.15s ease;
+  border: 1px solid #5C822D;
+}
+
+.gov-btn-primary:hover {
+  background-color: #4D6E26;
+  border-color: #4D6E26;
+}
+
+.gov-btn-primary:active {
+  background-color: #35551F;
+}
+
+.gov-btn-secondary {
+  background-color: #FFFFFF;
+  color: #263026;
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #E7E5DE;
+  transition: all 0.15s ease;
+}
+
+.gov-btn-secondary:hover {
+  background-color: #F0EFE9;
+  border-color: #D5D2C9;
+}
+
+.gov-btn-danger {
+  background-color: #A94442;
+  color: #FFFFFF;
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.15s ease;
+  border: 1px solid #A94442;
+}
+
+.gov-btn-danger:hover {
+  background-color: #8F3937;
+}
+
+.gov-btn-warning {
+  background-color: #C96B32;
+  color: #FFFFFF;
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.15s ease;
+  border: 1px solid #C96B32;
+}
+
+.gov-btn-warning:hover {
+  background-color: #B35B26;
+}
+
+/* Institutional Badges & Status Pills */
+.gov-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.gov-badge-normal {
+  background-color: #EEF3E7;
+  color: #35551F;
+  border: 1px solid #C8DEC0;
+}
+
+.gov-badge-elevated {
+  background-color: #FAEFE7;
+  color: #C96B32;
+  border: 1px solid #F3D5C0;
+}
+
+.gov-badge-high {
+  background-color: #FAEFE7;
+  color: #D47A32;
+  border: 1px solid #F3D5C0;
+}
+
+.gov-badge-critical {
+  background-color: #F7EAEA;
+  color: #A94442;
+  border: 1px solid #F0C4C4;
+}
+
+.gov-badge-neutral {
+  background-color: #F0EFE9;
+  color: #596158;
+  border: 1px solid #E7E5DE;
+}
+
+.gov-badge-brand {
+  background-color: #EEF3E7;
+  color: #5C822D;
+  border: 1px solid #C8DEC0;
+}
