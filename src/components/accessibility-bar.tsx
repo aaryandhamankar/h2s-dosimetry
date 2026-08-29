@@ -7,10 +7,10 @@ import {
   Calendar as CalendarIcon, 
   Clock, 
   Sun,
-  Languages,
 } from 'lucide-react';
+import { useMounted } from '@/hooks/use-mounted';
 
-export function AccessibilityBar({ onOpenSearch }: { onOpenSearch?: () => void }) {
+export function AccessibilityBar() {
   const { 
     language, 
     setLanguage, 
@@ -22,12 +22,11 @@ export function AccessibilityBar({ onOpenSearch }: { onOpenSearch?: () => void }
 
   const [currentTime, setCurrentTime] = useState<string>('');
   const [currentDate, setCurrentDate] = useState<string>('');
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
 
   const t = TRANSLATIONS[language];
 
   useEffect(() => {
-    setMounted(true);
     const updateDateTime = () => {
       const now = new Date();
       setCurrentTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
@@ -175,4 +174,3 @@ export function AccessibilityBar({ onOpenSearch }: { onOpenSearch?: () => void }
     </div>
   );
 }
-

@@ -17,7 +17,7 @@ import { formatDose } from '@/lib/utils';
 
 export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const router = useRouter();
-  const { scans, alerts } = useAppStore();
+  const { scans } = useAppStore();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<'ALL' | 'WORKERS' | 'DOSIMETERS' | 'ALERTS' | 'SOP'>('ALL');
 
@@ -75,12 +75,12 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-2xs flex items-start justify-center pt-4 sm:pt-24 px-2.5 sm:px-4">
       <div 
-        className="bg-white border border-[#E7E5DE] rounded-md max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[80vh]"
+        className="bg-white border border-[#E8E2D5] rounded-xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[80vh]"
         onClick={e => e.stopPropagation()}
       >
         
         {/* Search Input Header */}
-        <div className="p-3 sm:p-4 border-b border-[#E7E5DE] flex items-center gap-2.5 bg-[#FAFBFD]">
+        <div className="p-3 sm:p-4 border-b border-[#E8E2D5] flex items-center gap-2.5 bg-[#FAF7F0]">
           <Search className="w-4 sm:w-5 h-4 sm:h-5 text-[#5C822D] flex-shrink-0" />
           <input
             type="text"
@@ -92,14 +92,14 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
           />
           <button 
             onClick={onClose} 
-            className="text-[#7A8178] hover:text-[#263026] p-1.5 rounded hover:bg-[#F0EFE9]"
+            className="text-[#7A8178] hover:text-[#263026] p-1.5 rounded hover:bg-[#F4EFE6]"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Category Filter Tabs */}
-        <div className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#F7F6F1] border-b border-[#E7E5DE] text-[11px] sm:text-[12px] overflow-x-auto">
+        <div className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#FAF6EE] border-b border-[#E8E2D5] text-[11px] sm:text-[12px] overflow-x-auto">
           {(['ALL', 'WORKERS', 'DOSIMETERS', 'ALERTS', 'SOP'] as const).map(cat => (
             <button
               key={cat}
@@ -107,7 +107,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
               className={`px-2.5 sm:px-3 py-1 rounded font-semibold transition-all whitespace-nowrap flex-shrink-0 ${
                 category === cat 
                   ? 'bg-[#5C822D] text-white shadow-2xs' 
-                  : 'bg-white border border-[#E7E5DE] text-[#596158] hover:bg-[#F0EFE9]'
+                  : 'bg-white border border-[#E8E2D5] text-[#596158] hover:bg-[#F4EFE6]'
               }`}
             >
               {cat}
@@ -130,7 +130,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
                   <div
                     key={w.id}
                     onClick={() => handleSelectWorker()}
-                    className="p-2.5 rounded hover:bg-[#F7F6F1] flex items-center justify-between cursor-pointer border border-transparent hover:border-[#E7E5DE]"
+                    className="p-2.5 rounded hover:bg-[#FAF6EE] flex items-center justify-between cursor-pointer border border-transparent hover:border-[#E8E2D5]"
                   >
                     <div>
                       <span className="font-semibold text-[#263026]">{w.displayName}</span>
@@ -156,7 +156,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
                   <div
                     key={d}
                     onClick={() => handleSelectWorker()}
-                    className="p-2 rounded border border-[#E7E5DE] bg-white hover:bg-[#F7F6F1] cursor-pointer flex items-center justify-between"
+                    className="p-2 rounded border border-[#E8E2D5] bg-white hover:bg-[#FAF6EE] cursor-pointer flex items-center justify-between"
                   >
                     <span className="font-mono font-bold text-[13px] text-[#263026]">{d}</span>
                     <span className="text-[10px] text-[#5C822D] font-semibold">Active</span>
@@ -178,7 +178,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
                   <div
                     key={s.id}
                     onClick={() => handleSelectScan(s.id)}
-                    className="p-2.5 rounded hover:bg-[#F7F6F1] flex items-center justify-between cursor-pointer border border-transparent hover:border-[#E7E5DE]"
+                    className="p-2.5 rounded hover:bg-[#FAF6EE] flex items-center justify-between cursor-pointer border border-transparent hover:border-[#E8E2D5]"
                   >
                     <div>
                       <span className="font-mono text-[13px] font-bold text-[#263026]">{s.id.substring(0, 14)}...</span>
@@ -207,7 +207,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
                   <div
                     key={t.title}
                     onClick={() => handleSelectSop(t.link)}
-                    className="p-2.5 rounded hover:bg-[#F7F6F1] cursor-pointer border border-transparent hover:border-[#E7E5DE]"
+                    className="p-2.5 rounded hover:bg-[#FAF6EE] cursor-pointer border border-transparent hover:border-[#E8E2D5]"
                   >
                     <div className="font-semibold text-[#263026]">{t.title}</div>
                     <div className="text-[12px] text-[#596158]">{t.desc}</div>
@@ -220,8 +220,8 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
         </div>
 
         {/* Footer info */}
-        <div className="p-3 bg-[#F7F6F1] border-t border-[#E7E5DE] text-[12px] text-[#7A8178] flex justify-between items-center">
-          <span>Press <kbd className="bg-white px-1.5 py-0.5 rounded border border-[#E7E5DE] font-mono text-[10px]">ESC</kbd> to exit</span>
+        <div className="p-3 bg-[#FAF6EE] border-t border-[#E8E2D5] text-[12px] text-[#7A8178] flex justify-between items-center">
+          <span>Press <kbd className="bg-white px-1.5 py-0.5 rounded border border-[#E8E2D5] font-mono text-[10px]">ESC</kbd> to exit</span>
           <span className="text-[#35551F] font-semibold">MRPL Directory Search</span>
         </div>
 

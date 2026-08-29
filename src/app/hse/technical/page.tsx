@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useAppStore } from '@/stores/app-store';
 import { useSearchParams } from 'next/navigation';
 import { 
@@ -16,13 +16,10 @@ function TechnicalContent() {
   const { scans } = useAppStore();
   const searchParams = useSearchParams();
   const queryScanId = searchParams.get('scanId');
-  const [selectedScanId, setSelectedScanId] = useState<string | null>(queryScanId || scans[0]?.id || null);
+  const [selectedScanId, setSelectedScanId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (queryScanId) setSelectedScanId(queryScanId);
-  }, [queryScanId]);
-
-  const selectedScan = scans.find(s => s.id === selectedScanId) || scans[0];
+  const activeScanId = selectedScanId || queryScanId || scans[0]?.id || null;
+  const selectedScan = scans.find(s => s.id === activeScanId) || scans[0];
 
   return (
     <div className="space-y-4 sm:space-y-6">

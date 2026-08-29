@@ -6,7 +6,6 @@ import { useState, useRef, useEffect } from 'react';
 import { getScanPipeline } from '@/services/scientific/scan-processing-pipeline';
 import { 
   Camera, 
-  ArrowRight, 
   CheckCircle2, 
   Loader2, 
   Edit3, 
@@ -18,10 +17,8 @@ import {
   VideoOff, 
   Play, 
   Square,
-  ShieldAlert,
 } from 'lucide-react';
 import { DemoScenario, ProcessingStatus, ShiftStatus } from '@/types';
-import { formatTime } from '@/lib/utils';
 import { TRANSLATIONS } from '@/lib/i18n';
 
 const STAGE_LABELS: Record<ProcessingStatus, string> = {
@@ -124,60 +121,10 @@ export default function WorkerHomePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [cameraRetryCount, setCameraRetryCount] = useState(0);
 
   // Shift duration timer
   const [elapsed, setElapsed] = useState('');
-
-  useEffect(() => {
-    if (activeShift?.startTime && activeShift.status === ShiftStatus.ACTIVE) {
-      const updateElapsed = () => {
-        const start = new Date(activeShift.startTime).getTime();
-        const now = new Date().getTime();
-        const diffMs = Math.max(0, now - start);
-        const diffHrs = Math.floor(diffMs / 3600000);
-        const diffMins = Math.floor((diffMs % 3600000) / 60000);
-        setElapsed(`${diffHrs}h ${diffMins}m`);
-      };
-      updateElapsed();
-      const interval = setInterval(updateElapsed, 60000);
-      return () => clearInterval(interval);
-    } else {
-      setElapsed('');
-    }
-  }, [activeShift]);
-
-  useEffect(() => {
-    startCamera();
-    return () => {
-      stopCamera();
-    };
-  }, []);
-
-  const startCamera = async () => {
-    setCameraError(null);
-    try {
-      if (typeof navigator !== 'undefined' && navigator.mediaDevices?.getUserMedia) {
-        let stream: MediaStream | null = null;
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
-          });
-        } catch {
-          stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        }
-        
-        if (videoRef.current && stream) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play().catch(() => {});
-          setCameraActive(true);
-        }
-      }
-    } catch (err) {
-      console.warn('Camera viewfinder could not be started:', err);
-      setCameraError('Camera offline. You can upload an image or select a calibrated sample below.');
-      setCameraActive(false);
-    }
-  };
 
   const stopCamera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
@@ -187,6 +134,61 @@ export default function WorkerHomePage() {
       setCameraActive(false);
     }
   };
+
+  useEffect(() => {
+    if (!activeShift?.startTime || activeShift.status !== ShiftStatus.ACTIVE) {
+      return;
+    }
+    const updateElapsed = () => {
+      const start = new Date(activeShift.startTime).getTime();
+      const now = new Date().getTime();
+      const diffMs = Math.max(0, now - start);
+      const diffHrs = Math.floor(diffMs / 3600000);
+      const diffMins = Math.floor((diffMs % 3600000) / 60000);
+      setElapsed(`${diffHrs}h ${diffMins}m`);
+    };
+    updateElapsed();
+    const interval = setInterval(updateElapsed, 60000);
+    return () => clearInterval(interval);
+  }, [activeShift]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const runCamera = async () => {
+      try {
+        if (typeof navigator !== 'undefined' && navigator.mediaDevices?.getUserMedia) {
+          let stream: MediaStream | null = null;
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+            });
+          } catch {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          }
+          
+          if (!isCancelled && videoRef.current && stream) {
+            videoRef.current.srcObject = stream;
+            await videoRef.current.play().catch(() => {});
+            setCameraActive(true);
+          }
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          console.warn('Camera viewfinder could not be started:', err);
+          setCameraError('Camera offline. You can upload an image or select a calibrated sample below.');
+          setCameraActive(false);
+        }
+      }
+    };
+
+    runCamera();
+
+    return () => {
+      isCancelled = true;
+      stopCamera();
+    };
+  }, [cameraRetryCount]);
 
   const handleCaptureClick = async () => {
     let photoDataUrl: string | null = null;
@@ -486,7 +488,7 @@ export default function WorkerHomePage() {
                 {cameraError || (language === 'hi' ? 'कैमरा व्यूफ़ाइंडर ऑफ़लाइन है। नीचे दिए गए बटन पर क्लिक करें या टेस्ट नमूने चुनें।' : 'Camera viewfinder offline. Click button below to capture or use test samples.')}
               </p>
               <button
-                onClick={startCamera}
+                onClick={() => setCameraRetryCount(c => c + 1)}
                 className="gov-btn-secondary text-[11px] h-7 px-3 text-white bg-white/10 hover:bg-white/20 border-white/30"
               >
                 <RefreshCw size={12} />

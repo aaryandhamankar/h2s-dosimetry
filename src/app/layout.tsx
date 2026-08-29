@@ -3,6 +3,7 @@ import './globals.css';
 import { PortalHeaderWrapper } from '@/components/portal-header-wrapper';
 import { InstitutionalFooter } from '@/components/institutional-footer';
 import { DemoControlPanel } from '@/components/demo-control-panel';
+import { BottomNav } from '@/components/bottom-nav';
 
 export const metadata: Metadata = {
   title: 'H₂S Exposure Monitoring Portal | MRPL',
@@ -16,18 +17,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased bg-[#F7F6F1] text-[#263026] min-h-screen flex flex-col font-sans">
+      <body className="antialiased bg-[#FAF6EE] text-[#263026] min-h-screen flex flex-col font-sans">
         
         {/* National Portal / India.gov.in Inspired Master Header Wrapper */}
         <PortalHeaderWrapper />
 
-        {/* Main Content Area with Accessible Skip Anchor */}
-        <main id="main-content" className="flex-1 flex flex-col">
+        {/* Main Content Area with Adaptive Mobile/Desktop Zero-Scroll Padding */}
+        <main id="main-content" className="flex-1 flex flex-col justify-center min-h-0 pb-16 sm:pb-0">
           {children}
         </main>
 
-        {/* Institutional 4-Column Directory Footer */}
+        {/* Institutional Team Dossier Footer Pill */}
         <InstitutionalFooter />
+
+        {/* Mobile-Only Bottom Navigation Bar (Hidden on Desktop) */}
+        <BottomNav />
 
         {/* Evaluator Demo Helper (Press 'D' key or floating button) */}
         <DemoControlPanel />

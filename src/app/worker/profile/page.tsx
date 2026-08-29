@@ -11,7 +11,6 @@ import {
   Edit3,
   X,
   Save,
-  User,
 } from 'lucide-react';
 
 export default function WorkerProfilePage() {

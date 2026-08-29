@@ -9,7 +9,7 @@ import { ColorAnalysisEngine } from '../color-analysis-engine';
 import { RiskClassificationEngine } from '../risk-classification-engine';
 import { MockInferenceEngine } from '../mock-inference-engine';
 import { ScanProcessingPipeline } from '../scan-processing-pipeline';
-import { DemoScenario, RiskStatus, ValidityStatus, ImageQualityStatus } from '../../../types';
+import { DemoScenario, RiskStatus, ValidityStatus } from '../../../types';
 
 function assert(condition: boolean, message: string) {
   if (!condition) {

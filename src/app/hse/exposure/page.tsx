@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useAppStore } from '@/stores/app-store';
 import {
   ResponsiveContainer,
@@ -16,12 +15,11 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { Printer } from 'lucide-react';
+import { useMounted } from '@/hooks/use-mounted';
 
 export default function HSEExposurePage() {
   const { scans } = useAppStore();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => { setMounted(true); }, []);
+  const mounted = useMounted();
 
   if (!mounted) return <div className="text-[13px] text-[#7A8178]">Loading exposure analytics...</div>;
 

@@ -13,13 +13,14 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useMounted } from '@/hooks/use-mounted';
 
 export default function HSELayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { alerts, language } = useAppStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
 
   const t = TRANSLATIONS[language];
 
@@ -30,10 +31,6 @@ export default function HSELayout({ children }: { children: React.ReactNode }) {
     { label: t.navAlerts, href: '/hse/alerts', icon: AlertTriangle },
     { label: t.navMetrology, href: '/hse/technical', icon: Cpu },
   ];
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   if (!mounted) {
     return (

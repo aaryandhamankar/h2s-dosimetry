@@ -1,306 +1,178 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Camera, BarChart3, ArrowRight, ShieldCheck, Sparkles, Activity } from 'lucide-react';
 import { useAppStore } from '@/stores/app-store';
-import { DEMO_WORKERS, HSE_USER } from '@/data/demo-workers';
-import { TRANSLATIONS } from '@/lib/i18n';
-import { 
-  User, 
-  ShieldCheck, 
-  ArrowRight, 
-  CheckCircle2, 
-  Clock, 
-  Camera, 
-  Layers, 
-  FileCheck,
-  ChevronDown,
-  Sparkles,
-} from 'lucide-react';
 import Image from 'next/image';
 import mrplLogo from '../../public/mrpl-logo.png';
 
-export default function LandingPage() {
-  const router = useRouter();
-  const { login, initializeDemoData, language } = useAppStore();
-  const [selectedPreviewDose, setSelectedPreviewDose] = useState<number>(3.2);
-  const [showSpecs, setShowSpecs] = useState<boolean>(false);
-
-  const t = TRANSLATIONS[language];
-
-  const handleWorkerLogin = () => {
-    initializeDemoData();
-    login(DEMO_WORKERS[0]);
-    router.push('/worker');
-  };
-
-  const handleHseLogin = () => {
-    initializeDemoData();
-    login(HSE_USER);
-    router.push('/hse');
-  };
-
-  const getDotColor = (dose: number) => {
-    if (dose <= 4) return '#F4ECE1'; // Unexposed pale neutral
-    if (dose <= 12) return '#BF9F80'; // Light tan brown CuS / Bi2S3
-    if (dose <= 18) return '#876043'; // Medium brown sulfide
-    return '#3A2214'; // Deep dark brown Bismuth Sulfide
-  };
+export default function HomePage() {
+  const { language } = useAppStore();
 
   return (
-    <div className="flex-1 py-3 sm:py-8 px-3 sm:px-8">
-      <div className="max-w-[1200px] mx-auto space-y-4 sm:space-y-8">
+    <div className="w-full max-w-[900px] mx-auto px-4 sm:px-6 py-2 sm:py-3 md:py-4 flex-1 flex flex-col justify-center">
+      <div className="space-y-3 sm:space-y-4 md:space-y-5 text-center">
         
-        {/* Main Hero Card */}
-        <div className="gov-card p-4 sm:p-8 space-y-4 sm:space-y-6">
+        {/* ───────────────────────────────────────────────────────────── */}
+        {/* HERO TITLE & BRAND IDENTITY BANNER                            */}
+        {/* ───────────────────────────────────────────────────────────── */}
+        <div className="flex flex-col items-center justify-center space-y-2">
           
-          {/* Header & Identity */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7E5DE] pb-4 sm:pb-6">
-            <div className="flex items-start gap-3 sm:gap-4">
-              <div className="h-11 sm:h-14 w-11 sm:w-14 flex-shrink-0 flex items-center justify-center p-1.5 bg-white rounded-lg border border-[#E7E5DE] shadow-xs">
-                <Image 
-                  src={mrplLogo} 
-                  alt="ONGC MRPL Logo" 
-                  className="h-8 sm:h-11 w-auto object-contain rounded-md"
-                  priority
-                />
-              </div>
-              <div className="space-y-0.5 sm:space-y-1 min-w-0">
-                <span className="text-[10px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
-                  {t.homeBadge}
-                </span>
-                <h1 className="text-[18px] sm:text-[28px] font-bold text-[#263026] leading-tight">
-                  {t.homeTitle}
-                </h1>
-                <p className="text-[12px] sm:text-[15px] text-[#596158] leading-relaxed">
-                  {t.homeDescription}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between sm:flex-col sm:items-end sm:justify-center gap-1 border-t sm:border-t-0 sm:border-l sm:border-[#E7E5DE] pt-2.5 sm:pt-0 sm:pl-6">
-              <span className="gov-badge gov-badge-normal text-[11px] sm:text-[13px]">
-                <CheckCircle2 className="w-3.5 h-3.5" /> ISO/CIE D65
-              </span>
-              <span className="text-[10px] sm:text-[11px] text-[#7A8178] font-mono">Lead-Free Cu-PAN / Bi³⁺</span>
+          {/* Logo Badge with soft clean elevation */}
+          <div className="relative group">
+            <div className="h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center p-1.5 bg-white rounded-2xl border-2 border-[#E8E2D5] shadow-xs group-hover:border-[#5C822D] group-hover:shadow-sm group-hover:scale-105 transition-all duration-300">
+              <Image 
+                src={mrplLogo} 
+                alt="MRPL Official Emblem" 
+                className="h-9 sm:h-11 w-auto object-contain rounded-lg"
+                priority
+              />
             </div>
           </div>
 
-          {/* Primary Quick-Action Buttons (Large, Tappable, High-Contrast) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-            <button
-              onClick={handleWorkerLogin}
-              className="group p-4 sm:p-5 rounded-lg bg-[#5C822D] hover:bg-[#4E6F26] active:bg-[#3E5A1E] text-white shadow-sm hover:shadow-md transition-all text-left flex items-center justify-between gap-3 min-h-[64px]"
-            >
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-md bg-white/15 flex items-center justify-center flex-shrink-0">
-                  <User className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[11px] uppercase tracking-wider text-white/80 font-bold">{language === 'hi' ? 'फ़ील्ड ऑपरेटर' : 'Field Operator'}</div>
-                  <div className="text-[15px] sm:text-[17px] font-bold leading-tight truncate">{t.enterWorker}</div>
-                  <div className="text-[11px] sm:text-[12px] text-white/85 truncate">{t.enterWorkerSub}</div>
-                </div>
-              </div>
-              <ArrowRight className="w-5 h-5 text-white/80 group-hover:translate-x-1 transition-transform flex-shrink-0" />
-            </button>
-
-            <button
-              onClick={handleHseLogin}
-              className="group p-4 sm:p-5 rounded-lg bg-white hover:bg-[#FAFBF9] active:bg-[#F0EFE9] border-2 border-[#5C822D] text-[#263026] shadow-xs hover:shadow-md transition-all text-left flex items-center justify-between gap-3 min-h-[64px]"
-            >
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-md bg-[#EEF3E7] text-[#5C822D] flex items-center justify-center flex-shrink-0">
-                  <ShieldCheck className="w-5 sm:w-6 h-5 sm:h-6" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[11px] uppercase tracking-wider text-[#5C822D] font-bold">{language === 'hi' ? 'सुरक्षा अधिकारी' : 'Safety Officer'}</div>
-                  <div className="text-[15px] sm:text-[17px] font-bold leading-tight truncate">{t.openDashboard}</div>
-                  <div className="text-[11px] sm:text-[12px] text-[#596158] truncate">{t.openDashboardSub}</div>
-                </div>
-              </div>
-              <ArrowRight className="w-5 h-5 text-[#5C822D] group-hover:translate-x-1 transition-transform flex-shrink-0" />
-            </button>
+          {/* Clean Headline & Subtitle with strict contrast hierarchy */}
+          <div className="space-y-0.5 max-w-xl mx-auto">
+            <h1 className="text-[22px] sm:text-[28px] md:text-[32px] font-black text-[#263026] leading-tight tracking-tight">
+              {language === 'hi' ? 'H₂S एक्सपोजर मॉनिटरिंग' : 'H₂S Dosimetry Platform'}
+            </h1>
+            <p className="text-[12px] sm:text-[13.5px] text-[#596158] font-normal leading-snug">
+              {language === 'hi' 
+                ? 'त्वरित ऑप्टिकल रिस्टबैंड सत्यापन एवं कार्यस्थल सुरक्षा प्रणाली' 
+                : 'Rapid Optical Wristband Verification & Real-Time Gas Exposure Safety'}
+            </p>
           </div>
 
-          {/* Interactive Wearable Hardware Schematic */}
-          <div className="bg-[#FAFBF9] border border-[#E7E5DE] rounded-lg p-3.5 sm:p-5 space-y-3">
-            
-            {/* Header & Simulator Selector */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-              <div>
-                <h2 className="text-[14px] sm:text-[16px] font-bold text-[#263026] flex items-center gap-1.5">
-                  <Layers className="w-4 h-4 text-[#5C822D]" /> {t.schematicTitle}
-                </h2>
-                <p className="text-[11px] sm:text-[12px] text-[#596158]">
-                  {t.schematicSubtitle}
-                </p>
-              </div>
-
-              {/* Exposure Simulator Pills */}
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[11px] text-[#7A8178] font-bold mr-0.5">{language === 'hi' ? 'अनुकरण:' : 'Simulate:'}</span>
-                {[
-                  { label: t.normalDemo, val: 3.2 },
-                  { label: t.elevatedDemo, val: 12.4 },
-                  { label: t.criticalDemo, val: 24.8 },
-                ].map(p => (
-                  <button
-                    key={p.val}
-                    onClick={() => setSelectedPreviewDose(p.val)}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all min-h-[32px] ${
-                      selectedPreviewDose === p.val
-                        ? 'bg-[#5C822D] text-white shadow-2xs'
-                        : 'bg-white border border-[#E7E5DE] text-[#596158] hover:bg-[#F0EFE9]'
-                    }`}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Fully Responsive Wristband Pod Diagram */}
-            <div className="bg-white border border-[#E7E5DE] rounded-lg p-3 sm:p-6 flex flex-col items-center justify-center">
-              
-              {/* Responsive Container: Scales naturally on small screens */}
-              <div className="w-full max-w-xl flex items-center justify-center py-2 sm:py-3">
-                
-                {/* Left Strap */}
-                <div className="w-12 xs:w-20 sm:w-36 h-10 sm:h-13 bg-gradient-to-r from-[#1C241C] via-[#2A3728] to-[#384835] rounded-l-xl flex items-center justify-between px-2 sm:px-3 shadow-xs border-y-2 border-l-2 border-[#131A13] flex-shrink-0">
-                  <div className="w-2.5 sm:w-4 h-6 sm:h-8 border border-[#94A388] rounded bg-[#475545] flex items-center justify-center">
-                    <div className="w-0.5 sm:w-1 h-4 sm:h-5 bg-[#CBD5C0] rounded-full" />
-                  </div>
-                  <span className="hidden sm:inline text-white/40 font-mono text-[8px] tracking-widest uppercase">MRPL</span>
-                </div>
-
-                {/* Central Sensor Enclosure (Pod) */}
-                <div className="flex-1 max-w-[240px] sm:max-w-[260px] bg-[#FAFBF9] rounded-xl border-2 border-[#D5D2C9] p-2.5 sm:p-3 shadow-xs flex flex-col justify-between relative z-10 mx-[-2px]">
-                  
-                  {/* Top 4-Patch Reference Bar */}
-                  <div className="flex items-center justify-between bg-[#F0EFE9] p-1 sm:p-1.5 rounded border border-[#E7E5DE]">
-                    <div className="w-4 xs:w-5 sm:w-6 h-3 sm:h-3.5 bg-[#FFFFFF] border border-[#ADB5BD] rounded-xs shadow-2xs" title="White (L*=100)" />
-                    <div className="w-4 xs:w-5 sm:w-6 h-3 sm:h-3.5 bg-[#7F7F7F] border border-[#6C757D] rounded-xs shadow-2xs" title="Neutral Gray (L*=50)" />
-                    <div className="w-4 xs:w-5 sm:w-6 h-3 sm:h-3.5 bg-[#00A3E0] border border-[#0080B0] rounded-xs shadow-2xs" title="Cyan" />
-                    <div className="w-4 xs:w-5 sm:w-6 h-3 sm:h-3.5 bg-[#EC008C] border border-[#C00070] rounded-xs shadow-2xs" title="Magenta" />
-                  </div>
-
-                  {/* Central Chemosensor Spot */}
-                  <div className="flex items-center justify-center gap-2 sm:gap-3 py-1.5 sm:py-2">
-                    <div 
-                      className="w-10 sm:w-12 h-10 sm:h-12 rounded-full border-2 border-[#868E96] shadow-2xs transition-colors duration-300 flex flex-col items-center justify-center text-[7px] sm:text-[8px] font-bold font-mono text-white/90"
-                      style={{ backgroundColor: getDotColor(selectedPreviewDose) }}
-                    >
-                      <span>Cu/Bi</span>
-                      <span className="opacity-80">Sulfide</span>
-                    </div>
-                    <div className="text-[11px] sm:text-[12px] text-[#596158] font-mono leading-tight">
-                      <div>{language === 'hi' ? 'खुराक:' : 'Dose:'} <strong className="text-[#263026] text-[12px] sm:text-[14px]">{selectedPreviewDose} ppm·h</strong></div>
-                      <div className="text-[9px] sm:text-[10px] text-[#5C822D]">Cu-PAN + Bi³⁺</div>
-                    </div>
-                  </div>
-
-                  <div className="text-[8px] sm:text-[9px] text-center text-[#7A8178] font-mono uppercase tracking-wider">
-                    BATCH-2026-A · LEAD-FREE
-                  </div>
-                </div>
-
-                {/* Right Strap */}
-                <div className="w-12 xs:w-20 sm:w-36 h-10 sm:h-13 bg-gradient-to-r from-[#384835] via-[#2A3728] to-[#1C241C] rounded-r-xl flex items-center justify-around px-2 sm:px-3 shadow-xs border-y-2 border-r-2 border-[#131A13] flex-shrink-0">
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#0F140F] border border-white/20" />
-                    <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#0F140F] border border-white/20" />
-                    <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#0F140F] border border-white/20" />
-                  </div>
-                  <span className="hidden sm:inline text-white/30 font-mono text-[8px] uppercase">ZONE-A</span>
-                </div>
-
-              </div>
-
-              {/* Collapsible / Responsive Specifications Toggle */}
-              <div className="w-full mt-2 pt-2 border-t border-[#E7E5DE]">
-                <button
-                  onClick={() => setShowSpecs(!showSpecs)}
-                  className="w-full flex items-center justify-between text-[11px] sm:text-[12px] text-[#596158] font-semibold hover:text-[#263026] py-1"
-                >
-                  <span className="flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-[#5C822D]" />
-                    <span>{t.techSpecs}</span>
-                  </span>
-                  <ChevronDown className={`w-4 h-4 transition-transform ${showSpecs ? 'rotate-180' : ''}`} />
-                </button>
-
-                {showSpecs && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pt-2.5 text-[11px] sm:text-[12px] text-[#596158] animate-in fade-in duration-200">
-                    <div className="bg-[#FAFBF9] p-2.5 rounded border border-[#E7E5DE]">
-                      <span className="text-[#7A8178] text-[9px] sm:text-[10px] uppercase font-bold block">{t.reagentMatrix}</span>
-                      <strong className="text-[#263026]">Cu-PAN & Bi(III)</strong>
-                    </div>
-                    <div className="bg-[#FAFBF9] p-2.5 rounded border border-[#E7E5DE]">
-                      <span className="text-[#7A8178] text-[9px] sm:text-[10px] uppercase font-bold block">{language === 'hi' ? 'प्रतिक्रिया' : 'Reaction'}</span>
-                      <span className="font-mono text-[10px] sm:text-[11px]">CuS / Bi₂S₃↓</span>
-                    </div>
-                    <div className="bg-[#FAFBF9] p-2.5 rounded border border-[#E7E5DE]">
-                      <span className="text-[#7A8178] text-[9px] sm:text-[10px] uppercase font-bold block">{language === 'hi' ? 'पर्यावरण सुरक्षा' : 'Eco-Safety'}</span>
-                      <span className="text-[#5C822D] font-bold">100% Lead-Free</span>
-                    </div>
-                    <div className="bg-[#FAFBF9] p-2.5 rounded border border-[#E7E5DE]">
-                      <span className="text-[#7A8178] text-[9px] sm:text-[10px] uppercase font-bold block">{language === 'hi' ? 'वर्णमिति' : 'Colorimetry'}</span>
-                      <span className="text-[#5C822D] font-bold">Bradford D65</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-            </div>
-          </div>
         </div>
 
-        {/* 3-Step Simple SOP Guide */}
-        <div className="gov-card p-4 sm:p-6 space-y-3 sm:space-y-4">
-          <h3 className="text-[14px] sm:text-[15px] font-bold text-[#263026] uppercase tracking-wider">
-            {language === 'hi' ? 'मानक संचालन प्रक्रिया (SOP)' : 'Standard Field Operating Procedure (SOP)'}
-          </h3>
+        {/* ───────────────────────────────────────────────────────────── */}
+        {/* 2 MAIN HERO CARDS: UNIFIED VISUAL HIERARCHY                    */}
+        {/* ───────────────────────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 pt-0.5 sm:pt-1">
+          
+          {/* ════════════════════════════════════════════════════════════ */}
+          {/* TILE 1: SCAN WRISTBAND (Primary Action Hero Card)           */}
+          {/* ════════════════════════════════════════════════════════════ */}
+          <Link
+            href="/scan"
+            className="group relative flex flex-col justify-between p-5 sm:p-6 md:p-7 rounded-3xl bg-gradient-to-br from-[#4D7324] via-[#3D5E1C] to-[#2E4814] text-white shadow-md hover:shadow-2xl hover:shadow-[#3D5E1C]/25 hover:-translate-y-1.5 active:scale-[0.98] active:translate-y-0 transition-all duration-300 text-left border-2 border-[#5E8A2C]/60 hover:border-[#86B84A] overflow-hidden min-h-[210px] sm:min-h-[235px] md:min-h-[250px] cursor-pointer"
+          >
+            {/* Ambient Radial Sheen */}
+            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-44 h-44 rounded-full bg-white/10 blur-2xl group-hover:scale-150 group-hover:bg-white/20 transition-all duration-700 pointer-events-none" />
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[13px] text-[#596158]">
-            <div className="p-3.5 bg-[#FAFBF9] border border-[#E7E5DE] rounded-lg space-y-1.5">
-              <div className="font-bold text-[#263026] flex items-center gap-2 text-[13px] sm:text-[14px]">
-                <Clock className="w-4 h-4 text-[#5C822D]" /> 1. {language === 'hi' ? 'शिफ्ट प्रारंभ करें' : 'Start Shift'}
+            <div className="space-y-3 sm:space-y-3.5 relative z-10">
+              
+              {/* Header Icon */}
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 text-white flex items-center justify-center shadow-md group-hover:scale-110 group-hover:bg-white group-hover:text-[#35551F] group-hover:rotate-[-4deg] group-active:scale-95 transition-all duration-300">
+                  <Camera className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.3]" />
+                </div>
+
+                <span className="text-[10px] sm:text-[10.5px] font-mono font-bold tracking-widest text-white/90 bg-white/15 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-white/20 uppercase shadow-2xs">
+                  {language === 'hi' ? 'प्राथमिक क्रिया' : 'Primary Action'}
+                </span>
               </div>
-              <p className="text-[12px] sm:text-[13px] leading-relaxed">
-                {language === 'hi' 
-                  ? 'अपनी शिफ्ट की शुरुआत में अपने आवंटित रिस्टबैंड बैज आईडी की पुष्टि करें।' 
-                  : 'Confirm your assigned wristband badge ID at the start of your shift.'}
-              </p>
+
+              {/* Title & Description */}
+              <div>
+                <h2 className="text-[20px] sm:text-[24px] font-black text-white leading-tight group-hover:translate-x-0.5 transition-transform duration-300">
+                  {language === 'hi' ? 'रिस्टबैंड स्कैन करें' : 'Scan Wristband'}
+                </h2>
+                <p className="text-[12px] sm:text-[13px] text-white/90 leading-snug mt-1 font-normal">
+                  {language === 'hi' 
+                    ? 'कैमरा खोलें, 4-पैच ग्रिड संरेखित करें और तत्काल H₂S ppm खुराक प्रमाणपत्र प्राप्त करें।' 
+                    : 'Open camera viewfinder for Bradford D65 chromatic analysis & instant H₂S ppm certificate.'}
+                </p>
+              </div>
+
             </div>
 
-            <div className="p-3.5 bg-[#FAFBF9] border border-[#E7E5DE] rounded-lg space-y-1.5">
-              <div className="font-bold text-[#263026] flex items-center gap-2 text-[13px] sm:text-[14px]">
-                <Camera className="w-4 h-4 text-[#5C822D]" /> 2. {language === 'hi' ? 'ऑप्टिकल स्कैन' : 'Optical Scan'}
+            {/* Bottom Action Footer Bar */}
+            <div className="pt-3 sm:pt-3.5 mt-3 sm:mt-3.5 flex items-center justify-between border-t border-white/20 text-[12.5px] sm:text-[13.5px] font-bold relative z-10">
+              <span className="flex items-center gap-1.5 text-white/95 group-hover:text-white transition-colors duration-300">
+                <Sparkles className="w-3.5 h-3.5 text-white/90 group-hover:rotate-12 transition-all duration-300" />
+                <span>{language === 'hi' ? 'स्कैनर प्रारंभ करें' : 'Launch Camera Scanner'}</span>
+              </span>
+              
+              {/* Moving Arrow Pill Button */}
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white text-[#35551F] flex items-center justify-center shadow-md group-hover:translate-x-1.5 group-hover:scale-105 group-hover:shadow-lg group-active:scale-95 transition-all duration-300">
+                <ArrowRight className="w-4 h-4 stroke-[2.6]" />
               </div>
-              <p className="text-[12px] sm:text-[13px] leading-relaxed">
-                {language === 'hi'
-                  ? 'अपने फोन कैमरे का उपयोग करके सेंसर बैज की त्वरित फोटो लें।'
-                  : 'Take a quick photo of the sensor badge using your phone camera.'}
-              </p>
             </div>
 
-            <div className="p-3.5 bg-[#FAFBF9] border border-[#E7E5DE] rounded-lg space-y-1.5">
-              <div className="font-bold text-[#263026] flex items-center gap-2 text-[13px] sm:text-[14px]">
-                <FileCheck className="w-4 h-4 text-[#5C822D]" /> 3. {language === 'hi' ? 'सत्यापित परिणाम' : 'Verified Result'}
+          </Link>
+
+          {/* ════════════════════════════════════════════════════════════ */}
+          {/* TILE 2: VIEW DASHBOARD (Command Center Hero Card)            */}
+          {/* ════════════════════════════════════════════════════════════ */}
+          <Link
+            href="/dashboard"
+            className="group relative flex flex-col justify-between p-5 sm:p-6 md:p-7 rounded-3xl bg-white hover:bg-[#FAF7F0] text-[#263026] shadow-md hover:shadow-2xl hover:shadow-[#5C822D]/15 hover:-translate-y-1.5 active:scale-[0.98] active:translate-y-0 transition-all duration-300 text-left border-2 border-[#E8E2D5] hover:border-[#5C822D] overflow-hidden min-h-[210px] sm:min-h-[235px] md:min-h-[250px] cursor-pointer"
+          >
+            {/* Ambient Soft Green Glow */}
+            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-44 h-44 rounded-full bg-[#5C822D]/5 blur-3xl group-hover:scale-150 group-hover:bg-[#5C822D]/12 transition-all duration-700 pointer-events-none" />
+
+            <div className="space-y-3 sm:space-y-3.5 relative z-10">
+              
+              {/* Header Icon */}
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#EDF3E4] border border-[#C6DCC0] text-[#5C822D] flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-[#5C822D] group-hover:text-white group-hover:rotate-[4deg] group-active:scale-95 transition-all duration-300">
+                  <BarChart3 className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.3]" />
+                </div>
+
+                <span className="text-[10px] sm:text-[10.5px] font-mono font-bold tracking-widest text-[#5C822D] bg-[#EDF3E4] px-2.5 py-0.5 rounded-full border border-[#C6DCC0] uppercase shadow-2xs group-hover:bg-[#5C822D] group-hover:text-white group-hover:border-[#5C822D] transition-colors duration-300">
+                  {language === 'hi' ? 'पर्यवेक्षी स्नैपशॉट' : 'Command Center'}
+                </span>
               </div>
-              <p className="text-[12px] sm:text-[13px] leading-relaxed">
-                {language === 'hi'
-                  ? 'तुरंत सटीक H₂S रीडिंग और सुरक्षा मार्गदर्शन प्राप्त करें।'
-                  : 'Receive instant quantitative H₂S reading and safety guidance.'}
-              </p>
+
+              {/* Title & Description */}
+              <div>
+                <h2 className="text-[20px] sm:text-[24px] font-black text-[#263026] leading-tight group-hover:text-[#35551F] group-hover:translate-x-0.5 transition-all duration-300">
+                  {language === 'hi' ? 'डैशबोर्ड देखें' : 'View Safety Dashboard'}
+                </h2>
+                <p className="text-[12px] sm:text-[13px] text-[#596158] leading-snug mt-1 font-normal">
+                  {language === 'hi' 
+                    ? 'कार्यबल जोखिम स्थिति, सक्रिय एक्सपोज़र अलर्ट और लाइव रिफाइनरी टेलीमेट्री देखें।' 
+                    : 'Check live workforce telemetry, active hazard alarms, shift risk tiers & unit trends.'}
+                </p>
+              </div>
+
             </div>
-          </div>
+
+            {/* Bottom Action Footer Bar */}
+            <div className="pt-3 sm:pt-3.5 mt-3 sm:mt-3.5 flex items-center justify-between border-t border-[#E8E2D5] group-hover:border-[#C6DCC0] text-[12.5px] sm:text-[13.5px] font-bold relative z-10 transition-colors duration-300">
+              <span className="flex items-center gap-1.5 text-[#596158] group-hover:text-[#35551F] transition-colors duration-300">
+                <ShieldCheck className="w-4 h-4 text-[#5C822D] group-hover:scale-110 transition-all duration-300" />
+                <span>{language === 'hi' ? 'कमांड सेंटर खोलें' : 'Open Safety Command Center'}</span>
+              </span>
+              
+              {/* Moving Arrow Pill Button */}
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#FAF6EE] border border-[#E8E2D5] text-[#5C822D] flex items-center justify-center shadow-xs group-hover:translate-x-1.5 group-hover:scale-105 group-hover:shadow-md group-hover:bg-[#5C822D] group-hover:text-white group-hover:border-[#5C822D] group-active:scale-95 transition-all duration-300">
+                <ArrowRight className="w-4 h-4 stroke-[2.6]" />
+              </div>
+            </div>
+
+          </Link>
+
+        </div>
+
+        {/* ───────────────────────────────────────────────────────────── */}
+        {/* SUB-HERO EXPLORATION LINK                                     */}
+        {/* ───────────────────────────────────────────────────────────── */}
+        <div className="pt-0.5 sm:pt-1 text-center">
+          <Link
+            href="/about"
+            className="inline-flex items-center gap-1.5 text-[11.5px] sm:text-[12.5px] text-[#596158] hover:text-[#263026] font-semibold transition-all px-3.5 py-1.5 rounded-full hover:bg-white border border-transparent hover:border-[#E8E2D5] hover:shadow-2xs active:scale-95"
+          >
+            <Activity className="w-3.5 h-3.5 text-[#5C822D]" />
+            <span>
+              {language === 'hi' 
+                ? 'तकनीक, 4-पैच ऑप्टिकल ग्रिड एवं उत्पाद कार्यप्रणाली के बारे में जानें →' 
+                : 'Learn about the lead-free chemosensor matrix & optical calibration technology →'}
+            </span>
+          </Link>
         </div>
 
       </div>
     </div>
   );
 }
-
-

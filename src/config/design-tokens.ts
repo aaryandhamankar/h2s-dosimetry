@@ -3,10 +3,10 @@
  * 
  * Theme: MRPL / ONGC Institutional Identity + Premium Indian Public-Sector Usability
  * Anchor Brand: MRPL Green (#5C822D), Deep Forest (#35551F)
- * Canvas: Warm Ivory (#F7F6F1), White Surface (#FFFFFF), Soft Surface (#F0EFE9)
+ * Canvas: Warm Cream (#FAF6EE), White Surface (#FFFFFF), Soft Surface (#F4EFE6)
  * Typography: Noto Sans (Primary text: #263026, Secondary: #596158, Muted: #7A8178)
- * Accents: Terracotta / Saffron (#C96B32), Subtle Gold (#B89B5E)
- * Tricolor Ribbon: #FF9933, #FFFFFF, #138808 (4px horizontal strip)
+ * Accents: Saffron Orange (#FF9933), Golden Amber (#FFDE59), Terracotta (#C96B32)
+ * Tricolor Ribbon: #FF9933 (Saffron), #FFFFFF (White), #138808 (India Green)
  */
 
 export const DESIGN_TOKENS = {
@@ -14,35 +14,39 @@ export const DESIGN_TOKENS = {
     // Brand Anchor
     brandGreen: '#5C822D',     // Primary action green (MRPL identity)
     brandDarkGreen: '#35551F', // Deep forest supporting dark green
-    brandLightGreen: '#EEF3E7',// Pale green background tint
+    brandLightGreen: '#EDF3E4',// Pale green background tint
+    brandGreenBorder: '#C6DCC0',// Clean green border tone
 
     // Canvas & Working Surfaces
-    canvas: '#F7F6F1',         // Warm ivory main background
-    canvasAlt: '#F4F3EE',      // Soft canvas alternative
+    canvas: '#FAF6EE',         // Warm cream main background
+    canvasAlt: '#F5F0E4',      // Soft cream canvas alternative
     surface: '#FFFFFF',        // Pure white card working surface
-    surfaceSoft: '#F0EFE9',    // Light warm card secondary surface
+    surfaceSoft: '#F4EFE6',    // Light warm cream card secondary surface
+    surfaceMuted: '#FAF7F0',   // Subtle card container tone
 
     // Borders
-    border: '#E7E5DE',         // Warm neutral border
-    borderStrong: '#D5D2C9',   // Stronger boundary border
+    border: '#E8E2D5',         // Warm neutral border
+    borderStrong: '#D8D0C0',   // Stronger boundary border
 
     // Typography
     textPrimary: '#263026',    // Dark charcoal/deep green-grey text
     textSecondary: '#596158',  // Secondary descriptive text
     textMuted: '#7A8178',      // Muted metadata & timestamps
 
-    // Accents
-    terracotta: '#C96B32',     // Accent / warning / attention (used sparingly ~2%)
-    saffronAlt: '#D47A32',     // Saffron terracotta alternative
-    gold: '#B89B5E',           // Muted gold for institutional detail
+    // Saffron & Golden Amber Warm Palette (Tricolor & Interactive Glow)
+    saffron: '#FF9933',        // National Saffron Orange
+    saffronAlt: '#FF9933',     // Saffron alias
+    goldenAmber: '#FFDE59',    // High-visibility golden yellow glow
+    terracotta: '#C96B32',     // Warm terracotta accent / warning
+    warmAmber: '#D97706',      // Deep amber for text legibility on light surfaces
 
     // Semantic Status Colors
     success: '#5C822D',
-    successBg: '#EEF3E7',
+    successBg: '#EDF3E4',
     warning: '#C96B32',
-    warningBg: '#FAEFE7',
+    warningBg: '#FAF2EB',
     error: '#A94442',
-    errorBg: '#F7EAEA',
+    errorBg: '#F8ECEC',
     info: '#397C7A',
     infoBg: '#EAF3F2',
 

@@ -1,10 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { PhoneCall, CheckCircle2, Sparkles, X, Award, Beaker, Code2, Users2, Cpu, Compass } from 'lucide-react';
-import Link from 'next/link';
-import Image from 'next/image';
-import mrplLogo from '../../public/mrpl-logo.png';
+import { useEffect, useRef, useCallback } from 'react';
+import { CheckCircle2, X, Award, Beaker, Code2, Users2, Cpu, Compass } from 'lucide-react';
+import { useAppStore } from '@/stores/app-store';
 
 const TEAM_MEMBERS = [
   {
@@ -57,8 +55,18 @@ const TEAM_MEMBERS = [
   },
 ];
 
-const EMOJIS = ['🎉', '🥳', '🎊', '🇮🇳', '🏆', '🚀', '✨', '🧪', '💡', '🔥', '👏', '💥'];
-const CONFETTI_COLORS = ['#FF9933', '#138808', '#5C822D', '#FFD700', '#FFFFFF', '#C96B32', '#00A3E0', '#EC008C'];
+const EMOJIS = ['🎉', '🥳', '🎊', '🇮🇳', '🏆', '🚀', '✨', '🧪', '💡', '🔥', '👏', '💥', '⚡', '🌟'];
+const CONFETTI_COLORS = [
+  '#FF9933', // Saffron
+  '#138808', // Indian Green
+  '#5C822D', // Moss Green
+  '#FFD700', // Gold
+  '#FFFFFF', // White
+  '#00C2FF', // Electric Cyan
+  '#FF2E93', // Vivid Pink
+  '#FF6B4A', // Bright Coral
+  '#9B51E0', // Royal Purple
+];
 
 interface Particle {
   x: number;
@@ -74,121 +82,51 @@ interface Particle {
   opacity: number;
   decay: number;
   isEmoji: boolean;
+  isCircle?: boolean;
   emoji?: string;
 }
 
 export function InstitutionalFooter() {
-  const [easterEggOpen, setEasterEggOpen] = useState(false);
-  const [celebrating, setCelebrating] = useState(false);
+  const { teamModalOpen, setTeamModalOpen } = useAppStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const particlesRef = useRef<Particle[]>([]);
+  const isRunningRef = useRef<boolean>(false);
 
-  const launchConfettiCannon = useCallback(() => {
-    if (typeof window === 'undefined') return;
-
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    const newParticles: Particle[] = [];
-
-    // Confetti Ribbons / Flakes (120 particles)
-    for (let i = 0; i < 140; i++) {
-      const fromLeft = Math.random() < 0.5;
-      const originX = fromLeft ? width * 0.15 : width * 0.85;
-      const angle = fromLeft 
-        ? -Math.PI / 4 + (Math.random() * 0.6 - 0.3)
-        : -3 * Math.PI / 4 + (Math.random() * 0.6 - 0.3);
-      const speed = 14 + Math.random() * 22;
-
-      newParticles.push({
-        x: originX,
-        y: height * 0.85,
-        vx: Math.cos(angle) * speed + (Math.random() * 6 - 3),
-        vy: Math.sin(angle) * speed - Math.random() * 6,
-        size: 8 + Math.random() * 10,
-        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-        rotation: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.2,
-        wobble: Math.random() * Math.PI * 2,
-        wobbleSpeed: 0.08 + Math.random() * 0.08,
-        opacity: 1,
-        decay: 0.006 + Math.random() * 0.005,
-        isEmoji: false,
-      });
-    }
-
-    // Party Emojis Bursting Everywhere (36 emojis)
-    for (let i = 0; i < 36; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = 8 + Math.random() * 16;
-      newParticles.push({
-        x: width * 0.5 + (Math.random() * 200 - 100),
-        y: height * 0.5 + (Math.random() * 100 - 50),
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 6,
-        size: 28 + Math.random() * 20,
-        color: '#FFFFFF',
-        rotation: (Math.random() - 0.5) * 0.4,
-        rotationSpeed: (Math.random() - 0.5) * 0.05,
-        wobble: 0,
-        wobbleSpeed: 0,
-        opacity: 1,
-        decay: 0.005 + Math.random() * 0.004,
-        isEmoji: true,
-        emoji: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
-      });
-    }
-
-    particlesRef.current = [...particlesRef.current, ...newParticles];
-  }, []);
-
-  const triggerCelebration = useCallback(() => {
-    setCelebrating(true);
-    launchConfettiCannon();
-    // Second burst after 350ms for cascade effect
-    setTimeout(() => {
-      launchConfettiCannon();
-    }, 350);
-  }, [launchConfettiCannon]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.key === 'h' || e.key === 'H') && (e.shiftKey || e.metaKey || e.ctrlKey)) {
-        setEasterEggOpen(prev => !prev);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  // Animation Loop for Fullscreen Canvas
-  useEffect(() => {
-    if (!celebrating) return;
-
+  // Resize canvas to match actual viewport
+  const syncCanvasSize = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (canvas && typeof window !== 'undefined') {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+  }, []);
+
+  // Main Animation Loop
+  const runAnimationLoop = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      isRunningRef.current = false;
+      return;
+    }
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      isRunningRef.current = false;
+      return;
+    }
 
-    let active = true;
-
-    const handleResize = () => {
-      if (canvas) {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+    const loop = () => {
+      if (particlesRef.current.length === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        isRunningRef.current = false;
+        animationFrameRef.current = null;
+        return;
       }
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-
-    const animate = () => {
-      if (!active || !canvas || !ctx) return;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const gravity = 0.45;
-      const airDrag = 0.985;
+      const gravity = 0.38;
+      const airDrag = 0.984;
       const particles = particlesRef.current;
 
       for (let i = particles.length - 1; i >= 0; i--) {
@@ -203,182 +141,220 @@ export function InstitutionalFooter() {
         p.wobble += p.wobbleSpeed;
         p.opacity -= p.decay;
 
-        if (p.opacity <= 0 || p.y > canvas.height + 100) {
+        if (p.opacity <= 0 || p.y > canvas.height + 100 || p.x < -100 || p.x > canvas.width + 100) {
           particles.splice(i, 1);
           continue;
         }
 
         ctx.save();
-        ctx.globalAlpha = Math.max(0, p.opacity);
+        ctx.globalAlpha = Math.max(0, Math.min(1, p.opacity));
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rotation);
 
         if (p.isEmoji && p.emoji) {
-          ctx.font = `${p.size}px sans-serif`;
+          ctx.font = `${p.size}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillText(p.emoji, 0, 0);
+        } else if (p.isCircle) {
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+          ctx.fill();
         } else {
           ctx.fillStyle = p.color;
           const wobbleScale = Math.cos(p.wobble);
           ctx.scale(1, wobbleScale);
-          ctx.fillRect(-p.size / 2, -p.size / 3, p.size, p.size * 0.6);
+          ctx.fillRect(-p.size / 2, -p.size / 3, p.size, p.size * 0.65);
         }
 
         ctx.restore();
       }
 
-      if (particles.length > 0) {
-        animationFrameRef.current = requestAnimationFrame(animate);
-      } else {
-        setCelebrating(false);
+      animationFrameRef.current = requestAnimationFrame(loop);
+    };
+
+    if (!isRunningRef.current) {
+      isRunningRef.current = true;
+      animationFrameRef.current = requestAnimationFrame(loop);
+    }
+  }, []);
+
+  // 360-Degree Center Supernova Burst + Side Cannons across entire screen
+  const launchExplosion = useCallback(() => {
+    if (typeof window === 'undefined') return;
+
+    syncCanvasSize();
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const centerX = width / 2;
+    const centerY = height * 0.45;
+
+    const newParticles: Particle[] = [];
+
+    // 1. Center Starburst (160 ribbons spreading in all 360 degrees)
+    for (let i = 0; i < 160; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 9 + Math.random() * 26;
+      newParticles.push({
+        x: centerX + (Math.random() * 40 - 20),
+        y: centerY + (Math.random() * 40 - 20),
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 5,
+        size: 8 + Math.random() * 11,
+        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+        rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.25,
+        wobble: Math.random() * Math.PI * 2,
+        wobbleSpeed: 0.08 + Math.random() * 0.1,
+        opacity: 1,
+        decay: 0.005 + Math.random() * 0.005,
+        isEmoji: false,
+        isCircle: Math.random() < 0.25,
+      });
+    }
+
+    // 2. Center Emoji Shockwave (40 celebration emojis radiating outwards)
+    for (let i = 0; i < 40; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 6 + Math.random() * 18;
+      newParticles.push({
+        x: centerX + (Math.random() * 60 - 30),
+        y: centerY + (Math.random() * 60 - 30),
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 7,
+        size: 26 + Math.random() * 22,
+        color: '#FFFFFF',
+        rotation: (Math.random() - 0.5) * 0.4,
+        rotationSpeed: (Math.random() - 0.5) * 0.06,
+        wobble: 0,
+        wobbleSpeed: 0,
+        opacity: 1,
+        decay: 0.004 + Math.random() * 0.004,
+        isEmoji: true,
+        emoji: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
+      });
+    }
+
+    // 3. Left Bottom Cannon (50 particles blasting upward-right)
+    for (let i = 0; i < 50; i++) {
+      const angle = -Math.PI / 4 + (Math.random() * 0.6 - 0.3);
+      const speed = 16 + Math.random() * 22;
+      newParticles.push({
+        x: width * 0.08,
+        y: height * 0.9,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 9 + Math.random() * 10,
+        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+        rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.3,
+        wobble: Math.random() * Math.PI * 2,
+        wobbleSpeed: 0.1,
+        opacity: 1,
+        decay: 0.006 + Math.random() * 0.005,
+        isEmoji: false,
+      });
+    }
+
+    // 4. Right Bottom Cannon (50 particles blasting upward-left)
+    for (let i = 0; i < 50; i++) {
+      const angle = -3 * Math.PI / 4 + (Math.random() * 0.6 - 0.3);
+      const speed = 16 + Math.random() * 22;
+      newParticles.push({
+        x: width * 0.92,
+        y: height * 0.9,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 9 + Math.random() * 10,
+        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+        rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.3,
+        wobble: Math.random() * Math.PI * 2,
+        wobbleSpeed: 0.1,
+        opacity: 1,
+        decay: 0.006 + Math.random() * 0.005,
+        isEmoji: false,
+      });
+    }
+
+    particlesRef.current = [...particlesRef.current, ...newParticles];
+    runAnimationLoop();
+  }, [syncCanvasSize, runAnimationLoop]);
+
+  // Master Celebration Trigger: 2 Rapid Successive Bursts for Maximum Impact
+  const triggerCelebration = useCallback(() => {
+    launchExplosion();
+    setTimeout(() => {
+      launchExplosion();
+    }, 280);
+  }, [launchExplosion]);
+
+  // Auto-trigger ON MOBILE ONLY when the modal opens
+  useEffect(() => {
+    if (teamModalOpen) {
+      if (typeof window !== 'undefined' && window.innerWidth < 640) {
+        triggerCelebration();
+      }
+    }
+  }, [teamModalOpen, triggerCelebration]);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      syncCanvasSize();
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [syncCanvasSize]);
+
+  // Shortcut key (Shift+H)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === 'h' || e.key === 'H') && (e.shiftKey || e.metaKey || e.ctrlKey)) {
+        setTeamModalOpen(!teamModalOpen);
       }
     };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [teamModalOpen, setTeamModalOpen]);
 
-    animationFrameRef.current = requestAnimationFrame(animate);
-
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
-      active = false;
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-      window.removeEventListener('resize', handleResize);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     };
-  }, [celebrating]);
+  }, []);
 
   return (
-    <footer className="bg-[#263026] text-white/85 border-t border-[#E7E5DE] text-[13px] mt-12">
+    <footer className="py-1.5 sm:py-2 px-3 sm:px-6 mt-auto flex-shrink-0">
       
-      {/* FULLSCREEN CELEBRATION OVERLAY & CANVAS */}
+      {/* Fullscreen Celebration Canvas (always ready, z-100 on top of everything) */}
       <canvas
         ref={canvasRef}
-        className={`fixed inset-0 pointer-events-none z-[100] transition-opacity duration-300 ${
-          celebrating ? 'opacity-100' : 'opacity-0'
-        }`}
+        className="fixed inset-0 pointer-events-none z-[100] w-full h-full"
       />
 
-      {/* 4-Column Directory Grid (Max Width 1200px) */}
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-8 py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        
-        {/* Column 1: Official MRPL Identity with Logo */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="h-11 flex-shrink-0 flex items-center justify-center bg-white rounded-lg p-1 border border-white/20 shadow-xs">
-              <Image 
-                src={mrplLogo} 
-                alt="ONGC MRPL Logo" 
-                className="h-9 w-auto object-contain rounded-md"
-              />
-            </div>
-            <div>
-              <span className="font-bold text-white text-[14px] block leading-tight">MRPL HSE Directorate</span>
-              <span className="text-[12px] text-white/70 block">A Subsidiary of ONGC Limited</span>
-            </div>
-          </div>
-          <p className="text-[13px] leading-relaxed text-white/70">
-            Mangalore Refinery and Petrochemicals Limited<br />
-            Post Kuthethur, Via Katipalla,<br />
-            Mangaluru, Karnataka — 575030
-          </p>
-          <div className="text-[12px] text-[#A7D7C1] font-mono">
-            Refinery Complex: Zone A Gas Surveillance
-          </div>
-        </div>
-
-        {/* Column 2: Chemical & Metrology Specifications */}
-        <div className="space-y-3">
-          <h4 className="font-bold text-white uppercase tracking-wider text-[12px]">
-            Metrology & Substrate Specs
-          </h4>
-          <ul className="space-y-1.5 text-[13px] text-white/75 list-disc list-inside">
-            <li><strong>Active Substrate:</strong> Copper-PAN & Bismuth(III)</li>
-            <li><strong>Reaction:</strong> Cu-PAN/Bi³⁺ + H₂S → CuS/Bi₂S₃↓</li>
-            <li><strong>Calibration Space:</strong> CIE Standard D65</li>
-            <li><strong>Formulation:</strong> CIE76 Euclidean ΔE*ab</li>
-            <li><strong>Linear Domain:</strong> 0.0 – 30.0 ppm·h</li>
-          </ul>
-        </div>
-
-        {/* Column 3: Regulatory Exposure Limits */}
-        <div className="space-y-3">
-          <h4 className="font-bold text-white uppercase tracking-wider text-[12px]">
-            Occupational Thresholds
-          </h4>
-          <ul className="space-y-1.5 text-[13px] text-white/75">
-            <li><strong>OSHA 8h TWA:</strong> 10 ppm (Permissible Limit)</li>
-            <li><strong>OSHA Ceiling:</strong> 20 ppm (Critical Action)</li>
-            <li><strong>NIOSH REL:</strong> 10 ppm / 10-min Peak</li>
-            <li><strong>ACGIH TLV:</strong> 1 ppm TWA / 5 ppm STEL</li>
-            <li><strong>Shift Duration:</strong> Standard 8.0 Hours</li>
-          </ul>
-        </div>
-
-        {/* Column 4: Emergency Contacts & Helplines */}
-        <div className="space-y-3">
-          <h4 className="font-bold text-white uppercase tracking-wider text-[12px] flex items-center gap-1.5">
-            <PhoneCall size={14} className="text-[#C8DEC0]" />
-            <span>Emergency & Helplines</span>
-          </h4>
-          <div className="space-y-1.5 text-[13px] text-white/75">
-            <div>Fire & Gas Control: <strong className="text-white">Ext. 2222 / 2333</strong></div>
-            <div>Occupational Health (OHC): <strong className="text-white">Ext. 2444</strong></div>
-            <div>Safety Control Room: <strong className="text-white">+91 (0824) 2270400</strong></div>
-            <div>Shift Safety In-Charge: <strong className="text-[#A7D7C1]">Channel 1 (VHF)</strong></div>
-          </div>
-        </div>
-
+      {/* Desktop-Only Sleek Pill (Hidden on Mobile) */}
+      <div className="hidden sm:flex max-w-[1200px] mx-auto items-center justify-center">
+        <button
+          onClick={() => setTeamModalOpen(true)}
+          className="group inline-flex items-center gap-2 text-[11px] sm:text-[12px] text-[#596158] hover:text-[#263026] bg-white hover:bg-[#FAF7F0] px-3.5 sm:px-4 py-1.5 rounded-full border border-[#E8E2D5] hover:border-[#5C822D] transition-all cursor-pointer shadow-2xs hover:shadow-xs"
+          title="Click to view Hackathon 2026 Project Team Dossier"
+        >
+          <span className="font-medium tracking-normal text-center">
+            Hackathon Project 2026 by Aaryan Dhamankar, Arya Modh, Avani Abhyankar, Aarushi Jha, Payas Pawar, Sudnya Irranna
+          </span>
+        </button>
       </div>
 
-      {/* Bottom Compliance & Policy Bar with Center-Aligned Easter Egg Pill */}
-      <div className="bg-[#1C241C] border-t border-white/10 px-4 sm:px-8 py-5 text-[12px] text-white/60 space-y-4">
-        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
-          
-          <div className="space-y-0.5">
-            <p>© 2026 Mangalore Refinery and Petrochemicals Limited (MRPL) · ONGC Group Company.</p>
-            <p className="text-[11px] text-white/40">
-              Platform Version 0.1.0 · ISO 9001 / ISO 14001 / ISO 45001 Certified System
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-4 text-[12px]">
-            <Link href="/hse/technical" className="hover:text-white transition-colors">
-              Metrology Audit
-            </Link>
-            <span>•</span>
-            <Link href="/hse/exposure" className="hover:text-white transition-colors">
-              Compliance Reports
-            </Link>
-            <span>•</span>
-            <span className="text-[#A7D7C1] flex items-center gap-1">
-              <CheckCircle2 size={13} />
-              <span>GIGW & WCAG 2.1 AA Compliant</span>
-            </span>
-          </div>
-
-        </div>
-
-        {/* Center-Aligned Easter Egg Trigger Pill at the Very End */}
-        <div className="max-w-[1200px] mx-auto pt-3 border-t border-white/10 flex items-center justify-center">
-          <button
-            onClick={() => {
-              setEasterEggOpen(true);
-            }}
-            className="group inline-flex items-center gap-2 text-[11px] text-[#A7D7C1] hover:text-white bg-white/5 hover:bg-white/15 px-4 py-1.5 rounded-full border border-white/10 hover:border-[#A7D7C1] transition-all cursor-pointer shadow-xs hover:shadow-sm"
-            title="Click to reveal Hackathon 2026 Engineering Directorate Dossier (or press Shift+H)"
-          >
-            <Sparkles size={13} className="text-[#FF9933] group-hover:rotate-12 transition-transform animate-pulse" />
-            <span className="font-semibold tracking-wide">
-              Hackathon Project 2026 by Aaryan Dhamankar, Arya Modh, Avani Abhyankar, Aarushi Jha, Payas Pawar, Sudnya Irranna
-            </span>
-            <span className="text-[9px] bg-white/20 text-white px-2 py-0.5 rounded-full font-mono uppercase font-bold">
-              Explore ✨
-            </span>
-          </button>
-        </div>
-      </div>
-
-      {/* EASTER EGG MODAL: Hackathon 2026 Engineering Directorate */}
-      {easterEggOpen && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#FAFBF9] text-[#263026] rounded-xl max-w-2xl w-full shadow-2xl border-2 border-[#5C822D] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      {/* EASTER EGG MODAL: Hackathon 2026 Project Team */}
+      {teamModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-[#FAF7F0] text-[#263026] rounded-2xl max-w-2xl w-full shadow-2xl border-2 border-[#5C822D] overflow-hidden animate-in zoom-in-95 duration-150 relative">
             
             {/* Indian Tricolor Ribbon Top Bar */}
             <div className="tricolor-ribbon h-1.5 w-full flex">
@@ -388,9 +364,9 @@ export function InstitutionalFooter() {
             </div>
 
             {/* Modal Header */}
-            <div className="p-4 sm:p-6 bg-white border-b border-[#E7E5DE] flex items-start justify-between gap-3">
+            <div className="p-4 sm:p-5 bg-white border-b border-[#E8E2D5] flex items-start justify-between gap-3">
               <div className="flex items-center gap-2.5 sm:gap-3">
-                <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-lg bg-[#EEF3E7] border border-[#C8DEC0] flex items-center justify-center text-[#5C822D] shadow-2xs flex-shrink-0">
+                <div className="w-10 sm:w-11 h-10 sm:h-11 rounded-xl bg-[#EDF3E4] border border-[#C6DCC0] flex items-center justify-center text-[#5C822D] shadow-2xs flex-shrink-0">
                   <Award className="w-5 sm:w-6 h-5 sm:h-6" />
                 </div>
                 <div>
@@ -399,25 +375,25 @@ export function InstitutionalFooter() {
                       COMMENDATION · 2026
                     </span>
                   </div>
-                  <h3 className="text-[16px] sm:text-[20px] font-bold text-[#263026] leading-tight">
+                  <h3 className="text-[16px] sm:text-[19px] font-bold text-[#263026] leading-tight">
                     H₂S Gas Dosimetry Directorate
                   </h3>
-                  <p className="text-[12px] sm:text-[13px] text-[#596158]">
+                  <p className="text-[11px] sm:text-[12px] text-[#596158]">
                     Wearable Colorimetric Chemosensor Platform
                   </p>
                 </div>
               </div>
 
               <button
-                onClick={() => setEasterEggOpen(false)}
-                className="text-[#7A8178] hover:text-[#263026] p-1.5 rounded-md hover:bg-[#F0EFE9] transition-colors"
+                onClick={() => setTeamModalOpen(false)}
+                className="text-[#7A8178] hover:text-[#263026] p-1.5 rounded-md hover:bg-[#F4EFE6] transition-colors"
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Team Members Grid */}
-            <div className="p-4 sm:p-6 max-h-[70vh] overflow-y-auto space-y-3 sm:space-y-4">
+            <div className="p-4 sm:p-5 max-h-[68vh] overflow-y-auto space-y-3">
               <div className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-[#7A8178] flex items-center justify-between">
                 <span>Core Project Team (6 Leads)</span>
                 <span className="text-[#5C822D] font-mono">MRPL INVENT</span>
@@ -429,11 +405,11 @@ export function InstitutionalFooter() {
                   return (
                     <div 
                       key={m.name}
-                      className="p-3 sm:p-3.5 bg-white rounded-lg border border-[#E7E5DE] hover:border-[#5C822D] hover:shadow-xs transition-all space-y-1.5 group"
+                      className="p-3 bg-white rounded-xl border border-[#E8E2D5] hover:border-[#5C822D] hover:shadow-xs transition-all space-y-1.5 group"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 sm:w-7 h-6 sm:h-7 rounded bg-[#EEF3E7] text-[#5C822D] flex items-center justify-center flex-shrink-0 group-hover:bg-[#5C822D] group-hover:text-white transition-colors">
+                          <div className="w-6 sm:w-7 h-6 sm:h-7 rounded-lg bg-[#EDF3E4] text-[#5C822D] flex items-center justify-center flex-shrink-0 group-hover:bg-[#5C822D] group-hover:text-white transition-colors">
                             <Icon size={14} />
                           </div>
                           <div>
@@ -453,7 +429,7 @@ export function InstitutionalFooter() {
                         {m.role}
                       </div>
 
-                      <div className="text-[10px] sm:text-[11px] text-[#596158] bg-[#FAFBF9] p-1.5 rounded border border-[#E7E5DE] font-mono">
+                      <div className="text-[10px] sm:text-[11px] text-[#596158] bg-[#FAF7F0] p-1.5 rounded-lg border border-[#E8E2D5] font-mono">
                         💡 {m.highlight}
                       </div>
                     </div>
@@ -462,7 +438,7 @@ export function InstitutionalFooter() {
               </div>
 
               {/* Scientific System Badge */}
-              <div className="p-3 sm:p-4 bg-[#EEF3E7] rounded-lg border border-[#C8DEC0] text-[11px] sm:text-[12px] space-y-1 text-[#35551F]">
+              <div className="p-3 bg-[#EDF3E4] rounded-xl border border-[#C6DCC0] text-[11px] sm:text-[12px] space-y-1 text-[#35551F]">
                 <div className="font-bold flex items-center gap-1.5">
                   <CheckCircle2 size={14} className="text-[#5C822D]" />
                   <span>Validated Innovation Principles</span>
@@ -474,30 +450,28 @@ export function InstitutionalFooter() {
             </div>
 
             {/* Modal Action Footer */}
-            <div className="p-3.5 sm:p-4 bg-white border-t border-[#E7E5DE] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-[12px]">
+            <div className="p-3 sm:p-4 bg-white border-t border-[#E8E2D5] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 text-[12px]">
               <div className="text-[#7A8178] text-center sm:text-left">
-                {celebrating ? (
-                  <span className="text-[#5C822D] font-bold animate-pulse flex items-center justify-center sm:justify-start gap-1.5">
-                    <Sparkles size={14} className="text-[#FF9933]" />
-                    <span>🎉 Celebrating Team!</span>
-                  </span>
-                ) : (
-                  <span>National Gas Safety & Excellence</span>
-                )}
+                <span>National Gas Safety & Excellence</span>
               </div>
 
               <div className="flex items-center gap-2 justify-end">
                 <button
-                  onClick={triggerCelebration}
-                  className="gov-btn-primary text-[11px] sm:text-[12px] h-8 px-3 font-semibold flex items-center gap-1.5 shadow-xs hover:shadow-sm flex-1 sm:flex-initial justify-center"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    triggerCelebration();
+                  }}
+                  className="gov-btn-primary text-[11px] sm:text-[12px] h-8 px-3.5 font-semibold flex items-center gap-1.5 shadow-md hover:shadow-lg active:scale-95 transition-all flex-1 sm:flex-initial justify-center cursor-pointer"
                 >
-                  <span className="text-[13px]">🥳</span>
+                  <span className="text-[14px]">🥳</span>
                   <span>Celebrate Team</span>
                 </button>
 
                 <button
-                  onClick={() => setEasterEggOpen(false)}
-                  className="gov-btn-secondary text-[11px] sm:text-[12px] h-8 px-3 flex-1 sm:flex-initial justify-center"
+                  type="button"
+                  onClick={() => setTeamModalOpen(false)}
+                  className="gov-btn-secondary text-[11px] sm:text-[12px] h-8 px-3 flex-1 sm:flex-initial justify-center cursor-pointer"
                 >
                   <span>Close</span>
                 </button>

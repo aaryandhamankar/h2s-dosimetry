@@ -1,9 +1,7 @@
 import { 
-  User, UserRole, 
-  Dosimeter, DosimeterStatus,
   Scan, ProcessingStatus, SyncStatus,
   Alert, AlertSeverity, AlertStatus,
-  RiskStatus, ValidityStatus, DataSource, ImageQualityStatus, DemoScenario,
+  RiskStatus, ValidityStatus, DataSource, ImageQualityStatus,
   Shift, ShiftStatus
 } from '@/types';
 import { DEMO_WORKERS, HSE_USER } from './demo-workers';

@@ -110,39 +110,7 @@ export default function WorkerScanPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
-
-  useEffect(() => {
-    startCamera();
-    return () => {
-      stopCamera();
-    };
-  }, []);
-
-  const startCamera = async () => {
-    setCameraError(null);
-    try {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        let stream: MediaStream | null = null;
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
-          });
-        } catch {
-          stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        }
-        
-        if (videoRef.current && stream) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play().catch(() => {});
-          setCameraActive(true);
-        }
-      }
-    } catch (err: unknown) {
-      console.warn('Camera stream could not be started:', err);
-      setCameraError('Camera viewfinder offline. You can upload an image or select a calibrated sample below.');
-      setCameraActive(false);
-    }
-  };
+  const [cameraRetryCount, setCameraRetryCount] = useState(0);
 
   const stopCamera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
@@ -152,6 +120,44 @@ export default function WorkerScanPage() {
       setCameraActive(false);
     }
   };
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const runCamera = async () => {
+      try {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          let stream: MediaStream | null = null;
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+            });
+          } catch {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          }
+          
+          if (!isCancelled && videoRef.current && stream) {
+            videoRef.current.srcObject = stream;
+            await videoRef.current.play().catch(() => {});
+            setCameraActive(true);
+          }
+        }
+      } catch (err: unknown) {
+        if (!isCancelled) {
+          console.warn('Camera stream could not be started:', err);
+          setCameraError('Camera viewfinder offline. You can upload an image or select a calibrated sample below.');
+          setCameraActive(false);
+        }
+      }
+    };
+
+    runCamera();
+
+    return () => {
+      isCancelled = true;
+      stopCamera();
+    };
+  }, [cameraRetryCount]);
 
   const handleCaptureClick = async () => {
     let photoDataUrl: string | null = null;
@@ -382,7 +388,7 @@ export default function WorkerScanPage() {
                 {cameraError || 'Camera permission pending. Click button below to capture photo or retry.'}
               </p>
               <button
-                onClick={startCamera}
+                onClick={() => setCameraRetryCount(c => c + 1)}
                 className="gov-btn-secondary text-[11px] sm:text-[12px] h-8 px-3 inline-flex items-center gap-1 text-white bg-white/10 hover:bg-white/20 border-white/30"
               >
                 <RefreshCw size={12} />

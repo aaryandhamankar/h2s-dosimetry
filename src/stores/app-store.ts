@@ -9,9 +9,7 @@ import {
   RiskStatus, 
   AlertSeverity, 
   AlertStatus, 
-  ShiftStatus,
-  DosimeterStatus,
-  UserRole
+  ShiftStatus
 } from '@/types';
 import { getDemoScans, getDemoAlerts, DEMO_WORKERS, DEMO_DOSIMETERS, DEMO_SHIFTS, HSE_USER } from '@/data/demo-data';
 
@@ -55,6 +53,8 @@ export interface AppState {
   acknowledgeAlert: (alertId: string, userId: string) => void;
   updateUserProfile: (updates: Partial<User>) => void;
   
+  teamModalOpen: boolean;
+  setTeamModalOpen: (open: boolean) => void;
   toggleDemoMode: () => void;
   toggleDemoPanel: () => void;
   resetDemo: () => void;
@@ -82,11 +82,13 @@ export const useAppStore = create<AppState>()(
       language: 'en',
       fontSize: 'md',
       highContrast: false,
+      teamModalOpen: false,
 
       setLanguage: (lang: Language) => set({ language: lang }),
       setFontSize: (size: 'sm' | 'md' | 'lg') => set({ fontSize: size }),
       setHighContrast: (val: boolean) => set({ highContrast: val }),
       toggleHighContrast: () => set(state => ({ highContrast: !state.highContrast })),
+      setTeamModalOpen: (open: boolean) => set({ teamModalOpen: open }),
       
       login: (user: User) => {
         set({

@@ -1,18 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAppStore } from '@/stores/app-store';
 import { AlertStatus, AlertSeverity } from '@/types';
 import { AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 
+import { useMounted } from '@/hooks/use-mounted';
+
 export default function HSEAlertsPage() {
   const { alerts, acknowledgeAlert, currentUser } = useAppStore();
-  const [mounted, setMounted] = useState(false);
   const [filter, setFilter] = useState<'ALL' | 'OPEN' | 'ACKNOWLEDGED'>('ALL');
   const [acknowledgingId, setAcknowledgingId] = useState<string | null>(null);
-
-  useEffect(() => { setMounted(true); }, []);
+  const mounted = useMounted();
 
   const handleAcknowledge = async (id: string) => {
     if (acknowledgingId) return;

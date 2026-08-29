@@ -1,18 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAppStore } from '@/stores/app-store';
 import { DEMO_WORKERS } from '@/data/demo-workers';
 import { RiskStatus } from '@/types';
 import Link from 'next/link';
 import { formatDose, formatDateTime } from '@/lib/utils';
+import { useMounted } from '@/hooks/use-mounted';
 
 export default function HSEWorkersPage() {
   const { scans } = useAppStore();
-  const [mounted, setMounted] = useState(false);
   const [selectedWorker, setSelectedWorker] = useState<string | null>(DEMO_WORKERS[0]?.id || null);
-
-  useEffect(() => { setMounted(true); }, []);
+  const mounted = useMounted();
 
   if (!mounted) return <div className="text-[13px] text-[#7A8178]">Loading personnel directory...</div>;
 

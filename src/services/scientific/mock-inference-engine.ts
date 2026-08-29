@@ -107,7 +107,7 @@ export class MockInferenceEngine {
   /**
    * Run inference for a demo scenario (deterministic).
    */
-  predictForScenario(scenario: DemoScenario, exposureDuration: number = 8): ExposurePrediction {
+  predictForScenario(scenario: DemoScenario): ExposurePrediction {
     const prediction = SCENARIO_PREDICTIONS[scenario];
 
     return {
@@ -135,7 +135,6 @@ export class MockInferenceEngine {
   predict(
     features: ColorFeatures,
     imageQuality: ImageQualityResult,
-    _context?: InferenceContext,
   ): ExposurePrediction {
     // Gate: reject invalid images
     if (imageQuality.overallStatus === ImageQualityStatus.INVALID) {

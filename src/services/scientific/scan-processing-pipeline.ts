@@ -17,16 +17,10 @@
 
 import {
   Scan,
-  ScanProcessingResult,
-  ExposureResult,
-  ImageQualityResult,
   DosimeterDetection,
   ROIResult,
-  ColorFeatures,
-  ExposurePrediction,
   ProcessingStatus,
   ValidityStatus,
-  RiskStatus,
   DataSource,
   DemoScenario,
   SyncStatus,
@@ -122,11 +116,12 @@ export class ScanProcessingPipeline {
     const scanId = `scan-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
     const capturedAt = new Date().toISOString();
 
-    // Simulate processing stages with delays for UI feedback
+    // Simulate all 8 processing stages with snappy delays for smooth UI feedback
     const stages: ProcessingStatus[] = [
       ProcessingStatus.VALIDATING_IMAGE,
       ProcessingStatus.DETECTING_DOSIMETER,
       ProcessingStatus.EXTRACTING_ROI,
+      ProcessingStatus.ANALYZING_REFERENCES,
       ProcessingStatus.CORRECTING_COLOR,
       ProcessingStatus.EXTRACTING_FEATURES,
       ProcessingStatus.RUNNING_INFERENCE,
@@ -135,7 +130,7 @@ export class ScanProcessingPipeline {
 
     for (const stage of stages) {
       onProgress?.(stage);
-      await this.delay(400 + Math.random() * 200);
+      await this.delay(180 + Math.random() * 80);
     }
 
     // Step 1: Image Quality

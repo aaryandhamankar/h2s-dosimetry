@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import Link from 'next/link';
 import { useAppStore } from '@/stores/app-store';
 import { RiskStatus, AlertStatus, ValidityStatus } from '@/types';
 import { TRANSLATIONS } from '@/lib/i18n';
@@ -8,28 +9,18 @@ import {
   Printer,
   ChevronRight,
   AlertTriangle,
-  CheckCircle2,
-  Users,
-  TrendingUp,
   Cpu,
   ChevronDown,
-  ShieldCheck,
-  Activity,
-  Layers
 } from 'lucide-react';
-import Link from 'next/link';
 import { formatDose, formatDateTime } from '@/lib/utils';
+import { useMounted } from '@/hooks/use-mounted';
 
 export default function HSEOverviewPage() {
   const { scans, alerts, language } = useAppStore();
-  const [mounted, setMounted] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const mounted = useMounted();
 
   const t = TRANSLATIONS[language];
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   if (!mounted) {
     return <div className="text-[13px] text-[#7A8178]">{language === 'hi' ? 'सुरक्षा डैशबोर्ड लोड हो रहा है...' : 'Loading safety dashboard...'}</div>;

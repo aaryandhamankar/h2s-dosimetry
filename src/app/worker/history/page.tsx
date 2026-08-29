@@ -9,15 +9,10 @@ import {
   Edit3, 
   X, 
   Save, 
-  ShieldCheck, 
-  AlertTriangle, 
-  CheckCircle2, 
   Clock, 
-  ArrowRight,
-  Layers
 } from 'lucide-react';
 import { formatDateTime, formatDose } from '@/lib/utils';
-import { ValidityStatus, RiskStatus, ShiftStatus } from '@/types';
+import { ValidityStatus, RiskStatus } from '@/types';
 import { TRANSLATIONS } from '@/lib/i18n';
 import { useState } from 'react';
 import Link from 'next/link';
@@ -26,8 +21,6 @@ export default function HistoryPage() {
   const { 
     scans, 
     currentUser, 
-    activeShift, 
-    activeDosimeter, 
     updateUserProfile,
     language 
   } = useAppStore();
