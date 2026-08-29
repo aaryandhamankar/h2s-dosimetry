@@ -1,13 +1,30 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { PortalHeaderWrapper } from '@/components/portal-header-wrapper';
 import { InstitutionalFooter } from '@/components/institutional-footer';
 import { DemoControlPanel } from '@/components/demo-control-panel';
 import { BottomNav } from '@/components/bottom-nav';
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#35551F',
+};
+
 export const metadata: Metadata = {
   title: 'H₂S Exposure Monitoring Portal | MRPL',
   description: 'Mangalore Refinery and Petrochemicals Limited — Occupational Health & Safety Dosimeter Verification System',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'H2S Portal',
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default function RootLayout({

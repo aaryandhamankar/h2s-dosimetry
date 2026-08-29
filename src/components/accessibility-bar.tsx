@@ -9,6 +9,7 @@ import {
   Sun,
 } from 'lucide-react';
 import { useMounted } from '@/hooks/use-mounted';
+import { FullscreenToggle } from '@/components/fullscreen-toggle';
 
 export function AccessibilityBar() {
   const { 
@@ -139,6 +140,9 @@ export function AccessibilityBar() {
             <Sun size={11} />
             <span className="text-[10px] sm:text-[11px]">{t.contrast}</span>
           </button>
+
+          {/* Full Screen Mode Toggle */}
+          <FullscreenToggle />
 
           {/* Language Switcher (EN / हिंदी) */}
           <div className="flex items-center border border-[#D5D2C9] rounded bg-white overflow-hidden shadow-2xs text-[10px] sm:text-[11px]">

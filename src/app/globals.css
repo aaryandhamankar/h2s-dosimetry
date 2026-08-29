@@ -20,6 +20,10 @@
     --accent-gold: #B89B5E;
   }
 
+  html {
+    min-height: 100dvh;
+  }
+
   body {
     background-color: #FAF6EE;
     color: var(--text-primary);
@@ -27,6 +31,9 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     letter-spacing: -0.01em;
+    min-height: 100dvh;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   /* Accessible Focus Ring for Keyboard Users across buttons, links & inputs */
