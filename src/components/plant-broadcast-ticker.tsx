@@ -38,7 +38,7 @@ export function PlantBroadcastTicker() {
         <div className="flex-shrink-0">
           {openAlerts.length > 0 ? (
             <Link
-              href="/hse/alerts"
+              href="/hse"
               className="flex items-center gap-1 text-[10px] font-bold text-[#C53030] hover:underline bg-[#FFF5F5] px-2 py-0.2 rounded border border-[#FEB2B2]"
             >
               <AlertTriangle size={11} className="text-[#C53030]" />

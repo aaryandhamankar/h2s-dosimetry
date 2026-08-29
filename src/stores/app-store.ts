@@ -43,8 +43,12 @@ export interface AppState {
   login: (user: User, role?: string) => void;
   logout: () => void;
   setCurrentUser: (user: User | null) => void;
-  startShift: (workerId?: string) => void;
+  startShift: (workerId?: string, startTime?: string) => void;
   endShift: () => void;
+  pauseShift: () => void;
+  resumeShift: () => void;
+  updateShiftStartTime: (startTime: string) => void;
+  setShiftElapsedMinutes: (elapsedMinutes: number) => void;
   pairDosimeter: (dosimeter: Dosimeter) => void;
   assignDosimeter: (dosimeterId: string) => void;
   
@@ -53,6 +57,8 @@ export interface AppState {
   acknowledgeAlert: (alertId: string, userId: string) => void;
   updateUserProfile: (updates: Partial<User>) => void;
   
+  shiftTimerModalOpen: boolean;
+  setShiftTimerModalOpen: (open: boolean) => void;
   teamModalOpen: boolean;
   setTeamModalOpen: (open: boolean) => void;
   toggleDemoMode: () => void;
@@ -83,12 +89,14 @@ export const useAppStore = create<AppState>()(
       fontSize: 'md',
       highContrast: false,
       teamModalOpen: false,
+      shiftTimerModalOpen: false,
 
       setLanguage: (lang: Language) => set({ language: lang }),
       setFontSize: (size: 'sm' | 'md' | 'lg') => set({ fontSize: size }),
       setHighContrast: (val: boolean) => set({ highContrast: val }),
       toggleHighContrast: () => set(state => ({ highContrast: !state.highContrast })),
       setTeamModalOpen: (open: boolean) => set({ teamModalOpen: open }),
+      setShiftTimerModalOpen: (open: boolean) => set({ shiftTimerModalOpen: open }),
       
       login: (user: User) => {
         set({
@@ -109,12 +117,12 @@ export const useAppStore = create<AppState>()(
       
       setCurrentUser: (user) => set({ currentUser: user, isAuthenticated: !!user }),
       
-      startShift: (workerId?: string) => {
+      startShift: (workerId?: string, startTime?: string) => {
         const id = workerId || get().currentUser?.id || 'worker-001';
         const newShift: Shift = {
           id: `shift-${Date.now()}`,
           workerId: id,
-          startTime: new Date().toISOString(),
+          startTime: startTime || new Date().toISOString(),
           endTime: null,
           status: ShiftStatus.ACTIVE,
         };
@@ -124,6 +132,64 @@ export const useAppStore = create<AppState>()(
         }));
       },
       
+      pauseShift: () => {
+        set(state => {
+          if (!state.activeShift) return state;
+          const updated = {
+            ...state.activeShift,
+            status: ShiftStatus.PAUSED,
+          };
+          return {
+            activeShift: updated,
+            shifts: state.shifts.map(s => s.id === updated.id ? updated : s),
+          };
+        });
+      },
+
+      resumeShift: () => {
+        set(state => {
+          if (!state.activeShift) return state;
+          const updated = {
+            ...state.activeShift,
+            status: ShiftStatus.ACTIVE,
+          };
+          return {
+            activeShift: updated,
+            shifts: state.shifts.map(s => s.id === updated.id ? updated : s),
+          };
+        });
+      },
+
+      updateShiftStartTime: (startTime: string) => {
+        set(state => {
+          if (!state.activeShift) return state;
+          const updated = {
+            ...state.activeShift,
+            startTime,
+          };
+          return {
+            activeShift: updated,
+            shifts: state.shifts.map(s => s.id === updated.id ? updated : s),
+          };
+        });
+      },
+
+      setShiftElapsedMinutes: (elapsedMinutes: number) => {
+        set(state => {
+          if (!state.activeShift) return state;
+          const newStart = new Date(Date.now() - elapsedMinutes * 60 * 1000).toISOString();
+          const updated = {
+            ...state.activeShift,
+            startTime: newStart,
+            status: ShiftStatus.ACTIVE,
+          };
+          return {
+            activeShift: updated,
+            shifts: state.shifts.map(s => s.id === updated.id ? updated : s),
+          };
+        });
+      },
+
       endShift: () => {
         set(state => {
           if (!state.activeShift) return state;
@@ -134,8 +200,6 @@ export const useAppStore = create<AppState>()(
           };
           return {
             activeShift: null,
-            activeDosimeter: null,
-            assignedDosimeter: null,
             shifts: state.shifts.map(s => s.id === updatedShift.id ? updatedShift : s),
           };
         });

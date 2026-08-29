@@ -3,50 +3,44 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { 
-  AlertTriangle, 
-  CheckCircle2, 
   Users, 
-  Camera, 
-  Printer,
+  CheckCircle2, 
+  AlertTriangle, 
+  ShieldCheck, 
+  Activity, 
+  Printer, 
+  Camera,
   ChevronDown,
   Cpu,
-  ShieldCheck,
-  Activity,
+  Eye
 } from 'lucide-react';
 import { useAppStore } from '@/stores/app-store';
-import { RiskStatus, AlertStatus, ValidityStatus } from '@/types';
-import { formatDose, formatDateTime } from '@/lib/utils';
-import { useMounted } from '@/hooks/use-mounted';
+import { RiskStatus, ValidityStatus, AlertStatus } from '@/types';
+import { formatDateTime, formatDose } from '@/lib/utils';
+import { sfx } from '@/lib/sound-effects';
 
 export default function DashboardPage() {
-  const { scans, alerts, language, acknowledgeAlert } = useAppStore();
+  const { scans, alerts, acknowledgeAlert, language } = useAppStore();
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const mounted = useMounted();
 
-  if (!mounted) {
-    return (
-      <div className="flex-1 flex items-center justify-center p-8 text-[13px] text-[#7A8178]">
-        {language === 'hi' ? 'डैशबोर्ड लोड हो रहा है...' : 'Loading safety dashboard...'}
-      </div>
-    );
-  }
-
-  // Real store metrics
+  // Compute key supervisory metrics cleanly
+  const uniqueWorkers = new Set(scans.map(s => s.workerId)).size;
   const validScans = scans.filter(s => s.exposureResult?.validityStatus === ValidityStatus.VALID);
   
-  const riskCounts = {
-    normal: scans.filter(s => s.exposureResult?.riskStatus === RiskStatus.NORMAL).length,
-    elevated: scans.filter(s => s.exposureResult?.riskStatus === RiskStatus.ELEVATED).length,
-    high: scans.filter(s => s.exposureResult?.riskStatus === RiskStatus.HIGH).length,
-    critical: scans.filter(s => s.exposureResult?.riskStatus === RiskStatus.CRITICAL).length,
-  };
+  const riskCounts = scans.reduce((acc, s) => {
+    const risk = s.exposureResult?.riskStatus;
+    if (risk === RiskStatus.CRITICAL) acc.critical += 1;
+    else if (risk === RiskStatus.HIGH) acc.high += 1;
+    else if (risk === RiskStatus.ELEVATED) acc.elevated += 1;
+    else acc.normal += 1;
+    return acc;
+  }, { normal: 0, elevated: 0, high: 0, critical: 0 });
 
-  const openAlerts = alerts.filter(a => a.status === AlertStatus.OPEN);
-  const uniqueWorkers = new Set(scans.map(s => s.workerId)).size || 5;
+  const openAlerts = alerts.filter(a => a.status === AlertStatus.OPEN || !a.acknowledgedAt);
 
   const maxDose = scans.reduce((max, s) => {
-    const dose = s.exposureResult?.estimatedDose || 0;
-    return dose > max ? dose : max;
+    const d = s.exposureResult?.estimatedDose || 0;
+    return d > max ? d : max;
   }, 0);
 
   const safeCompliancePercent = scans.length > 0 
@@ -99,36 +93,45 @@ export default function DashboardPage() {
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 2. CRITICAL ATTENTION / OPEN ALERTS BANNER (Conditional)       */}
+      {/* 2. COMPACT ACTIVE ALERTS STRIP (Conditional)                  */}
       {/* ───────────────────────────────────────────────────────────── */}
       {openAlerts.length > 0 && (
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-[#F8ECEC] border-2 border-[#E8B8B8] text-[#A94442] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs animate-in fade-in duration-200">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-white text-[#A94442] shadow-2xs flex-shrink-0">
-              <AlertTriangle className="w-5 h-5 animate-pulse" />
-            </div>
-            <div>
-              <strong className="text-[14px] sm:text-[15px] font-black block">
-                {language === 'hi'
-                  ? `${openAlerts.length} अपुष्ट सुरक्षा सीमा अलर्ट`
-                  : `${openAlerts.length} Active Hazard Exceedance Alert${openAlerts.length > 1 ? 's' : ''}`}
-              </strong>
-              <span className="text-[12px] text-[#A94442]/90 block">
-                {language === 'hi'
-                  ? 'कर्मचारी डोसीमीटर सुरक्षा सीमा पार हो गई है। तत्काल पर्यवेक्षी जांच आवश्यक है।'
-                  : 'Worker dosimeters exceeded OSHA safety thresholds. Supervisory triage required.'}
-              </span>
-            </div>
+        <div className="py-2 px-3 sm:px-4 rounded-lg bg-white border border-[#E8E2D5] border-l-4 border-l-[#C94A4A] flex items-center justify-between gap-3 shadow-2xs animate-in fade-in duration-150">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <AlertTriangle className="w-4 h-4 text-[#B83838] flex-shrink-0 animate-pulse" />
+            <span className="text-[12.5px] sm:text-[13px] font-bold text-[#263026] truncate">
+              {language === 'hi'
+                ? `${openAlerts.length} सक्रिय जोखिम अलर्ट`
+                : `${openAlerts.length} Active Hazard Alert${openAlerts.length > 1 ? 's' : ''}`}
+            </span>
           </div>
 
-          <button
-            onClick={() => {
-              openAlerts.forEach(a => acknowledgeAlert(a.id, 'Supervisor (On Duty)'));
-            }}
-            className="gov-btn-primary bg-[#A94442] hover:bg-[#8F3331] text-white text-[12px] font-bold h-8 px-3.5 rounded-lg self-start sm:self-auto shadow-xs whitespace-nowrap"
-          >
-            <span>{language === 'hi' ? 'सभी अलर्ट स्वीकार करें' : 'Acknowledge All'}</span>
-          </button>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                sfx.playClick();
+                document.getElementById('real-time-personnel-verification-feed')?.scrollIntoView({
+                  behavior: 'smooth',
+                  block: 'start',
+                });
+              }}
+              className="gov-btn-secondary h-7 px-2.5 text-[11.5px] font-semibold flex items-center gap-1 border-[#D5D2C9] hover:bg-[#FAF9F5]"
+            >
+              <Eye className="w-3.5 h-3.5 text-[#5C822D]" />
+              <span>{language === 'hi' ? 'देखें' : 'View'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                sfx.playClick();
+                openAlerts.forEach(a => acknowledgeAlert(a.id, 'Supervisor (On Duty)'));
+              }}
+              className="gov-btn-primary bg-[#B83838] hover:bg-[#9B2A2A] text-white text-[11.5px] font-bold h-7 px-2.5 rounded-md shadow-xs whitespace-nowrap"
+            >
+              <span>{language === 'hi' ? 'स्वीकार करें' : 'Acknowledge'}</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -226,7 +229,7 @@ export default function DashboardPage() {
               <div className="flex justify-between items-center">
                 <span className="flex items-center gap-1.5 font-bold text-[#263026]">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#5C822D]" />
-                  <span>Safe (&lt;5 ppm·h)</span>
+                  <span>{language === 'hi' ? 'सुरक्षित (<5 ppm·h)' : 'Safe (<5 ppm·h)'}</span>
                 </span>
                 <span className="font-mono font-bold text-[#263026]">{riskCounts.normal}</span>
               </div>
@@ -243,7 +246,7 @@ export default function DashboardPage() {
               <div className="flex justify-between items-center">
                 <span className="flex items-center gap-1.5 font-bold text-[#263026]">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#D99B26]" />
-                  <span>Elevated (5–10 ppm·h)</span>
+                  <span>{language === 'hi' ? 'मध्यम (5–10 ppm·h)' : 'Elevated (5–10 ppm·h)'}</span>
                 </span>
                 <span className="font-mono font-bold text-[#263026]">{riskCounts.elevated}</span>
               </div>
@@ -260,7 +263,7 @@ export default function DashboardPage() {
               <div className="flex justify-between items-center">
                 <span className="flex items-center gap-1.5 font-bold text-[#263026]">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#C96B32]" />
-                  <span>High (10–20 ppm·h)</span>
+                  <span>{language === 'hi' ? 'उच्च (10–20 ppm·h)' : 'High (10–20 ppm·h)'}</span>
                 </span>
                 <span className="font-mono font-bold text-[#263026]">{riskCounts.high}</span>
               </div>
@@ -277,7 +280,7 @@ export default function DashboardPage() {
               <div className="flex justify-between items-center">
                 <span className="flex items-center gap-1.5 font-bold text-[#263026]">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#A94442]" />
-                  <span>Critical (&gt;20 ppm·h)</span>
+                  <span>{language === 'hi' ? 'गंभीर (>20 ppm·h)' : 'Critical (>20 ppm·h)'}</span>
                 </span>
                 <span className="font-mono font-bold text-[#A94442]">{riskCounts.critical}</span>
               </div>
@@ -297,7 +300,10 @@ export default function DashboardPage() {
         </div>
 
         {/* COLUMN 2 & 3: Live Personnel Telemetry Feed */}
-        <div className="gov-card p-4 sm:p-5 rounded-2xl bg-white border border-[#E8E2D5] space-y-3 lg:col-span-2 shadow-2xs">
+        <div
+          id="real-time-personnel-verification-feed"
+          className="gov-card p-4 sm:p-5 rounded-2xl bg-white border border-[#E8E2D5] space-y-3 lg:col-span-2 shadow-2xs"
+        >
           <div className="flex items-center justify-between border-b border-[#E8E2D5] pb-2.5">
             <h2 className="text-[14px] sm:text-[15px] font-black text-[#263026] flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-[#5C822D]" />
@@ -316,11 +322,11 @@ export default function DashboardPage() {
             <table className="w-full text-left text-[12.5px]">
               <thead>
                 <tr className="border-b border-[#E8E2D5] text-[#7A8178] text-[10.5px] uppercase font-mono">
-                  <th className="pb-2 font-bold">Time</th>
-                  <th className="pb-2 font-bold">Worker</th>
-                  <th className="pb-2 font-bold">Badge ID</th>
-                  <th className="pb-2 font-bold">Cumulative Dose</th>
-                  <th className="pb-2 font-bold text-right">Risk Status</th>
+                  <th className="pb-2 font-bold">{language === 'hi' ? 'समय' : 'Time'}</th>
+                  <th className="pb-2 font-bold">{language === 'hi' ? 'श्रमिक' : 'Worker'}</th>
+                  <th className="pb-2 font-bold">{language === 'hi' ? 'बैज कोड' : 'Badge ID'}</th>
+                  <th className="pb-2 font-bold">{language === 'hi' ? 'संचयी खुराक' : 'Cumulative Dose'}</th>
+                  <th className="pb-2 font-bold text-right">{language === 'hi' ? 'जोखिम स्थिति' : 'Risk Status'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E8E2D5]">
@@ -338,6 +344,14 @@ export default function DashboardPage() {
                     ? 'bg-[#FAF2EB] text-[#C96B32] border-[#F3D5C0]'
                     : 'bg-[#F8ECEC] text-[#A94442] border-[#E8B8B8]';
 
+                  const riskText = isSafe 
+                    ? (language === 'hi' ? 'सुरक्षित' : 'SAFE')
+                    : isElevated 
+                    ? (language === 'hi' ? 'मध्यम' : 'ELEVATED')
+                    : isHigh 
+                    ? (language === 'hi' ? 'उच्च' : 'HIGH')
+                    : (language === 'hi' ? 'गंभीर' : 'CRITICAL');
+
                   return (
                     <tr key={s.id} className="hover:bg-[#FAF7F0] transition-colors">
                       <td className="py-2.5 text-[#596158] font-mono text-[11.5px]">
@@ -352,11 +366,11 @@ export default function DashboardPage() {
                       <td className="py-2.5 font-bold text-[#263026] font-mono">
                         {r?.estimatedDose !== null && r?.estimatedDose !== undefined
                           ? `${formatDose(r.estimatedDose, 1)} ${r.doseUnit || 'ppm·h'}`
-                          : 'Unverified'}
+                          : (language === 'hi' ? 'असत्यापित' : 'Unverified')}
                       </td>
                       <td className="py-2.5 text-right">
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeClass} uppercase`}>
-                          {r?.riskStatus || 'SAFE'}
+                          {riskText}
                         </span>
                       </td>
                     </tr>
@@ -382,6 +396,14 @@ export default function DashboardPage() {
                 ? 'bg-[#FAF2EB] text-[#C96B32] border-[#F3D5C0]'
                 : 'bg-[#F8ECEC] text-[#A94442] border-[#E8B8B8]';
 
+              const riskText = isSafe 
+                ? (language === 'hi' ? 'सुरक्षित' : 'SAFE')
+                : isElevated 
+                ? (language === 'hi' ? 'मध्यम' : 'ELEVATED')
+                : isHigh 
+                ? (language === 'hi' ? 'उच्च' : 'HIGH')
+                : (language === 'hi' ? 'गंभीर' : 'CRITICAL');
+
               return (
                 <div key={s.id} className="py-2.5 flex items-center justify-between gap-2">
                   <div className="min-w-0">
@@ -400,7 +422,7 @@ export default function DashboardPage() {
                         : '—'}
                     </div>
                     <span className={`text-[9.5px] font-bold px-2 py-0.2 rounded-full border ${badgeClass} uppercase inline-block mt-0.5`}>
-                      {r?.riskStatus || 'SAFE'}
+                      {riskText}
                     </span>
                   </div>
                 </div>
@@ -431,23 +453,35 @@ export default function DashboardPage() {
           <div className="p-4 sm:p-5 border-t border-[#E8E2D5] space-y-3 text-[12px] sm:text-[12.5px] animate-in fade-in duration-150">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="bg-[#FAF7F0] p-3 rounded-xl border border-[#E8E2D5] space-y-1">
-                <span className="font-bold text-[#263026] block">Bradford D65 Chromaticity</span>
+                <span className="font-bold text-[#263026] block">
+                  {language === 'hi' ? 'Bradford D65 क्रोमैटिकिटी' : 'Bradford D65 Chromaticity'}
+                </span>
                 <p className="text-[#596158] text-[11px] leading-relaxed">
-                  Normalizes ambient refinery illumination to standard CIE D65 white-point using 4-patch fiducial bar.
+                  {language === 'hi'
+                    ? '4-पैच फिद्यूशियल बार का उपयोग करके मानक CIE D65 व्हाइट-पॉइंट पर परिवेशी रिफाइनरी रोशनी को सामान्य करता है।'
+                    : 'Normalizes ambient refinery illumination to standard CIE D65 white-point using 4-patch fiducial bar.'}
                 </p>
               </div>
 
               <div className="bg-[#FAF7F0] p-3 rounded-xl border border-[#E8E2D5] space-y-1">
-                <span className="font-bold text-[#263026] block">Reaction Kinetic Model</span>
+                <span className="font-bold text-[#263026] block">
+                  {language === 'hi' ? 'प्रतिक्रिया कैनेटीक्स मॉडल' : 'Reaction Kinetic Model'}
+                </span>
                 <p className="text-[#596158] text-[11px] leading-relaxed">
-                  Cu-PAN lead-free matrix with linear colorimetric response interval 0.0 – 30.0 ppm·h.
+                  {language === 'hi'
+                    ? '0.0 – 30.0 ppm·h के रैखिक वर्णमितीय प्रतिक्रिया अंतराल के साथ Cu-PAN लेड-मुक्त मैट्रिक्स।'
+                    : 'Cu-PAN lead-free matrix with linear colorimetric response interval 0.0 – 30.0 ppm·h.'}
                 </p>
               </div>
 
               <div className="bg-[#FAF7F0] p-3 rounded-xl border border-[#E8E2D5] space-y-1">
-                <span className="font-bold text-[#263026] block">OSHA Safety Benchmarks</span>
+                <span className="font-bold text-[#263026] block">
+                  {language === 'hi' ? 'OSHA सुरक्षा मानक' : 'OSHA Safety Benchmarks'}
+                </span>
                 <p className="text-[#596158] text-[11px] leading-relaxed">
-                  Thresholds configured to OSHA Permissible Exposure Limit (10 ppm 8h TWA) and Evacuation Ceiling (20 ppm).
+                  {language === 'hi'
+                    ? 'OSHA स्वीकार्य एक्सपोज़र सीमा (10 ppm 8h TWA) और निकासी सीमा (20 ppm) के अनुसार कॉन्फ़िगर की गई सीमाएं।'
+                    : 'Thresholds configured to OSHA Permissible Exposure Limit (10 ppm 8h TWA) and Evacuation Ceiling (20 ppm).'}
                 </p>
               </div>
             </div>
@@ -457,7 +491,7 @@ export default function DashboardPage() {
                 href="/about"
                 className="text-[11.5px] text-[#5C822D] hover:text-[#35551F] font-bold hover:underline flex items-center gap-1"
               >
-                <span>Learn about the Sensing Science & Technology →</span>
+                <span>{language === 'hi' ? 'सेंसिंग विज्ञान और प्रौद्योगिकी के बारे में जानें →' : 'Learn about the Sensing Science & Technology →'}</span>
               </Link>
             </div>
           </div>

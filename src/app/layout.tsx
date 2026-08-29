@@ -3,6 +3,7 @@ import './globals.css';
 import { PortalHeaderWrapper } from '@/components/portal-header-wrapper';
 import { InstitutionalFooter } from '@/components/institutional-footer';
 import { DemoControlPanel } from '@/components/demo-control-panel';
+import { ShiftTimer } from '@/components/shift-timer';
 import { BottomNav } from '@/components/bottom-nav';
 
 export const viewport: Viewport = {
@@ -50,7 +51,10 @@ export default function RootLayout({
         {/* Mobile-Only Bottom Navigation Bar (Hidden on Desktop) */}
         <BottomNav />
 
-        {/* Evaluator Demo Helper (Press 'D' key or floating button) */}
+        {/* Shift Exposure Timer on lower left side */}
+        <ShiftTimer />
+
+        {/* Evaluator Demo Helper (Press 'D' key or floating button on lower right side) */}
         <DemoControlPanel />
 
       </body>

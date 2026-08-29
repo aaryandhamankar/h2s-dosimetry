@@ -87,12 +87,12 @@ export default function HistoryPage() {
                   {latestScan.exposureResult?.riskStatus || 'VERIFIED'}
                 </span>
                 <span className="font-mono text-[12px] text-[#596158]">
-                  Badge: <strong className="text-[#263026]">{latestScan.dosimeterId}</strong>
+                  {language === 'hi' ? 'बैज:' : 'Badge:'} <strong className="text-[#263026]">{latestScan.dosimeterId}</strong>
                 </span>
               </div>
 
               <div className="text-[12px] sm:text-[13px] text-[#596158] pt-0.5">
-                <strong>Action:</strong> {getActionSummary(latestScan.exposureResult?.riskStatus)}
+                <strong>{language === 'hi' ? 'कार्रवाई:' : 'Action:'}</strong> {getActionSummary(latestScan.exposureResult?.riskStatus)}
               </div>
             </div>
 
@@ -101,7 +101,7 @@ export default function HistoryPage() {
                 <div className="text-[24px] sm:text-[28px] font-black text-[#263026] font-mono leading-none">
                   {latestScan.exposureResult?.estimatedDose !== null && latestScan.exposureResult?.estimatedDose !== undefined
                     ? `${formatDose(latestScan.exposureResult.estimatedDose)} ${latestScan.exposureResult.doseUnit}`
-                    : 'Unverified'}
+                    : (language === 'hi' ? 'असत्यापित' : 'Unverified')}
                 </div>
                 <div className="text-[11px] text-[#7A8178] mt-0.5">
                   8h TWA: {latestScan.exposureResult?.estimatedTwa !== null && latestScan.exposureResult?.estimatedTwa !== undefined ? `${formatDose(latestScan.exposureResult.estimatedTwa)} ppm` : 'N/A'}
@@ -112,7 +112,7 @@ export default function HistoryPage() {
                 href={`/worker/result?scanId=${latestScan.id}`}
                 className="gov-btn-primary h-10 px-3 text-[12px] sm:text-[13px] font-semibold flex items-center gap-1 shadow-xs"
               >
-                <span>Details</span>
+                <span>{language === 'hi' ? 'विवरण' : 'Details'}</span>
                 <ChevronRight size={14} />
               </Link>
             </div>
@@ -120,7 +120,7 @@ export default function HistoryPage() {
         </div>
       ) : (
         <div className="gov-card p-4 text-center text-[13px] text-[#7A8178]">
-          No previous scan recorded yet. Use the scanner tab to log your first reading.
+          {language === 'hi' ? 'अभी तक कोई पिछला स्कैन दर्ज नहीं किया गया है। अपनी पहली रीडिंग दर्ज करने के लिए स्कैनर का उपयोग करें।' : 'No previous scan recorded yet. Use the scanner tab to log your first reading.'}
         </div>
       )}
 
@@ -130,7 +130,7 @@ export default function HistoryPage() {
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-[#5C822D]" />
             <h2 className="text-[14px] sm:text-[15px] font-bold text-[#263026]">
-              Worker Profile Dossier
+              {language === 'hi' ? 'श्रमिक प्रोफ़ाइल विवरण' : 'Worker Profile Dossier'}
             </h2>
           </div>
 
@@ -145,25 +145,25 @@ export default function HistoryPage() {
             className="p-1.5 px-2.5 rounded-md bg-[#F7F6F1] hover:bg-[#F0EFE9] border border-[#E7E5DE] text-[#263026] text-[12px] font-semibold flex items-center gap-1.5 transition-colors"
           >
             <Edit3 size={13} className="text-[#5C822D]" />
-            <span>Edit Details</span>
+            <span>{language === 'hi' ? 'विवरण संपादित करें' : 'Edit Details'}</span>
           </button>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-[12px] sm:text-[13px]">
           <div className="bg-[#FAFBF9] p-2.5 rounded border border-[#E7E5DE]">
-            <span className="text-[10px] text-[#7A8178] uppercase font-bold block">Operator Name</span>
+            <span className="text-[10px] text-[#7A8178] uppercase font-bold block">{language === 'hi' ? 'ऑपरेटर नाम' : 'Operator Name'}</span>
             <strong className="text-[#263026] truncate block">{currentUser?.displayName || 'Rajesh Kumar'}</strong>
           </div>
           <div className="bg-[#FAFBF9] p-2.5 rounded border border-[#E7E5DE]">
-            <span className="text-[10px] text-[#7A8178] uppercase font-bold block">Worker Code</span>
+            <span className="text-[10px] text-[#7A8178] uppercase font-bold block">{language === 'hi' ? 'श्रमिक कोड' : 'Worker Code'}</span>
             <span className="text-[#263026] font-mono font-bold">{currentUser?.workerCode || 'W-001'}</span>
           </div>
           <div className="bg-[#FAFBF9] p-2.5 rounded border border-[#E7E5DE]">
-            <span className="text-[10px] text-[#7A8178] uppercase font-bold block">Department</span>
+            <span className="text-[10px] text-[#7A8178] uppercase font-bold block">{language === 'hi' ? 'विभाग' : 'Department'}</span>
             <span className="text-[#263026] truncate block">{currentUser?.department || 'Operations'}</span>
           </div>
           <div className="bg-[#FAFBF9] p-2.5 rounded border border-[#E7E5DE]">
-            <span className="text-[10px] text-[#7A8178] uppercase font-bold block">Work Area</span>
+            <span className="text-[10px] text-[#7A8178] uppercase font-bold block">{language === 'hi' ? 'कार्य क्षेत्र' : 'Work Area'}</span>
             <span className="text-[#263026] truncate block">{currentUser?.site || 'Refinery Zone A'}</span>
           </div>
         </div>
@@ -174,15 +174,15 @@ export default function HistoryPage() {
         <div className="p-3.5 sm:p-4 border-b border-[#E7E5DE] bg-[#FAFBF9] text-[12px] sm:text-[13px] font-bold text-[#263026] uppercase tracking-wider flex items-center justify-between">
           <span className="flex items-center gap-1.5">
             <HistoryIcon size={14} className="text-[#5C822D]" />
-            <span>Exposure Scan Ledger ({userScans.length})</span>
+            <span>{language === 'hi' ? `एक्सपोजर स्कैन लेजर (${userScans.length})` : `Exposure Scan Ledger (${userScans.length})`}</span>
           </span>
-          <span className="text-[#7A8178] text-[11px] sm:text-[12px]">Chronological</span>
+          <span className="text-[#7A8178] text-[11px] sm:text-[12px]">{language === 'hi' ? 'कालक्रमानुसार' : 'Chronological'}</span>
         </div>
 
         {userScans.length === 0 ? (
           <div className="p-8 text-center space-y-2">
             <HistoryIcon className="w-8 h-8 text-[#7A8178] mx-auto" />
-            <p className="text-[13px] text-[#596158]">No exposure readings logged yet.</p>
+            <p className="text-[13px] text-[#596158]">{language === 'hi' ? 'अभी तक कोई एक्सपोजर रीडिंग दर्ज नहीं की गई है।' : 'No exposure readings logged yet.'}</p>
           </div>
         ) : (
           <div className="divide-y divide-[#E7E5DE]">
@@ -190,15 +190,15 @@ export default function HistoryPage() {
               const res = scan.exposureResult;
               const isValid = res?.validityStatus === ValidityStatus.VALID;
 
-              let badge = <span className="gov-badge gov-badge-normal text-[10px] sm:text-[11px]">Normal</span>;
+              let badge = <span className="gov-badge gov-badge-normal text-[10px] sm:text-[11px]">{language === 'hi' ? 'सामान्य' : 'Normal'}</span>;
               if (res?.riskStatus === RiskStatus.ELEVATED) {
-                badge = <span className="gov-badge gov-badge-elevated text-[10px] sm:text-[11px]">Elevated</span>;
+                badge = <span className="gov-badge gov-badge-elevated text-[10px] sm:text-[11px]">{language === 'hi' ? 'मध्यम' : 'Elevated'}</span>;
               } else if (res?.riskStatus === RiskStatus.HIGH) {
-                badge = <span className="gov-badge gov-badge-high text-[10px] sm:text-[11px]">High</span>;
+                badge = <span className="gov-badge gov-badge-high text-[10px] sm:text-[11px]">{language === 'hi' ? 'उच्च' : 'High'}</span>;
               } else if (res?.riskStatus === RiskStatus.CRITICAL) {
-                badge = <span className="gov-badge gov-badge-critical text-[10px] sm:text-[11px]">Critical</span>;
+                badge = <span className="gov-badge gov-badge-critical text-[10px] sm:text-[11px]">{language === 'hi' ? 'गंभीर' : 'Critical'}</span>;
               } else if (!isValid) {
-                badge = <span className="gov-badge gov-badge-neutral text-[10px] sm:text-[11px]">Unverified</span>;
+                badge = <span className="gov-badge gov-badge-neutral text-[10px] sm:text-[11px]">{language === 'hi' ? 'असत्यापित' : 'Unverified'}</span>;
               }
 
               return (
@@ -224,7 +224,7 @@ export default function HistoryPage() {
                         {formatDateTime(scan.capturedAt)}
                       </div>
                       <div className="text-[11px] text-[#596158] font-mono truncate">
-                        Badge: {scan.dosimeterId} · {currentUser?.site || 'Zone A'}
+                        {language === 'hi' ? 'बैज:' : 'Badge:'} {scan.dosimeterId} · {currentUser?.site || 'Zone A'}
                       </div>
                     </div>
                   </div>
@@ -234,7 +234,7 @@ export default function HistoryPage() {
                       <div className="text-[14px] sm:text-[16px] font-bold text-[#263026] font-mono">
                         {res?.estimatedDose !== null && res?.estimatedDose !== undefined
                           ? `${formatDose(res.estimatedDose)} ${res.doseUnit}`
-                          : 'Unverified'}
+                          : (language === 'hi' ? 'असत्यापित' : 'Unverified')}
                       </div>
                       <div className="text-[10px] text-[#7A8178]">
                         TWA: {res?.estimatedTwa !== null && res?.estimatedTwa !== undefined ? `${formatDose(res.estimatedTwa)} ppm` : '—'}
@@ -261,7 +261,7 @@ export default function HistoryPage() {
             <div className="p-4 border-b border-[#E7E5DE] flex items-center justify-between bg-[#FAFBF9]">
               <div className="flex items-center gap-2 font-bold text-[15px] text-[#263026]">
                 <Edit3 className="w-4 h-4 text-[#5C822D]" />
-                <span>Edit Profile Details</span>
+                <span>{language === 'hi' ? 'प्रोफ़ाइल विवरण संपादित करें' : 'Edit Profile Details'}</span>
               </div>
               <button 
                 onClick={() => setEditModalOpen(false)}
@@ -273,7 +273,7 @@ export default function HistoryPage() {
 
             <form onSubmit={handleSaveProfile} className="p-4 sm:p-5 space-y-3.5 text-[13px]">
               <div>
-                <label className="font-semibold text-[#263026] block mb-1">Full Name:</label>
+                <label className="font-semibold text-[#263026] block mb-1">{language === 'hi' ? 'पूरा नाम:' : 'Full Name:'}</label>
                 <input
                   type="text"
                   value={editName}
@@ -285,7 +285,7 @@ export default function HistoryPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-semibold text-[#263026] block mb-1">Worker Code:</label>
+                  <label className="font-semibold text-[#263026] block mb-1">{language === 'hi' ? 'श्रमिक कोड:' : 'Worker Code:'}</label>
                   <input
                     type="text"
                     value={editCode}
@@ -295,7 +295,7 @@ export default function HistoryPage() {
                   />
                 </div>
                 <div>
-                  <label className="font-semibold text-[#263026] block mb-1">Department:</label>
+                  <label className="font-semibold text-[#263026] block mb-1">{language === 'hi' ? 'विभाग:' : 'Department:'}</label>
                   <input
                     type="text"
                     value={editDept}
@@ -307,7 +307,7 @@ export default function HistoryPage() {
               </div>
 
               <div>
-                <label className="font-semibold text-[#263026] block mb-1">Assigned Plant Work Area:</label>
+                <label className="font-semibold text-[#263026] block mb-1">{language === 'hi' ? 'आवंटित प्लांट कार्य क्षेत्र:' : 'Assigned Plant Work Area:'}</label>
                 <input
                   type="text"
                   value={editSite}
@@ -323,14 +323,14 @@ export default function HistoryPage() {
                   onClick={() => setEditModalOpen(false)}
                   className="gov-btn-secondary text-[12px] h-9 px-3"
                 >
-                  Cancel
+                  {language === 'hi' ? 'रद्द करें' : 'Cancel'}
                 </button>
                 <button
                   type="submit"
                   className="gov-btn-primary text-[12px] h-9 px-4 font-semibold flex items-center gap-1.5"
                 >
                   <Save size={14} />
-                  <span>Save Profile</span>
+                  <span>{language === 'hi' ? 'प्रोफ़ाइल सहेजें' : 'Save Profile'}</span>
                 </button>
               </div>
             </form>
@@ -342,4 +342,3 @@ export default function HistoryPage() {
     </div>
   );
 }
-

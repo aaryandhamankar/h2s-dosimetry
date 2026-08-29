@@ -77,11 +77,19 @@ export default function AboutPage() {
         <div className="flex items-center gap-2 text-[#5C822D]">
           <ShieldCheck className="w-4.5 h-4.5" />
           <h2 className="text-[15px] sm:text-[17px] font-black text-[#263026]">
-            What is it?
+            {language === 'hi' ? 'यह क्या है?' : 'What is it?'}
           </h2>
         </div>
         <p className="text-[13px] sm:text-[14px] text-[#596158] leading-relaxed">
-          The <strong>MRPL H₂S Wearable Dosimeter</strong> is a lightweight, zero-power personal chemical sensor band paired with an optical smartphone readout system. It gives refinery personnel and HSE safety officers real-time, quantitative exposure measurements without cumbersome electronic badges or expensive laboratory turnaround.
+          {language === 'hi' ? (
+            <>
+              <strong>MRPL H₂S वियरेबल डोसीमीटर</strong> एक हल्का, बिना बिजली (जीरो-पावर) वाला व्यक्तिगत रासायनिक सेंसर बैंड है जिसे स्मार्टफोन के ऑप्टिकल रीडआउट सिस्टम से जोड़ा गया है। यह रिफाइनरी कर्मियों और एचएसई सुरक्षा अधिकारियों को भारी इलेक्ट्रॉनिक बैज या महंगी प्रयोगशाला जांच के बिना वास्तविक समय में मात्रात्मक गैस एक्सपोज़र माप प्रदान करता है।
+            </>
+          ) : (
+            <>
+              The <strong>MRPL H₂S Wearable Dosimeter</strong> is a lightweight, zero-power personal chemical sensor band paired with an optical smartphone readout system. It gives refinery personnel and HSE safety officers real-time, quantitative exposure measurements without cumbersome electronic badges or expensive laboratory turnaround.
+            </>
+          )}
         </p>
       </div>
 
@@ -226,7 +234,7 @@ export default function AboutPage() {
         <div className="flex items-center gap-2 text-[#5C822D]">
           <Activity className="w-4.5 h-4.5" />
           <h2 className="text-[15px] sm:text-[17px] font-black text-[#263026]">
-            How it works
+            {language === 'hi' ? 'यह कैसे काम करता है?' : 'How it works'}
           </h2>
         </div>
 
@@ -236,9 +244,11 @@ export default function AboutPage() {
             <div className="w-6 h-6 rounded-md bg-[#EDF3E4] text-[#5C822D] flex items-center justify-center font-bold text-[11px]">
               1
             </div>
-            <div className="font-bold text-[12px] sm:text-[13px] text-[#263026]">Wristband</div>
+            <div className="font-bold text-[12px] sm:text-[13px] text-[#263026]">
+              {language === 'hi' ? 'रिस्टबैंड' : 'Wristband'}
+            </div>
             <p className="text-[11px] sm:text-[12px] text-[#596158] leading-tight">
-              Worn by operators across active shifts.
+              {language === 'hi' ? 'ऑपरेटरों द्वारा शिफ्ट के दौरान कलाई पर पहना जाता है।' : 'Worn by operators across active shifts.'}
             </p>
           </div>
 
@@ -246,9 +256,11 @@ export default function AboutPage() {
             <div className="w-6 h-6 rounded-md bg-[#EDF3E4] text-[#5C822D] flex items-center justify-center font-bold text-[11px]">
               2
             </div>
-            <div className="font-bold text-[12px] sm:text-[13px] text-[#263026]">Colorimetric</div>
+            <div className="font-bold text-[12px] sm:text-[13px] text-[#263026]">
+              {language === 'hi' ? 'वर्णमितीय' : 'Colorimetric'}
+            </div>
             <p className="text-[11px] sm:text-[12px] text-[#596158] leading-tight">
-              Darkens proportionally to H₂S gas dose.
+              {language === 'hi' ? 'H₂S गैस की मात्रा के अनुपात में रंग गहरा होता है।' : 'Darkens proportionally to H₂S gas dose.'}
             </p>
           </div>
 
@@ -256,9 +268,11 @@ export default function AboutPage() {
             <div className="w-6 h-6 rounded-md bg-[#EDF3E4] text-[#5C822D] flex items-center justify-center font-bold text-[11px]">
               3
             </div>
-            <div className="font-bold text-[12px] sm:text-[13px] text-[#263026]">Image Scan</div>
+            <div className="font-bold text-[12px] sm:text-[13px] text-[#263026]">
+              {language === 'hi' ? 'इमेज स्कैन' : 'Image Scan'}
+            </div>
             <p className="text-[11px] sm:text-[12px] text-[#596158] leading-tight">
-              Phone camera captures badge under ambient light.
+              {language === 'hi' ? 'फोन कैमरा परिवेशी प्रकाश में बैज की फोटो लेता है।' : 'Phone camera captures badge under ambient light.'}
             </p>
           </div>
 
@@ -266,9 +280,11 @@ export default function AboutPage() {
             <div className="w-6 h-6 rounded-md bg-[#EDF3E4] text-[#5C822D] flex items-center justify-center font-bold text-[11px]">
               4
             </div>
-            <div className="font-bold text-[12px] sm:text-[13px] text-[#263026]">Exposure Estimate</div>
+            <div className="font-bold text-[12px] sm:text-[13px] text-[#263026]">
+              {language === 'hi' ? 'खुराक अनुमान' : 'Exposure Estimate'}
+            </div>
             <p className="text-[11px] sm:text-[12px] text-[#596158] leading-tight">
-              Quantitative ppm certified in &lt; 1s.
+              {language === 'hi' ? '< 1 सेकंड में मात्रात्मक ppm प्रमाणित।' : 'Quantitative ppm certified in < 1s.'}
             </p>
           </div>
         </div>
@@ -281,11 +297,19 @@ export default function AboutPage() {
         <div className="flex items-center gap-2 text-[#C96B32]">
           <AlertTriangle className="w-4.5 h-4.5" />
           <h2 className="text-[15px] sm:text-[17px] font-black text-[#263026]">
-            Why H₂S monitoring?
+            {language === 'hi' ? 'H₂S निगरानी क्यों आवश्यक है?' : 'Why H₂S monitoring?'}
           </h2>
         </div>
         <p className="text-[13px] sm:text-[14px] text-[#596158] leading-relaxed">
-          Hydrogen Sulfide (H₂S) is an insidious petrochemical hazard. While characterized by a pungent rotten-egg odor at trace levels, it rapidly causes <strong>olfactory fatigue (loss of sense of smell)</strong> at concentrations above 100 ppm, leaving workers unaware of deadly exposure. Key benchmarks: <strong>OSHA PEL (10 ppm 8h TWA)</strong> and <strong>20 ppm ceiling</strong>.
+          {language === 'hi' ? (
+            <>
+              हाइड्रोजन सल्फाइड (H₂S) एक अत्यधिक घातक पेट्रोकेमिकल गैस है। हालांकि कम सांद्रता में इसमें सड़े हुए अंडे जैसी गंध होती है, लेकिन <strong>100 ppm</strong> से अधिक होने पर यह तुरंत <strong>सूंघने की क्षमता को सुन्न (घ्राण थकान)</strong> कर देती है, जिससे श्रमिकों को खतरे का पता नहीं चलता। मुख्य मानक: <strong>OSHA PEL (10 ppm 8h TWA)</strong> और <strong>20 ppm अधिकतम सीमा (सीलिंग)</strong>।
+            </>
+          ) : (
+            <>
+              Hydrogen Sulfide (H₂S) is an insidious petrochemical hazard. While characterized by a pungent rotten-egg odor at trace levels, it rapidly causes <strong>olfactory fatigue (loss of sense of smell)</strong> at concentrations above 100 ppm, leaving workers unaware of deadly exposure. Key benchmarks: <strong>OSHA PEL (10 ppm 8h TWA)</strong> and <strong>20 ppm ceiling</strong>.
+            </>
+          )}
         </p>
       </div>
 
@@ -296,26 +320,30 @@ export default function AboutPage() {
         <div className="flex items-center gap-2 text-[#5C822D]">
           <FlaskConical className="w-4.5 h-4.5" />
           <h2 className="text-[15px] sm:text-[17px] font-black text-[#263026]">
-            Technology Approach
+            {language === 'hi' ? 'तकनीकी दृष्टिकोण' : 'Technology Approach'}
           </h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 text-[12px] sm:text-[13px] text-[#596158]">
           <div className="p-3 sm:p-3.5 bg-[#FAF7F0] border border-[#E8E2D5] rounded-lg sm:rounded-xl space-y-1">
             <span className="font-bold text-[#263026] text-[13px] sm:text-[14px] flex items-center gap-1.5">
-              <FlaskConical className="w-3.5 h-3.5 text-[#5C822D]" /> Lead-Free Chemosensing Matrix
+              <FlaskConical className="w-3.5 h-3.5 text-[#5C822D]" /> {language === 'hi' ? 'लेड-मुक्त कीमोसेंसिंग मैट्रिक्स' : 'Lead-Free Chemosensing Matrix'}
             </span>
             <p className="leading-relaxed text-[11px] sm:text-[12px]">
-              Utilizes 100% lead-free <strong>Copper-PAN & Bismuth(III)</strong> complexation chemistry with a wide linear response across 0.0 – 50.0 ppm·h.
+              {language === 'hi' 
+                ? '0.0 – 50.0 ppm·h की विस्तृत प्रतिक्रिया सीमा के साथ 100% लेड-मुक्त Copper-PAN और Bismuth(III) कॉम्प्लेक्सेशन रसायन का उपयोग।'
+                : 'Utilizes 100% lead-free Copper-PAN & Bismuth(III) complexation chemistry with a wide linear response across 0.0 – 50.0 ppm·h.'}
             </p>
           </div>
 
           <div className="p-3 sm:p-3.5 bg-[#FAF7F0] border border-[#E8E2D5] rounded-lg sm:rounded-xl space-y-1">
             <span className="font-bold text-[#263026] text-[13px] sm:text-[14px] flex items-center gap-1.5">
-              <Cpu className="w-3.5 h-3.5 text-[#5C822D]" /> Bradford D65 Optical Normalization
+              <Cpu className="w-3.5 h-3.5 text-[#5C822D]" /> {language === 'hi' ? 'Bradford D65 ऑप्टिकल सामान्यीकरण' : 'Bradford D65 Optical Normalization'}
             </span>
             <p className="leading-relaxed text-[11px] sm:text-[12px]">
-              4-patch calibration grid on every badge corrects for ambient refinery yellow lighting and shadows to ISO/CIE D65 standard reference.
+              {language === 'hi'
+                ? 'प्रत्येक बैज पर 4-पैच कैलिब्रेशन ग्रिड परिवेशी पीली रिफाइनरी लाइटिंग और छाया को ISO/CIE D65 मानक संदर्भ में सही करता है।'
+                : '4-patch calibration grid on every badge corrects for ambient refinery yellow lighting and shadows to ISO/CIE D65 standard reference.'}
             </p>
           </div>
         </div>
@@ -329,30 +357,32 @@ export default function AboutPage() {
           <div className="flex items-center gap-2 text-[#5C822D]">
             <Sparkles className="w-4.5 h-4.5" />
             <h2 className="text-[15px] sm:text-[17px] font-black text-[#263026]">
-              Prototype Demonstration Status
+              {language === 'hi' ? 'प्रोटोटाइप प्रदर्शन स्थिति' : 'Prototype Demonstration Status'}
             </h2>
           </div>
           <span className="gov-badge gov-badge-normal text-[10px] sm:text-[11px] font-bold py-0.5 px-2">
-            PHASE 1 EVALUATION
+            {language === 'hi' ? 'चरण 1 मूल्यांकन' : 'PHASE 1 EVALUATION'}
           </span>
         </div>
 
         <p className="text-[12px] sm:text-[13px] text-[#596158] leading-relaxed">
-          Demonstrates the end-to-end user experience: camera capture and optical decoding to automated shift extraction, validity flagging, and supervisor dashboard integration.
+          {language === 'hi'
+            ? 'शुरुआत से अंत तक उपयोगकर्ता अनुभव का प्रदर्शन: कैमरा कैप्चर और ऑप्टिकल डिकोडिंग से लेकर स्वचालित शिफ्ट निष्कर्षण, वैधता फ्लैगिंग और पर्यवेक्षक डैशबोर्ड एकीकरण।'
+            : 'Demonstrates the end-to-end user experience: camera capture and optical decoding to automated shift extraction, validity flagging, and supervisor dashboard integration.'}
         </p>
 
         <div className="pt-1 flex flex-wrap gap-1.5 sm:gap-2 text-[11px] sm:text-[12px]">
           <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-white border border-[#C6DCC0] rounded-md font-semibold text-[#35551F]">
-            ✓ Live Camera & Torch
+            ✓ {language === 'hi' ? 'लाइव कैमरा और टॉर्च' : 'Live Camera & Torch'}
           </span>
           <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-white border border-[#C6DCC0] rounded-md font-semibold text-[#35551F]">
-            ✓ Instant Quantitative ppm
+            ✓ {language === 'hi' ? 'त्वरित मात्रात्मक ppm' : 'Instant Quantitative ppm'}
           </span>
           <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-white border border-[#C6DCC0] rounded-md font-semibold text-[#35551F]">
-            ✓ Derived Shift & Expiry
+            ✓ {language === 'hi' ? 'शिफ्ट और समाप्ति गणना' : 'Derived Shift & Expiry'}
           </span>
           <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-white border border-[#C6DCC0] rounded-md font-semibold text-[#35551F]">
-            ✓ Multi-Worker Feed
+            ✓ {language === 'hi' ? 'मल्टी-वर्कर लाइव टेलीमेट्री' : 'Multi-Worker Feed'}
           </span>
         </div>
       </div>

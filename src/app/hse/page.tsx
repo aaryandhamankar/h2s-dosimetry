@@ -90,7 +90,7 @@ export default function HSEOverviewPage() {
           </div>
 
           <Link
-            href="/hse/alerts"
+            href="/hse"
             className="gov-btn-primary bg-[#A94442] hover:bg-[#8F3331] text-white text-[12px] sm:text-[13px] h-8 px-3.5 self-start sm:self-auto shadow-xs"
           >
             <span>{language === 'hi' ? 'समीक्षा व स्वीकार करें →' : 'Review & Acknowledge →'}</span>

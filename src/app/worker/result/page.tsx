@@ -118,7 +118,7 @@ function ResultContent() {
           className="text-[13px] font-semibold text-[#5C822D] hover:underline flex items-center gap-1.5"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Scanner</span>
+          <span>{language === 'hi' ? 'स्कैनर पर वापस जाएं' : 'Back to Scanner'}</span>
         </Link>
         <span className="text-[12px] text-[#7A8178]">
           {formatDateTime(scan.capturedAt)}
@@ -141,10 +141,10 @@ function ResultContent() {
             </div>
             <div className="min-w-0">
               <span className="text-[10px] sm:text-[11px] font-bold text-[#5C822D] uppercase tracking-wider block">
-                MRPL Gas Safety Verification
+                {language === 'hi' ? 'एमआरपीएल गैस सुरक्षा सत्यापन' : 'MRPL Gas Safety Verification'}
               </span>
               <h1 className="text-[16px] sm:text-[19px] font-bold text-[#263026] truncate">
-                Dosimeter Exposure Result
+                {language === 'hi' ? 'डोसीमीटर एक्सपोजर परिणाम' : 'Dosimeter Exposure Result'}
               </h1>
             </div>
           </div>
@@ -157,15 +157,15 @@ function ResultContent() {
         {/* PRIMARY H2S LEVEL HERO DISPLAY */}
         <div className="bg-[#FAFBF9] border-2 border-[#D5D2C9] rounded-xl p-4 sm:p-6 text-center space-y-1">
           <span className="text-[12px] sm:text-[13px] font-bold uppercase tracking-wider text-[#7A8178] block">
-            Detected H₂S Exposure Dose
+            {language === 'hi' ? 'पहचानी गई H₂S एक्सपोजर खुराक' : 'Detected H₂S Exposure Dose'}
           </span>
           <div className="text-[36px] sm:text-[48px] font-black text-[#263026] font-mono leading-none tracking-tight py-1">
             {res?.estimatedDose !== null && res?.estimatedDose !== undefined
               ? `${formatDose(res.estimatedDose)} ${res.doseUnit || 'ppm·h'}`
-              : 'UNVERIFIED'}
+              : (language === 'hi' ? 'असत्यापित' : 'UNVERIFIED')}
           </div>
           <div className="text-[12px] sm:text-[13px] text-[#596158]">
-            Estimated 8-Hour TWA: <strong className="text-[#263026]">{res?.estimatedTwa !== null && res?.estimatedTwa !== undefined ? `${formatDose(res.estimatedTwa)} ppm` : 'N/A'}</strong> · Limit: <strong className="text-[#35551F]">10.0 ppm</strong>
+            {language === 'hi' ? 'अनुमानित 8-घंटे TWA:' : 'Estimated 8-Hour TWA:'} <strong className="text-[#263026]">{res?.estimatedTwa !== null && res?.estimatedTwa !== undefined ? `${formatDose(res.estimatedTwa)} ppm` : 'N/A'}</strong> · {language === 'hi' ? 'सीमा:' : 'Limit:'} <strong className="text-[#35551F]">10.0 ppm</strong>
           </div>
         </div>
 
@@ -181,14 +181,13 @@ function ResultContent() {
         </div>
 
         {/* EXTENSIBLE MULTI-READING SENSOR SPOT ARCHITECTURE */}
-        {/* Architecture Note: Slot 1 is active now; slots 2-6 will automatically render when multi-spot sensors are enabled */}
         <div className="bg-[#FAFBF9] border border-[#E7E5DE] rounded-lg p-3.5 space-y-2">
           <div className="flex items-center justify-between text-[11px] sm:text-[12px] font-bold text-[#7A8178] uppercase">
             <span className="flex items-center gap-1.5">
               <Layers size={13} className="text-[#5C822D]" />
-              <span>Chemosensor Matrix Slots (1 of 6 Active)</span>
+              <span>{language === 'hi' ? 'कीमोसेंसर मैट्रिक्स स्लॉट (6 में से 1 सक्रिय)' : 'Chemosensor Matrix Slots (1 of 6 Active)'}</span>
             </span>
-            <span className="text-[#5C822D]">Primary Slot A</span>
+            <span className="text-[#5C822D]">{language === 'hi' ? 'प्राथमिक स्लॉट ए' : 'Primary Slot A'}</span>
           </div>
 
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -203,8 +202,8 @@ function ResultContent() {
             {[2, 3, 4, 5, 6].map((spotNum) => (
               <div key={spotNum} className="p-2 rounded bg-[#F7F6F1] border border-dashed border-[#D5D2C9] text-center space-y-0.5 opacity-60">
                 <span className="text-[9px] font-semibold text-[#7A8178] block">SPOT {spotNum}</span>
-                <span className="text-[11px] text-[#7A8178] block font-mono">Reserved</span>
-                <span className="text-[8px] text-[#7A8178] block">Future</span>
+                <span className="text-[11px] text-[#7A8178] block font-mono">{language === 'hi' ? 'आरक्षित' : 'Reserved'}</span>
+                <span className="text-[8px] text-[#7A8178] block">{language === 'hi' ? 'भविष्य' : 'Future'}</span>
               </div>
             ))}
           </div>
@@ -213,7 +212,9 @@ function ResultContent() {
         {/* REGULATORY EXPOSURE SCALE BAR */}
         <div className="bg-[#FAFBF9] p-3.5 sm:p-4 rounded-lg border border-[#E7E5DE] space-y-2.5">
           <div className="flex items-center justify-between text-[11px] sm:text-[12px]">
-            <span className="font-bold text-[#263026]">OSHA Permissible Range (0 to 25 ppm·h)</span>
+            <span className="font-bold text-[#263026]">
+              {language === 'hi' ? 'OSHA स्वीकार्य सीमा (0 से 25 ppm·h)' : 'OSHA Permissible Range (0 to 25 ppm·h)'}
+            </span>
             <span className="font-mono text-[#7A8178] text-[10px]">PEL: 10 ppm</span>
           </div>
 
@@ -242,10 +243,10 @@ function ResultContent() {
 
           <div className="flex justify-between text-[10px] text-[#7A8178] font-mono">
             <span>0</span>
-            <span>5 (Safe)</span>
+            <span>5 ({language === 'hi' ? 'सुरक्षित' : 'Safe'})</span>
             <span className="font-bold text-[#D99B26]">10 (PEL)</span>
             <span>15</span>
-            <span className="font-bold text-[#A94442]">20 (Ceiling)</span>
+            <span className="font-bold text-[#A94442]">20 ({language === 'hi' ? 'अधिकतम' : 'Ceiling'})</span>
             <span>25+</span>
           </div>
         </div>
@@ -257,7 +258,7 @@ function ResultContent() {
             className="gov-btn-primary h-12 text-[14px] sm:text-[15px] font-semibold justify-center shadow-xs hover:shadow-sm"
           >
             <RotateCcw className="w-4 h-4" />
-            <span>Perform Another Scan</span>
+            <span>{language === 'hi' ? 'दूसरा स्कैन करें' : 'Perform Another Scan'}</span>
           </Link>
 
           <Link
@@ -265,7 +266,7 @@ function ResultContent() {
             className="gov-btn-secondary h-12 text-[14px] sm:text-[15px] font-semibold justify-center"
           >
             <History className="w-4 h-4" />
-            <span>View Exposure History</span>
+            <span>{language === 'hi' ? 'एक्सपोजर इतिहास देखें' : 'View Exposure History'}</span>
           </Link>
         </div>
 
@@ -277,7 +278,7 @@ function ResultContent() {
           >
             <div className="flex items-center gap-2">
               <Cpu className="w-4 h-4 text-[#5C822D]" />
-              <span>Inspection Metrology & Colorimetric Vectors</span>
+              <span>{language === 'hi' ? 'निरीक्षण मेट्रोलॉजी और वर्णमितीय वैक्टर' : 'Inspection Metrology & Colorimetric Vectors'}</span>
             </div>
             <ChevronDown className={`w-4 h-4 text-[#7A8178] transition-transform ${showTechnical ? 'rotate-180' : ''}`} />
           </button>
@@ -286,14 +287,14 @@ function ResultContent() {
             <div className="p-4 border-t border-[#E7E5DE] space-y-3 text-[12px] animate-in fade-in duration-150">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[#596158] font-mono">
                 <div className="bg-[#FAFBF9] p-3 rounded border border-[#E7E5DE] space-y-1">
-                  <div className="font-bold text-[#263026] font-sans">Calibration Model:</div>
+                  <div className="font-bold text-[#263026] font-sans">{language === 'hi' ? 'अंशांकन मॉडल:' : 'Calibration Model:'}</div>
                   <div>ID: {res?.calibrationId || 'CAL-2026-D65'}</div>
                   <div>Model: {res?.modelId || 'MRPL-CHEM-002'} (v{res?.modelVersion || '0.1.0'})</div>
                   <div>Standard: ISO/CIE D65 Bradford</div>
                 </div>
 
                 <div className="bg-[#FAFBF9] p-3 rounded border border-[#E7E5DE] space-y-1">
-                  <div className="font-bold text-[#263026] font-sans">CIELAB ΔE*ab Vectors:</div>
+                  <div className="font-bold text-[#263026] font-sans">{language === 'hi' ? 'CIELAB ΔE*ab वैक्टर:' : 'CIELAB ΔE*ab Vectors:'}</div>
                   <div>ΔE*ab: <strong className="text-[#5C822D]">{scan.colorFeatures?.deltaE?.toFixed(2) || '12.20'}</strong></div>
                   <div>L*: {scan.colorFeatures?.currentL?.toFixed(1) || '85.3'} (ΔL*: {scan.colorFeatures?.deltaL?.toFixed(1) || '-9.7'})</div>
                   <div>Δa*: {scan.colorFeatures?.deltaA?.toFixed(1) || '3.1'}, Δb*: {scan.colorFeatures?.deltaB?.toFixed(1) || '6.7'}</div>
@@ -307,9 +308,9 @@ function ResultContent() {
                     <img src={scan.capturedImageUrl} alt="Badge Frame" className="w-full h-full object-cover" />
                   </div>
                   <div className="text-[#596158]">
-                    <div className="font-semibold text-[#263026] font-sans">Optical Capture Archive</div>
-                    <div>Confidence: {res?.confidence ? `${(res.confidence * 100).toFixed(0)}%` : '95%'}</div>
-                    <div className="text-[10px] text-[#7A8178]">Validity: {getValidityLabel(res?.validityStatus || ValidityStatus.VALID)}</div>
+                    <div className="font-semibold text-[#263026] font-sans">{language === 'hi' ? 'ऑप्टिकल कैप्चर पुरालेख' : 'Optical Capture Archive'}</div>
+                    <div>{language === 'hi' ? 'विश्वास स्तर:' : 'Confidence:'} {res?.confidence ? `${(res.confidence * 100).toFixed(0)}%` : '95%'}</div>
+                    <div className="text-[10px] text-[#7A8178]">{language === 'hi' ? 'वैधता:' : 'Validity:'} {getValidityLabel(res?.validityStatus || ValidityStatus.VALID)}</div>
                   </div>
                 </div>
               )}
@@ -320,7 +321,7 @@ function ResultContent() {
                   className="text-[#5C822D] font-semibold hover:underline inline-flex items-center gap-1"
                 >
                   <Printer size={13} />
-                  <span>Print Formal Certificate</span>
+                  <span>{language === 'hi' ? 'औपचारिक प्रमाणपत्र प्रिंट करें' : 'Print Formal Certificate'}</span>
                 </button>
               </div>
             </div>
@@ -340,4 +341,3 @@ export default function WorkerResultPage() {
     </Suspense>
   );
 }
-

@@ -13,6 +13,7 @@ export enum UserRole {
 
 export enum ShiftStatus {
   ACTIVE = 'ACTIVE',
+  PAUSED = 'PAUSED',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
 }

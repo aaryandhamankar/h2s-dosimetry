@@ -17,7 +17,7 @@ import { formatDose } from '@/lib/utils';
 
 export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const router = useRouter();
-  const { scans } = useAppStore();
+  const { scans, language } = useAppStore();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<'ALL' | 'WORKERS' | 'DOSIMETERS' | 'ALERTS' | 'SOP'>('ALL');
 
@@ -54,7 +54,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
     { title: 'OSHA Permissible Exposure Limit (PEL)', desc: '10 ppm 8-hour Time-Weighted Average (TWA) ceiling', link: '/hse/exposure' },
     { title: 'Copper-PAN & Bismuth(III) Chemosensor Specs', desc: 'Cu-PAN / Bi³⁺ + H₂S → CuS / Bi₂S₃↓ non-toxic reaction kinetics', link: '/hse/technical' },
     { title: 'ISO/CIE Standard D65 4-Patch Colorimetry', desc: 'Bradford chromatic adaptation & CIE76 ΔE*ab formulation', link: '/hse/technical' },
-    { title: 'Refinery Emergency Incident Response', desc: 'SOP for Critical (> 20 ppm·h) exposure evacuation protocol', link: '/hse/alerts' },
+    { title: 'Refinery Emergency Incident Response', desc: 'SOP for Critical (> 20 ppm·h) exposure evacuation protocol', link: '/hse' },
   ].filter(t => !q || t.title.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q));
 
   const handleSelectWorker = () => {
@@ -72,6 +72,23 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
     router.push(link);
   };
 
+  const CATEGORY_LABELS = {
+    en: {
+      ALL: 'ALL',
+      WORKERS: 'WORKERS',
+      DOSIMETERS: 'DOSIMETERS',
+      ALERTS: 'ALERTS',
+      SOP: 'SOP',
+    },
+    hi: {
+      ALL: 'सभी',
+      WORKERS: 'श्रमिक',
+      DOSIMETERS: 'डोसीमीटर',
+      ALERTS: 'अलर्ट',
+      SOP: 'मानक प्रक्रिया (SOP)',
+    },
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-2xs flex items-start justify-center pt-4 sm:pt-24 px-2.5 sm:px-4">
       <div 
@@ -86,7 +103,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Search workers, badge IDs, safety alerts..."
+            placeholder={language === 'hi' ? 'श्रमिक, बैज आईडी, सुरक्षा मानक खोजें...' : 'Search workers, badge IDs, safety alerts...'}
             className="flex-1 bg-transparent text-[13px] sm:text-[15px] text-[#263026] placeholder-[#7A8178] focus:outline-none"
             autoFocus
           />
@@ -110,7 +127,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
                   : 'bg-white border border-[#E8E2D5] text-[#596158] hover:bg-[#F4EFE6]'
               }`}
             >
-              {cat}
+              {CATEGORY_LABELS[language || 'en'][cat]}
             </button>
           ))}
         </div>
@@ -123,7 +140,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
             <div className="space-y-2">
               <div className="text-[11px] font-bold uppercase tracking-wider text-[#7A8178] flex items-center gap-1.5">
                 <User size={13} className="text-[#5C822D]" />
-                <span>Personnel ({matchedWorkers.length})</span>
+                <span>{language === 'hi' ? `कार्मिक (${matchedWorkers.length})` : `Personnel (${matchedWorkers.length})`}</span>
               </div>
               <div className="space-y-1">
                 {matchedWorkers.map(w => (
@@ -149,7 +166,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
             <div className="space-y-2">
               <div className="text-[11px] font-bold uppercase tracking-wider text-[#7A8178] flex items-center gap-1.5">
                 <Layers size={13} className="text-[#5C822D]" />
-                <span>Dosimeter Badges ({matchedDosimeters.length})</span>
+                <span>{language === 'hi' ? `डोसीमीटर बैज (${matchedDosimeters.length})` : `Dosimeter Badges (${matchedDosimeters.length})`}</span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {matchedDosimeters.map(d => (
@@ -159,7 +176,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
                     className="p-2 rounded border border-[#E8E2D5] bg-white hover:bg-[#FAF6EE] cursor-pointer flex items-center justify-between"
                   >
                     <span className="font-mono font-bold text-[13px] text-[#263026]">{d}</span>
-                    <span className="text-[10px] text-[#5C822D] font-semibold">Active</span>
+                    <span className="text-[10px] text-[#5C822D] font-semibold">{language === 'hi' ? 'सक्रिय' : 'Active'}</span>
                   </div>
                 ))}
               </div>
@@ -171,7 +188,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
             <div className="space-y-2">
               <div className="text-[11px] font-bold uppercase tracking-wider text-[#7A8178] flex items-center gap-1.5">
                 <Activity size={13} className="text-[#5C822D]" />
-                <span>Recent Shift Readings ({matchedScans.length})</span>
+                <span>{language === 'hi' ? `हालिया शिफ्ट रीडिंग (${matchedScans.length})` : `Recent Shift Readings (${matchedScans.length})`}</span>
               </div>
               <div className="space-y-1">
                 {matchedScans.map(s => (
@@ -182,7 +199,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
                   >
                     <div>
                       <span className="font-mono text-[13px] font-bold text-[#263026]">{s.id.substring(0, 14)}...</span>
-                      <span className="text-[12px] text-[#596158] ml-2">Badge: {s.dosimeterId}</span>
+                      <span className="text-[12px] text-[#596158] ml-2">{language === 'hi' ? 'बैज:' : 'Badge:'} {s.dosimeterId}</span>
                     </div>
                     <div className="text-right">
                       <span className="font-bold text-[13px] text-[#263026] font-mono">
@@ -200,7 +217,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
             <div className="space-y-2">
               <div className="text-[11px] font-bold uppercase tracking-wider text-[#7A8178] flex items-center gap-1.5">
                 <FileText size={13} className="text-[#5C822D]" />
-                <span>Standard Operating Procedures (SOP)</span>
+                <span>{language === 'hi' ? 'मानक संचालन प्रक्रियाएं (SOP)' : 'Standard Operating Procedures (SOP)'}</span>
               </div>
               <div className="space-y-1">
                 {sopTopics.map(t => (
@@ -221,7 +238,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
 
         {/* Footer info */}
         <div className="p-3 bg-[#FAF6EE] border-t border-[#E8E2D5] text-[12px] text-[#7A8178] flex justify-between items-center">
-          <span>Press <kbd className="bg-white px-1.5 py-0.5 rounded border border-[#E8E2D5] font-mono text-[10px]">ESC</kbd> to exit</span>
+          <span>{language === 'hi' ? 'बंद करने के लिए ESC दबाएं' : 'Press ESC to exit'}</span>
           <span className="text-[#35551F] font-semibold">MRPL Directory Search</span>
         </div>
 

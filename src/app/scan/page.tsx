@@ -15,24 +15,25 @@ import {
   ShieldAlert, 
   ShieldCheck, 
   Upload, 
-  Loader2,
-  VideoOff,
-  RefreshCw,
-  Printer,
-  ChevronDown,
-  Cpu,
-  User,
-  History,
-  X,
-  XCircle,
-  Edit3,
-  Save,
-  BarChart3,
+  Loader2, 
+  VideoOff, 
+  RefreshCw, 
+  Printer, 
+  ChevronDown, 
+  Cpu, 
+  User, 
+  History, 
+  X, 
+  XCircle, 
+  Edit3, 
+  Save, 
+  BarChart3 
 } from 'lucide-react';
 import { useAppStore } from '@/stores/app-store';
 import { DemoScenario, RiskStatus, ValidityStatus, ProcessingStatus, Scan } from '@/types';
 import { getScanPipeline } from '@/services/scientific/scan-processing-pipeline';
 import { formatDateTime, formatDose, getValidityLabel } from '@/lib/utils';
+import { sfx } from '@/lib/sound-effects';
 import Image from 'next/image';
 import mrplLogo from '../../../public/mrpl-logo.png';
 
@@ -47,19 +48,35 @@ const STAGE_ORDER: ProcessingStatus[] = [
   ProcessingStatus.VALIDATING_RESULT,
 ];
 
-const STAGE_LABELS: Record<ProcessingStatus, string> = {
-  [ProcessingStatus.CAPTURED]: 'Photo Captured',
-  [ProcessingStatus.VALIDATING_IMAGE]: '1. Validating Sharpness & Glare',
-  [ProcessingStatus.DETECTING_DOSIMETER]: '2. Locating Sensor Boundary',
-  [ProcessingStatus.EXTRACTING_ROI]: '3. Extracting 4-Patch Grid',
-  [ProcessingStatus.ANALYZING_REFERENCES]: '4. Computing Bradford Adaptation',
-  [ProcessingStatus.CORRECTING_COLOR]: '5. Normalizing to ISO D65',
-  [ProcessingStatus.EXTRACTING_FEATURES]: '6. Measuring CIELAB ΔE*ab',
-  [ProcessingStatus.RUNNING_INFERENCE]: '7. Calculating Exposure Dose',
-  [ProcessingStatus.VALIDATING_RESULT]: '8. Certifying Safety Compliance',
-  [ProcessingStatus.COMPLETE]: 'Verification Complete',
-  [ProcessingStatus.INVALID]: 'Quality Gate Refusal',
-  [ProcessingStatus.ERROR]: 'Processing Error',
+const STAGE_LABELS: Record<'en' | 'hi', Record<ProcessingStatus, string>> = {
+  en: {
+    [ProcessingStatus.CAPTURED]: 'Photo Captured',
+    [ProcessingStatus.VALIDATING_IMAGE]: '1. Validating Sharpness & Glare',
+    [ProcessingStatus.DETECTING_DOSIMETER]: '2. Locating Sensor Boundary',
+    [ProcessingStatus.EXTRACTING_ROI]: '3. Extracting 4-Patch Grid',
+    [ProcessingStatus.ANALYZING_REFERENCES]: '4. Computing Bradford Adaptation',
+    [ProcessingStatus.CORRECTING_COLOR]: '5. Normalizing to ISO D65',
+    [ProcessingStatus.EXTRACTING_FEATURES]: '6. Measuring CIELAB ΔE*ab',
+    [ProcessingStatus.RUNNING_INFERENCE]: '7. Calculating Exposure Dose',
+    [ProcessingStatus.VALIDATING_RESULT]: '8. Certifying Safety Compliance',
+    [ProcessingStatus.COMPLETE]: 'Verification Complete',
+    [ProcessingStatus.INVALID]: 'Quality Gate Refusal',
+    [ProcessingStatus.ERROR]: 'Processing Error',
+  },
+  hi: {
+    [ProcessingStatus.CAPTURED]: 'फ़ोटो कैप्चर की गई',
+    [ProcessingStatus.VALIDATING_IMAGE]: '1. स्पष्टता और चमक की जांच',
+    [ProcessingStatus.DETECTING_DOSIMETER]: '2. सेंसर सीमा का निर्धारण',
+    [ProcessingStatus.EXTRACTING_ROI]: '3. 4-पैच ग्रिड निष्कर्षण',
+    [ProcessingStatus.ANALYZING_REFERENCES]: '4. Bradford अनुकूलन गणना',
+    [ProcessingStatus.CORRECTING_COLOR]: '5. ISO D65 सामान्यीकरण',
+    [ProcessingStatus.EXTRACTING_FEATURES]: '6. CIELAB ΔE*ab मापन',
+    [ProcessingStatus.RUNNING_INFERENCE]: '7. एक्सपोज़र खुराक की गणना',
+    [ProcessingStatus.VALIDATING_RESULT]: '8. सुरक्षा अनुपालन प्रमाणीकरण',
+    [ProcessingStatus.COMPLETE]: 'सत्यापन पूर्ण',
+    [ProcessingStatus.INVALID]: 'गुणवत्ता अस्वीकृति',
+    [ProcessingStatus.ERROR]: 'प्रसंस्करण त्रुटि',
+  },
 };
 
 function ScanPageContent() {
@@ -83,7 +100,7 @@ function ScanPageContent() {
 
   // Processing pipeline animation states
   const [currentStage, setCurrentStage] = useState<ProcessingStatus | null>(null);
-  const [completedStages, setCompletedStages] = useState<string[]>([]);
+  const [completedStages, setCompletedStages] = useState<ProcessingStatus[]>([]);
   const [activeScenarioTitle, setActiveScenarioTitle] = useState('');
   const [capturedPhotoUrl, setCapturedPhotoUrl] = useState<string | null>(null);
 
@@ -122,6 +139,7 @@ function ScanPageContent() {
   };
 
   const toggleTorch = async () => {
+    sfx.playClick();
     if (!mediaStream) {
       setTorchOn(!torchOn);
       return;
@@ -168,23 +186,34 @@ function ScanPageContent() {
         dosimeterCode,
         (status) => {
           setCurrentStage(status);
-          const label = STAGE_LABELS[status];
-          if (label) {
-            setCompletedStages(prev => prev.includes(label) ? prev : [...prev, label]);
+          setCompletedStages(prev => prev.includes(status) ? prev : [...prev, status]);
+          const stepIdx = STAGE_ORDER.indexOf(status);
+          if (stepIdx >= 0) {
+            sfx.playStepTick(stepIdx + 1);
           }
         },
         imageUrl || null
       );
 
       // Ensure all 8 stage labels are marked complete on finished
-      const allLabels = STAGE_ORDER.map(s => STAGE_LABELS[s]);
-      setCompletedStages(allLabels);
+      setCompletedStages([...STAGE_ORDER]);
 
       addScan(scan);
       setCurrentScan(scan);
 
-      // Brief delay so evaluator sees all 8 green ticks complete
+      // Trigger affirmative / warning / alarm sound based on certified outcome
+      const resRisk = scan.exposureResult?.riskStatus;
+      const isInv = scan.exposureResult?.validityStatus === ValidityStatus.INVALID_IMAGE || scan.exposureResult?.validityStatus === ValidityStatus.PROCESSING_ERROR;
+      const isOOR = scan.exposureResult?.validityStatus === ValidityStatus.OUT_OF_RANGE;
+
       setTimeout(() => {
+        if (resRisk === RiskStatus.CRITICAL) {
+          sfx.playCriticalAlarm();
+        } else if (resRisk === RiskStatus.HIGH || resRisk === RiskStatus.ELEVATED || isOOR || isInv) {
+          sfx.playWarning();
+        } else {
+          sfx.playSuccess();
+        }
         setScreenState('result');
       }, 450);
 
@@ -194,60 +223,86 @@ function ScanPageContent() {
     }
   };
 
-  const handleCapture = async () => {
-    let photoDataUrl: string | null = null;
+  // Live Camera Capture with Shutter Sound
+  const handleCapture = () => {
+    sfx.playCameraShutter();
 
-    if (videoRef.current && canvasRef.current && cameraActive) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      if (video.videoWidth > 0 && video.videoHeight > 0) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          photoDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-        }
-      }
-    }
-
-    await executePipeline(DemoScenario.HIGH, 'Live Camera Capture', photoDataUrl || undefined);
-  };
-
-  // Start camera on mount when in viewfinder state
-  useEffect(() => {
-    if (screenState !== 'viewfinder') {
+    if (!videoRef.current || !canvasRef.current) {
+      executePipeline(
+        DemoScenario.NORMAL, 
+        language === 'hi' ? '1. सामान्य शिफ्ट (3.2 ppm·h)' : '1. Normal Shift (3.2 ppm·h)'
+      );
       return;
     }
+
+    try {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        executePipeline(
+          DemoScenario.NORMAL, 
+          language === 'hi' ? 'लाइव ऑप्टिकल कैप्चर' : 'Live Optical Capture', 
+          dataUrl
+        );
+      } else {
+        executePipeline(
+          DemoScenario.NORMAL, 
+          language === 'hi' ? '1. सामान्य शिफ्ट (3.2 ppm·h)' : '1. Normal Shift (3.2 ppm·h)'
+        );
+      }
+    } catch {
+      executePipeline(
+        DemoScenario.NORMAL, 
+        language === 'hi' ? '1. सामान्य शिफ्ट (3.2 ppm·h)' : '1. Normal Shift (3.2 ppm·h)'
+      );
+    }
+  };
+
+  // Camera start effect
+  useEffect(() => {
+    if (screenState !== 'viewfinder') return;
+
     let isCancelled = false;
 
     const runCamera = async () => {
-      try {
-        if (typeof navigator !== 'undefined' && navigator.mediaDevices?.getUserMedia) {
-          let stream: MediaStream | null = null;
-          try {
-            stream = await navigator.mediaDevices.getUserMedia({
-              video: { 
-                facingMode: { ideal: 'environment' }, 
-                width: { ideal: 1280 }, 
-                height: { ideal: 720 } 
-              }
-            });
-          } catch {
-            stream = await navigator.mediaDevices.getUserMedia({ video: true });
-          }
-
-          if (!isCancelled && videoRef.current && stream) {
-            videoRef.current.srcObject = stream;
-            await videoRef.current.play().catch(() => {});
-            setMediaStream(stream);
-            setCameraActive(true);
-          }
-        }
-      } catch (err) {
+      if (typeof window === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         if (!isCancelled) {
-          console.warn('Camera viewfinder could not be started:', err);
-          setCameraError('Camera offline. Click the capture button or use the Demo button.');
+          setCameraError(language === 'hi' ? 'कैमरा उपलब्ध नहीं है। कैप्चर बटन का उपयोग करें।' : 'Camera API unavailable in this browser environment.');
+          setCameraActive(false);
+        }
+        return;
+      }
+
+      try {
+        setCameraError(null);
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        });
+
+        if (isCancelled) {
+          stream.getTracks().forEach(t => t.stop());
+          return;
+        }
+
+        setMediaStream(stream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play().catch(() => {});
+        }
+        setCameraActive(true);
+      } catch {
+        if (!isCancelled) {
+          setCameraError(language === 'hi' ? 'कैमरा ऑफलाइन है। कैप्चर बटन या डेमो बटन का उपयोग करें।' : 'Camera offline. Click the capture button or use the Demo button.');
           setCameraActive(false);
         }
       }
@@ -266,12 +321,12 @@ function ScanPageContent() {
   useEffect(() => {
     if (scenarioParam) {
       const scenarioMap: Record<string, { scenario: DemoScenario; title: string }> = {
-        NORMAL: { scenario: DemoScenario.NORMAL, title: '1. Normal Shift (3.2 ppm·h)' },
-        ELEVATED: { scenario: DemoScenario.ELEVATED, title: '2. Elevated Level (12.4 ppm·h)' },
-        HIGH: { scenario: DemoScenario.HIGH, title: '3. High Exposure (18.6 ppm·h)' },
-        CRITICAL: { scenario: DemoScenario.CRITICAL, title: '4. Critical Alarm (24.8 ppm·h)' },
-        INVALID: { scenario: DemoScenario.INVALID, title: '5. Invalid Image (Glare/Blur)' },
-        OUT_OF_RANGE: { scenario: DemoScenario.OUT_OF_RANGE, title: '6. Out of Range (>30 ppm·h)' },
+        NORMAL: { scenario: DemoScenario.NORMAL, title: language === 'hi' ? '1. सामान्य शिफ्ट (3.2 ppm·h)' : '1. Normal Shift (3.2 ppm·h)' },
+        ELEVATED: { scenario: DemoScenario.ELEVATED, title: language === 'hi' ? '2. मध्यम स्तर (12.4 ppm·h)' : '2. Elevated Level (12.4 ppm·h)' },
+        HIGH: { scenario: DemoScenario.HIGH, title: language === 'hi' ? '3. उच्च एक्सपोजर (18.6 ppm·h)' : '3. High Exposure (18.6 ppm·h)' },
+        CRITICAL: { scenario: DemoScenario.CRITICAL, title: language === 'hi' ? '4. गंभीर अलार्म (24.8 ppm·h)' : '4. Critical Alarm (24.8 ppm·h)' },
+        INVALID: { scenario: DemoScenario.INVALID, title: language === 'hi' ? '5. अमान्य छवि (चमक/धुंधलापन)' : '5. Invalid Image (Glare/Blur)' },
+        OUT_OF_RANGE: { scenario: DemoScenario.OUT_OF_RANGE, title: language === 'hi' ? '6. सीमा से अधिक (>30 ppm·h)' : '6. Out of Range (>30 ppm·h)' },
       };
 
       const matched = scenarioMap[scenarioParam.toUpperCase()];
@@ -283,7 +338,7 @@ function ScanPageContent() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scenarioParam, timestampParam]);
+  }, [scenarioParam, timestampParam, language]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -291,12 +346,17 @@ function ScanPageContent() {
     const reader = new FileReader();
     reader.onload = async (event) => {
       const dataUrl = event.target?.result as string;
-      await executePipeline(DemoScenario.HIGH, `Uploaded Photo (${file.name})`, dataUrl);
+      await executePipeline(
+        DemoScenario.HIGH, 
+        language === 'hi' ? `अपलोड की गई फ़ोटो (${file.name})` : `Uploaded Photo (${file.name})`, 
+        dataUrl
+      );
     };
     reader.readAsDataURL(file);
   };
 
   const handleResetScan = () => {
+    sfx.playClick();
     setCurrentScan(null);
     setCompletedStages([]);
     setCurrentStage(null);
@@ -337,62 +397,62 @@ function ScanPageContent() {
   // Unified non-repetitive action guidance & badges
   let statusBadge = (
     <span className="gov-badge gov-badge-normal text-[13px] py-1 px-3.5 shadow-2xs font-bold">
-      <CheckCircle2 className="w-4 h-4 text-[#5C822D]" /> SAFE BASELINE
+      <CheckCircle2 className="w-4 h-4 text-[#5C822D]" /> {language === 'hi' ? 'सुरक्षित बेसलाइन' : 'SAFE BASELINE'}
     </span>
   );
-  let actionTitle = 'Normal Shift Procedure — Safe Baseline';
-  let actionInstruction = 'Normal procedure — continue scheduled shift operations with standard PPE.';
+  let actionTitle = language === 'hi' ? 'सामान्य शिफ्ट प्रक्रिया — सुरक्षित बेसलाइन' : 'Normal Shift Procedure — Safe Baseline';
+  let actionInstruction = language === 'hi' ? 'सामान्य प्रक्रिया — मानक पीपीई के साथ निर्धारित शिफ्ट संचालन जारी रखें।' : 'Normal procedure — continue scheduled shift operations with standard PPE.';
   let cardAccentBorder = 'border-[#C6DCC0]';
   let bannerBg = 'bg-[#FAF7F0]';
 
   if (isInvalid) {
     statusBadge = (
       <span className="gov-badge gov-badge-neutral text-[13px] py-1 px-3.5 font-bold">
-        <XCircle className="w-4 h-4 text-[#A94442]" /> QUALITY GATE REFUSAL
+        <XCircle className="w-4 h-4 text-[#A94442]" /> {language === 'hi' ? 'गुणवत्ता अस्वीकृति' : 'QUALITY GATE REFUSAL'}
       </span>
     );
-    actionTitle = 'Reading Refused — Glare / Optical Blur Detected';
-    actionInstruction = 'Specular glare or blur detected on 4-patch grid. Re-align inside reticle and retake photo.';
+    actionTitle = language === 'hi' ? 'रीडिंग अस्वीकृत — चमक / ऑप्टिकल धुंधलापन पहचाना गया' : 'Reading Refused — Glare / Optical Blur Detected';
+    actionInstruction = language === 'hi' ? '4-पैच ग्रिड पर अत्यधिक चमक या धुंधलापन है। रेटिकल के अंदर पुनः संरेखित करें और दोबारा फोटो लें।' : 'Specular glare or blur detected on 4-patch grid. Re-align inside reticle and retake photo.';
     cardAccentBorder = 'border-[#D8D0C0]';
     bannerBg = 'bg-[#FAF6EE]';
   } else if (isOor) {
     statusBadge = (
       <span className="gov-badge gov-badge-neutral text-[13px] py-1 px-3.5 bg-[#FAF2EB] text-[#9C4124] border-[#E8C4B8] font-bold">
-        <AlertTriangle className="w-4 h-4 text-[#9C4124]" /> SENSOR SATURATED
+        <AlertTriangle className="w-4 h-4 text-[#9C4124]" /> {language === 'hi' ? 'सेंसर संतृप्त' : 'SENSOR SATURATED'}
       </span>
     );
-    actionTitle = 'Sensor Saturation Detected (>30.0 ppm·h)';
-    actionInstruction = 'Matrix exceeded 30 ppm·h ceiling. Submit badge to HSE laboratory for gas chromatography (GC) analysis.';
+    actionTitle = language === 'hi' ? 'सेंसर संतृप्ति पहचानी गई (>30.0 ppm·h)' : 'Sensor Saturation Detected (>30.0 ppm·h)';
+    actionInstruction = language === 'hi' ? 'मैट्रिक्स 30 ppm·h सीमा से अधिक हो गया है। गैस क्रोमैटोग्राफी (GC) विश्लेषण के लिए बैज एचएसई लैब में जमा करें।' : 'Matrix exceeded 30 ppm·h ceiling. Submit badge to HSE laboratory for gas chromatography (GC) analysis.';
     cardAccentBorder = 'border-[#E8C4B8]';
     bannerBg = 'bg-[#FFFDFB]';
   } else if (res?.riskStatus === RiskStatus.CRITICAL) {
     statusBadge = (
       <span className="gov-badge gov-badge-critical text-[13px] py-1 px-3.5 animate-pulse font-bold">
-        <ShieldAlert className="w-4 h-4" /> CRITICAL HAZARD
+        <ShieldAlert className="w-4 h-4" /> {language === 'hi' ? 'गंभीर खतरा' : 'CRITICAL HAZARD'}
       </span>
     );
-    actionTitle = 'MANDATORY SAFETY ACTION: IMMEDIATE EVACUATION';
-    actionInstruction = 'Ceiling safety threshold exceeded. Evacuate upwind immediately and notify plant emergency control.';
+    actionTitle = language === 'hi' ? 'अनिवार्य सुरक्षा कार्रवाई: तत्काल निकासी' : 'MANDATORY SAFETY ACTION: IMMEDIATE EVACUATION';
+    actionInstruction = language === 'hi' ? 'सुरक्षा सीमा पार हो गई है। तुरंत हवा की विपरीत दिशा में बाहर निकलें और संयंत्र आपातकालीन नियंत्रण को सूचित करें।' : 'Ceiling safety threshold exceeded. Evacuate upwind immediately and notify plant emergency control.';
     cardAccentBorder = 'border-[#F0C4C4]';
     bannerBg = 'bg-[#FFF9F9]';
   } else if (res?.riskStatus === RiskStatus.HIGH) {
     statusBadge = (
       <span className="gov-badge gov-badge-high text-[13px] py-1 px-3.5 font-bold">
-        <AlertTriangle className="w-4 h-4" /> HIGH EXPOSURE
+        <AlertTriangle className="w-4 h-4" /> {language === 'hi' ? 'उच्च एक्सपोजर' : 'HIGH EXPOSURE'}
       </span>
     );
-    actionTitle = 'Action Required — Inspect PPE & Check Ventilation';
-    actionInstruction = 'Approaching 10 ppm 8h TWA limit. Restrict zone access and inspect respirator / breathing apparatus.';
+    actionTitle = language === 'hi' ? 'कार्रवाई आवश्यक — पीपीई का निरीक्षण करें और वेंटिलेशन जांचें' : 'Action Required — Inspect PPE & Check Ventilation';
+    actionInstruction = language === 'hi' ? '10 ppm 8h TWA सीमा के करीब। क्षेत्र में प्रवेश सीमित करें और रेस्पिरेटर की जांच करें।' : 'Approaching 10 ppm 8h TWA limit. Restrict zone access and inspect respirator / breathing apparatus.';
     cardAccentBorder = 'border-[#F3D5C0]';
     bannerBg = 'bg-[#FFFDFB]';
   } else if (res?.riskStatus === RiskStatus.ELEVATED) {
     statusBadge = (
       <span className="gov-badge gov-badge-elevated text-[13px] py-1 px-3.5 font-bold">
-        <AlertTriangle className="w-4 h-4" /> ELEVATED LEVEL
+        <AlertTriangle className="w-4 h-4" /> {language === 'hi' ? 'मध्यम स्तर' : 'ELEVATED LEVEL'}
       </span>
     );
-    actionTitle = 'Caution Advised — Notify Shift Supervisor';
-    actionInstruction = 'Moderate CuS staining observed. Verify local ventilation and report reading to shift supervisor.';
+    actionTitle = language === 'hi' ? 'सावधानी बरतें — शिफ्ट पर्यवेक्षक को सूचित करें' : 'Caution Advised — Notify Shift Supervisor';
+    actionInstruction = language === 'hi' ? 'मध्यम CuS रंग परिवर्तन देखा गया। स्थानीय वेंटिलेशन की जांच करें और शिफ्ट लीड को रिपोर्ट करें।' : 'Moderate CuS staining observed. Verify local ventilation and report reading to shift supervisor.';
     cardAccentBorder = 'border-[#EAD7A8]';
     bannerBg = 'bg-[#FAF8F2]';
   }
@@ -415,19 +475,6 @@ function ScanPageContent() {
               <ArrowLeft className="w-4 h-4" />
               <span>{language === 'hi' ? 'होम' : 'Home'}</span>
             </Link>
-
-            <button
-              onClick={toggleTorch}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all border ${
-                torchOn 
-                  ? 'bg-[#FFDE59] text-[#263026] border-[#E5C328] shadow-xs' 
-                  : 'bg-white text-[#596158] border-[#E8E2D5] hover:bg-[#F4EFE6]'
-              }`}
-              title="Toggle Torch Light"
-            >
-              {torchOn ? <Flashlight className="w-4 h-4 text-[#C96B32]" /> : <FlashlightOff className="w-4 h-4 text-[#7A8178]" />}
-              <span>{torchOn ? 'Torch On' : 'Torch Off'}</span>
-            </button>
           </div>
 
           {/* Clean Title */}
@@ -443,6 +490,25 @@ function ScanPageContent() {
           {/* Large Camera Viewfinder */}
           <div className="relative bg-[#131A13] rounded-2xl overflow-hidden min-h-[320px] sm:min-h-[380px] flex items-center justify-center border-2 border-[#D8D0C0] shadow-inner">
             
+            {/* Top-Right Corner Torch Toggle (Icon Only) */}
+            <button
+              type="button"
+              onClick={toggleTorch}
+              className={`absolute top-3 right-3 z-20 p-2.5 rounded-full backdrop-blur-md transition-all shadow-md active:scale-90 cursor-pointer pointer-events-auto ${
+                torchOn 
+                  ? 'bg-[#FFDE59] text-[#263026] border-2 border-[#E5C328] shadow-[#FFDE59]/30' 
+                  : 'bg-black/60 text-white/90 border border-white/25 hover:bg-black/80 hover:text-white'
+              }`}
+              title={torchOn ? (language === 'hi' ? 'टॉर्च बंद करें' : 'Turn Torch Off') : (language === 'hi' ? 'टॉर्च चालू करें' : 'Turn Torch On')}
+              aria-label="Toggle Torch"
+            >
+              {torchOn ? (
+                <Flashlight className="w-5 h-5 text-[#263026]" />
+              ) : (
+                <FlashlightOff className="w-5 h-5 text-white/90" />
+              )}
+            </button>
+
             {/* Video */}
             <video
               ref={videoRef}
@@ -474,7 +540,7 @@ function ScanPageContent() {
 
               <div className="text-center">
                 <span className="text-[11px] text-white/80 font-medium bg-black/60 px-2.5 py-0.5 rounded-md">
-                  HOLD STEADY OVER BADGE
+                  {language === 'hi' ? 'बैज को फ्रेम में स्थिर रखें' : 'HOLD STEADY OVER BADGE'}
                 </span>
               </div>
             </div>
@@ -484,14 +550,14 @@ function ScanPageContent() {
               <div className="p-6 text-center text-white space-y-3 z-0">
                 <VideoOff className="w-10 h-10 text-white/40 mx-auto" />
                 <p className="text-[13px] text-white/85 max-w-xs mx-auto">
-                  {cameraError || 'Camera offline. Use the capture button or click the floating demo button.'}
+                  {cameraError || (language === 'hi' ? 'कैमरा ऑफलाइन है। कैप्चर बटन या डेमो बटन का उपयोग करें।' : 'Camera offline. Use the capture button or click the floating demo button.')}
                 </p>
                 <button
                   onClick={() => setCameraRetryCount(c => c + 1)}
                   className="gov-btn-secondary text-[12px] h-8 px-3 text-white bg-white/15 hover:bg-white/25 border-white/30 rounded-lg inline-flex items-center gap-1.5"
                 >
                   <RefreshCw size={13} />
-                  <span>Retry Camera</span>
+                  <span>{language === 'hi' ? 'कैमरा पुनः प्रयास करें' : 'Retry Camera'}</span>
                 </button>
               </div>
             )}
@@ -511,7 +577,7 @@ function ScanPageContent() {
             <div className="text-center">
               <label className="text-[12px] text-[#596158] hover:text-[#5C822D] hover:underline cursor-pointer inline-flex items-center gap-1.5 py-1">
                 <Upload size={13} className="text-[#5C822D]" />
-                <span>Upload photo from device</span>
+                <span>{language === 'hi' ? 'डिवाइस से फ़ोटो फ़ाइल अपलोड करें' : 'Upload photo file from device'}</span>
                 <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
               </label>
             </div>
@@ -538,14 +604,14 @@ function ScanPageContent() {
                     {currentUser?.displayName || 'Rajesh Kumar'} ({currentUser?.workerCode || 'W-001'})
                   </div>
                   <div className="text-[11px] text-[#7A8178] truncate">
-                    {currentUser?.department || 'Operations'} · {currentUser?.site || 'Zone A'} · {workerScans.length} logged scans
+                    {currentUser?.department || 'Operations'} · {currentUser?.site || 'Zone A'} · {workerScans.length} {language === 'hi' ? 'दर्ज स्कैन' : 'logged scans'}
                   </div>
                 </div>
               </div>
 
               <span className="text-[11px] font-bold text-[#5C822D] group-hover:underline flex items-center gap-1 flex-shrink-0 transition-colors">
                 <History size={13} />
-                <span>View History & Profile →</span>
+                <span>{language === 'hi' ? 'इतिहास व प्रोफ़ाइल देखें →' : 'View History & Profile →'}</span>
               </span>
             </button>
           </div>
@@ -565,10 +631,12 @@ function ScanPageContent() {
 
           <div>
             <h2 className="text-[20px] sm:text-[22px] font-black text-[#263026]">
-              Analyzing Wristband Sensor
+              {language === 'hi' ? 'रिस्टबैंड सेंसर का विश्लेषण जारी' : 'Analyzing Wristband Sensor'}
             </h2>
             <p className="text-[13px] text-[#596158] mt-1">
-              Extracting Bradford D65 chromatic vectors for {activeScenarioTitle || 'Optical Capture'}...
+              {language === 'hi' 
+                ? `Bradford D65 क्रोमैटिक वैक्टर निकाले जा रहे हैं (${activeScenarioTitle || 'ऑप्टिकल कैप्चर'})...` 
+                : `Extracting Bradford D65 chromatic vectors for ${activeScenarioTitle || 'Optical Capture'}...`}
             </p>
           </div>
 
@@ -584,8 +652,8 @@ function ScanPageContent() {
           {/* 1-8 Scientific Stage Checklist */}
           <div className="bg-[#FAF7F0] border border-[#E8E2D5] rounded-xl p-4 space-y-2 text-left text-[13px]">
             {STAGE_ORDER.map((stage) => {
-              const stageLabel = STAGE_LABELS[stage];
-              const isCompleted = completedStages.includes(stageLabel);
+              const stageLabel = STAGE_LABELS[language || 'en'][stage];
+              const isCompleted = completedStages.includes(stage);
               const isCurrent = currentStage === stage && !isCompleted;
 
               if (isCompleted) {
@@ -635,7 +703,7 @@ function ScanPageContent() {
               className="text-[13px] font-semibold text-[#5C822D] hover:text-[#35551F] hover:underline flex items-center gap-1.5 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to Scanner</span>
+              <span>{language === 'hi' ? 'स्कैनर पर वापस जाएं' : 'Back to Scanner'}</span>
             </button>
             <div className="flex items-center gap-2">
               <button
@@ -644,7 +712,7 @@ function ScanPageContent() {
                 title="Print Report"
               >
                 <Printer size={13} className="text-[#5C822D]" />
-                <span>Print Report</span>
+                <span>{language === 'hi' ? 'रिपोर्ट प्रिंट करें' : 'Print Report'}</span>
               </button>
               <span className="text-[11px] text-[#7A8178] font-mono hidden sm:inline">
                 {formatDateTime(currentScan.capturedAt)}
@@ -668,10 +736,10 @@ function ScanPageContent() {
                 </div>
                 <div className="min-w-0">
                   <span className="text-[10px] sm:text-[11px] font-bold text-[#5C822D] uppercase tracking-wider block">
-                    MRPL Gas Safety Verification
+                    {language === 'hi' ? 'एमआरपीएल गैस सुरक्षा सत्यापन' : 'MRPL Gas Safety Verification'}
                   </span>
                   <h1 className="text-[16px] sm:text-[19px] font-black text-[#263026] truncate">
-                    Exposure Certificate
+                    {language === 'hi' ? 'एक्सपोजर प्रमाणपत्र' : 'Exposure Certificate'}
                   </h1>
                 </div>
               </div>
@@ -684,12 +752,12 @@ function ScanPageContent() {
             {/* CUMULATIVE DOSE HERO NUMBER */}
             <div className="text-center space-y-1.5 py-2">
               <span className="text-[11px] sm:text-[12px] font-black uppercase tracking-widest text-[#7A8178] block">
-                Cumulative H₂S Exposure Dose
+                {language === 'hi' ? 'संचयी H₂S एक्सपोजर खुराक' : 'Cumulative H₂S Exposure Dose'}
               </span>
               
               <div className="text-[52px] sm:text-[68px] font-black text-[#263026] font-mono leading-none tracking-tight">
                 {isInvalid ? (
-                  <span className="text-[32px] sm:text-[44px] text-[#7A8178]">UNVERIFIED</span>
+                  <span className="text-[32px] sm:text-[44px] text-[#7A8178]">{language === 'hi' ? 'असत्यापित' : 'UNVERIFIED'}</span>
                 ) : isOor ? (
                   <span className="text-[#9C4124]">&gt; 30.0 <span className="text-[26px] sm:text-[34px] font-bold text-[#596158]">ppm·h</span></span>
                 ) : (
@@ -718,7 +786,9 @@ function ScanPageContent() {
             {/* DYNAMIC COLOR SCALE BAR WITH MOVING POINTER */}
             <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E8E2D5] space-y-2.5 shadow-2xs">
               <div className="flex items-center justify-between text-[11px] sm:text-[12px]">
-                <span className="font-bold text-[#263026]">OSHA Permissible Scale (0 to 30+ ppm·h)</span>
+                <span className="font-bold text-[#263026]">
+                  {language === 'hi' ? 'OSHA स्वीकार्य पैमाना (0 से 30+ ppm·h)' : 'OSHA Permissible Scale (0 to 30+ ppm·h)'}
+                </span>
                 <span className="font-mono text-[#7A8178] text-[10px]">PEL: 10 ppm · Ceiling: 20 ppm</span>
               </div>
 
@@ -737,7 +807,7 @@ function ScanPageContent() {
                 </div>
               ) : (
                 <div className="h-5 flex items-center justify-center text-[10px] text-[#7A8178] font-mono">
-                  [Pointer Inactive — Quality Gate Refusal]
+                  {language === 'hi' ? '[पॉइंटर निष्क्रिय — गुणवत्ता अस्वीकृति]' : '[Pointer Inactive — Quality Gate Refusal]'}
                 </div>
               )}
 
@@ -752,7 +822,7 @@ function ScanPageContent() {
 
               <div className="flex justify-between text-[10px] text-[#7A8178] font-mono">
                 <span>0</span>
-                <span>5 (Safe)</span>
+                <span>5 ({language === 'hi' ? 'सुरक्षित' : 'Safe'})</span>
                 <span className="font-bold text-[#D99B26]">10 (PEL)</span>
                 <span className="font-bold text-[#A94442]">20 (Ceiling)</span>
                 <span>30</span>
@@ -767,7 +837,7 @@ function ScanPageContent() {
                 className="gov-btn-primary h-12 text-[15px] font-bold justify-center rounded-xl shadow-md hover:shadow-lg transition-all"
               >
                 <RotateCcw className="w-5 h-5" />
-                <span>Perform Another Scan</span>
+                <span>{language === 'hi' ? 'दूसरा स्कैन करें' : 'Perform Another Scan'}</span>
               </button>
 
               <Link
@@ -775,7 +845,7 @@ function ScanPageContent() {
                 className="gov-btn-secondary h-12 text-[15px] font-bold justify-center rounded-xl border-2 border-[#D8D0C0] hover:border-[#5C822D] hover:text-[#263026] hover:bg-[#FAF7F0] transition-all"
               >
                 <BarChart3 className="w-5 h-5 text-[#5C822D]" />
-                <span>View Dashboard Snapshot</span>
+                <span>{language === 'hi' ? 'डैशबोर्ड स्नैपशॉट देखें' : 'View Dashboard Snapshot'}</span>
               </Link>
             </div>
 
@@ -787,7 +857,7 @@ function ScanPageContent() {
               >
                 <div className="flex items-center gap-2">
                   <Cpu className="w-4 h-4 text-[#5C822D]" />
-                  <span>Inspection Metrology & CIELAB ΔE*ab Vectors</span>
+                  <span>{language === 'hi' ? 'निरीक्षण मेट्रोलॉजी और CIELAB ΔE*ab वैक्टर' : 'Inspection Metrology & CIELAB ΔE*ab Vectors'}</span>
                 </div>
                 <ChevronDown className={`w-4 h-4 text-[#7A8178] transition-transform ${showTechnical ? 'rotate-180' : ''}`} />
               </button>
@@ -796,14 +866,14 @@ function ScanPageContent() {
                 <div className="p-4 border-t border-[#E8E2D5] space-y-3 text-[12px] animate-in fade-in duration-150">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[#596158] font-mono">
                     <div className="bg-[#FAF7F0] p-3 rounded-lg border border-[#E8E2D5] space-y-1">
-                      <div className="font-bold text-[#263026] font-sans">Calibration Model:</div>
+                      <div className="font-bold text-[#263026] font-sans">{language === 'hi' ? 'अंशांकन मॉडल:' : 'Calibration Model:'}</div>
                       <div>ID: {res?.calibrationId || 'CAL-2026-D65'}</div>
                       <div>Model: {res?.modelId || 'MRPL-CHEM-002'} (v{res?.modelVersion || '0.1.0'})</div>
                       <div>Standard: ISO/CIE D65 Bradford</div>
                     </div>
 
                     <div className="bg-[#FAF7F0] p-3 rounded-lg border border-[#E8E2D5] space-y-1">
-                      <div className="font-bold text-[#263026] font-sans">CIELAB ΔE*ab Vectors:</div>
+                      <div className="font-bold text-[#263026] font-sans">{language === 'hi' ? 'CIELAB ΔE*ab वैक्टर:' : 'CIELAB ΔE*ab Vectors:'}</div>
                       <div>ΔE*ab: <strong className="text-[#5C822D]">{currentScan.colorFeatures?.deltaE?.toFixed(2) || '12.20'}</strong></div>
                       <div>L*: {currentScan.colorFeatures?.currentL?.toFixed(1) || '85.3'} (ΔL*: {currentScan.colorFeatures?.deltaL?.toFixed(1) || '-9.7'})</div>
                       <div>Δa*: {currentScan.colorFeatures?.deltaA?.toFixed(1) || '3.1'}, Δb*: {currentScan.colorFeatures?.deltaB?.toFixed(1) || '6.7'}</div>
@@ -817,9 +887,9 @@ function ScanPageContent() {
                         <img src={currentScan.capturedImageUrl} alt="Badge Frame" className="w-full h-full object-cover" />
                       </div>
                       <div className="text-[#596158]">
-                        <div className="font-semibold text-[#263026] font-sans">Optical Capture Archive</div>
-                        <div>Confidence: {res?.confidence ? `${(res.confidence * 100).toFixed(0)}%` : '95%'}</div>
-                        <div className="text-[10px] text-[#7A8178]">Validity: {getValidityLabel(res?.validityStatus || ValidityStatus.VALID)}</div>
+                        <div className="font-semibold text-[#263026] font-sans">{language === 'hi' ? 'ऑप्टिकल कैप्चर पुरालेख' : 'Optical Capture Archive'}</div>
+                        <div>{language === 'hi' ? 'विश्वास स्तर:' : 'Confidence:'} {res?.confidence ? `${(res.confidence * 100).toFixed(0)}%` : '95%'}</div>
+                        <div className="text-[10px] text-[#7A8178]">{language === 'hi' ? 'वैधता:' : 'Validity:'} {getValidityLabel(res?.validityStatus || ValidityStatus.VALID)}</div>
                       </div>
                     </div>
                   )}
@@ -830,7 +900,7 @@ function ScanPageContent() {
                       className="text-[#5C822D] font-semibold hover:underline inline-flex items-center gap-1 text-[12px]"
                     >
                       <Printer size={13} />
-                      <span>Print Formal Certificate</span>
+                      <span>{language === 'hi' ? 'औपचारिक प्रमाणपत्र प्रिंट करें' : 'Print Formal Certificate'}</span>
                     </button>
                   </div>
                 </div>
@@ -860,7 +930,7 @@ function ScanPageContent() {
                     {currentUser?.displayName || 'Rajesh Kumar'}
                   </h3>
                   <span className="text-[11px] text-[#7A8178] font-mono">
-                    Code: {currentUser?.workerCode || 'W-001'} · {currentUser?.department || 'Operations'}
+                    {language === 'hi' ? 'कोड:' : 'Code:'} {currentUser?.workerCode || 'W-001'} · {currentUser?.department || 'Operations'}
                   </span>
                 </div>
               </div>
@@ -871,7 +941,7 @@ function ScanPageContent() {
                   className="p-1.5 px-2.5 rounded-md bg-[#FAF6EE] hover:bg-[#F4EFE6] border border-[#E8E2D5] text-[#263026] text-[11px] font-semibold flex items-center gap-1"
                 >
                   <Edit3 size={12} className="text-[#5C822D]" />
-                  <span>{editProfileMode ? 'Cancel Edit' : 'Edit Profile'}</span>
+                  <span>{editProfileMode ? (language === 'hi' ? 'रद्द करें' : 'Cancel Edit') : (language === 'hi' ? 'प्रोफ़ाइल संपादित करें' : 'Edit Profile')}</span>
                 </button>
                 <button 
                   onClick={() => { setWorkerModalOpen(false); setEditProfileMode(false); }} 
@@ -886,7 +956,7 @@ function ScanPageContent() {
             {editProfileMode ? (
               <form onSubmit={handleSaveProfile} className="space-y-3 pt-1 flex-shrink-0">
                 <div>
-                  <label className="font-semibold text-[#263026] block mb-1">Full Name:</label>
+                  <label className="font-semibold text-[#263026] block mb-1">{language === 'hi' ? 'पूरा नाम:' : 'Full Name:'}</label>
                   <input
                     type="text"
                     value={editName}
@@ -897,7 +967,7 @@ function ScanPageContent() {
                 </div>
                 <div className="grid grid-cols-2 gap-2.5">
                   <div>
-                    <label className="font-semibold text-[#263026] block mb-1">Worker Code:</label>
+                    <label className="font-semibold text-[#263026] block mb-1">{language === 'hi' ? 'श्रमिक कोड:' : 'Worker Code:'}</label>
                     <input
                       type="text"
                       value={editCode}
@@ -907,7 +977,7 @@ function ScanPageContent() {
                     />
                   </div>
                   <div>
-                    <label className="font-semibold text-[#263026] block mb-1">Department:</label>
+                    <label className="font-semibold text-[#263026] block mb-1">{language === 'hi' ? 'विभाग:' : 'Department:'}</label>
                     <input
                       type="text"
                       value={editDept}
@@ -918,7 +988,7 @@ function ScanPageContent() {
                   </div>
                 </div>
                 <div>
-                  <label className="font-semibold text-[#263026] block mb-1">Assigned Work Area:</label>
+                  <label className="font-semibold text-[#263026] block mb-1">{language === 'hi' ? 'आवंटित कार्य क्षेत्र:' : 'Assigned Work Area:'}</label>
                   <input
                     type="text"
                     value={editSite}
@@ -932,27 +1002,27 @@ function ScanPageContent() {
                   className="gov-btn-primary w-full h-9 text-[12px] font-semibold flex items-center justify-center gap-1.5"
                 >
                   <Save size={13} />
-                  <span>Save Worker Profile</span>
+                  <span>{language === 'hi' ? 'प्रोफ़ाइल सहेजें' : 'Save Worker Profile'}</span>
                 </button>
               </form>
             ) : (
               /* Profile Details Summary */
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[12px] flex-shrink-0">
                 <div className="bg-[#FAF7F0] p-2 rounded-lg border border-[#E8E2D5]">
-                  <span className="text-[10px] text-[#7A8178] uppercase font-bold block">Status</span>
-                  <span className="text-[#35551F] font-bold">Active On Duty</span>
+                  <span className="text-[10px] text-[#7A8178] uppercase font-bold block">{language === 'hi' ? 'स्थिति' : 'Status'}</span>
+                  <span className="text-[#35551F] font-bold">{language === 'hi' ? 'ड्यूटी पर सक्रिय' : 'Active On Duty'}</span>
                 </div>
                 <div className="bg-[#FAF7F0] p-2 rounded-lg border border-[#E8E2D5]">
-                  <span className="text-[10px] text-[#7A8178] uppercase font-bold block">Assigned Badge</span>
+                  <span className="text-[10px] text-[#7A8178] uppercase font-bold block">{language === 'hi' ? 'आवंटित बैज' : 'Assigned Badge'}</span>
                   <span className="text-[#263026] font-mono font-bold">{activeDosimeter?.dosimeterCode || 'DOS-001'}</span>
                 </div>
                 <div className="bg-[#FAF7F0] p-2 rounded-lg border border-[#E8E2D5]">
-                  <span className="text-[10px] text-[#7A8178] uppercase font-bold block">Shift Area</span>
+                  <span className="text-[10px] text-[#7A8178] uppercase font-bold block">{language === 'hi' ? 'शिफ्ट क्षेत्र' : 'Shift Area'}</span>
                   <span className="text-[#263026] truncate block">{currentUser?.site || 'Refinery Zone A'}</span>
                 </div>
                 <div className="bg-[#FAF7F0] p-2 rounded-lg border border-[#E8E2D5]">
-                  <span className="text-[10px] text-[#7A8178] uppercase font-bold block">Shift Status</span>
-                  <span className="text-[#5C822D] font-bold">Ongoing (Shift A)</span>
+                  <span className="text-[10px] text-[#7A8178] uppercase font-bold block">{language === 'hi' ? 'शिफ्ट स्थिति' : 'Shift Status'}</span>
+                  <span className="text-[#5C822D] font-bold">{language === 'hi' ? 'जारी (शिफ्ट ए)' : 'Ongoing (Shift A)'}</span>
                 </div>
               </div>
             )}
@@ -960,13 +1030,13 @@ function ScanPageContent() {
             {/* Worker's Past Scans Ledger */}
             <div className="flex-1 overflow-y-auto border border-[#E8E2D5] rounded-xl bg-white space-y-1">
               <div className="p-2.5 bg-[#FAF7F0] border-b border-[#E8E2D5] font-bold text-[12px] text-[#263026] sticky top-0 flex items-center justify-between">
-                <span>Personal Exposure Scans Ledger ({workerScans.length})</span>
-                <span className="text-[11px] text-[#7A8178] font-normal">Most recent first</span>
+                <span>{language === 'hi' ? `व्यक्तिगत एक्सपोज़र स्कैन लेजर (${workerScans.length})` : `Personal Exposure Scans Ledger (${workerScans.length})`}</span>
+                <span className="text-[11px] text-[#7A8178] font-normal">{language === 'hi' ? 'नवीनतम पहले' : 'Most recent first'}</span>
               </div>
 
               {workerScans.length === 0 ? (
                 <div className="p-6 text-center text-[#7A8178] text-[12px]">
-                  No past scans logged for this worker.
+                  {language === 'hi' ? 'इस श्रमिक के लिए कोई पिछला स्कैन दर्ज नहीं है।' : 'No past scans logged for this worker.'}
                 </div>
               ) : (
                 <div className="divide-y divide-[#E8E2D5]">
@@ -982,7 +1052,7 @@ function ScanPageContent() {
                             {formatDateTime(scan.capturedAt)}
                           </div>
                           <div className="text-[11px] text-[#7A8178] font-mono">
-                            Badge: {scan.dosimeterId} · 8h TWA: {scanRes?.estimatedTwa !== null && scanRes?.estimatedTwa !== undefined ? `${formatDose(scanRes.estimatedTwa, 1)} ppm` : '—'}
+                            {language === 'hi' ? 'बैज:' : 'Badge:'} {scan.dosimeterId} · 8h TWA: {scanRes?.estimatedTwa !== null && scanRes?.estimatedTwa !== undefined ? `${formatDose(scanRes.estimatedTwa, 1)} ppm` : '—'}
                           </div>
                         </div>
 
@@ -990,7 +1060,7 @@ function ScanPageContent() {
                           <span className="text-[15px] font-black text-[#263026] font-mono block">
                             {scanRes?.estimatedDose !== null && scanRes?.estimatedDose !== undefined
                               ? `${formatDose(scanRes.estimatedDose, 1)} ${scanRes.doseUnit || 'ppm·h'}`
-                              : 'Unverified'}
+                              : (language === 'hi' ? 'असत्यापित' : 'Unverified')}
                           </span>
                           <span className={`text-[10px] font-bold uppercase px-1.5 py-0.2 rounded border ${
                             scanRes?.riskStatus === RiskStatus.CRITICAL ? 'bg-[#F8ECEC] text-[#A94442] border-[#F0C4C4]' :
@@ -1013,7 +1083,7 @@ function ScanPageContent() {
                 onClick={() => { setWorkerModalOpen(false); setEditProfileMode(false); }}
                 className="gov-btn-secondary text-[12px] h-8 px-4"
               >
-                Close Ledger
+                {language === 'hi' ? 'लेजर बंद करें' : 'Close Ledger'}
               </button>
             </div>
 

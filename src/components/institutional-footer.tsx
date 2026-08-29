@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { CheckCircle2, X, Award, Beaker, Code2, Users2, Cpu, Compass } from 'lucide-react';
 import { useAppStore } from '@/stores/app-store';
+import { sfx } from '@/lib/sound-effects';
 
 const TEAM_MEMBERS = [
   {
@@ -87,7 +88,7 @@ interface Particle {
 }
 
 export function InstitutionalFooter() {
-  const { teamModalOpen, setTeamModalOpen } = useAppStore();
+  const { teamModalOpen, setTeamModalOpen, language } = useAppStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const particlesRef = useRef<Particle[]>([]);
@@ -285,6 +286,7 @@ export function InstitutionalFooter() {
 
   // Master Celebration Trigger: 2 Rapid Successive Bursts for Maximum Impact
   const triggerCelebration = useCallback(() => {
+    sfx.playCelebration();
     launchExplosion();
     setTimeout(() => {
       launchExplosion();
@@ -372,14 +374,14 @@ export function InstitutionalFooter() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] sm:text-[11px] font-bold text-[#5C822D] uppercase tracking-wider font-mono">
-                      COMMENDATION · 2026
+                      {language === 'hi' ? 'प्रशंसा पत्र · 2026' : 'COMMENDATION · 2026'}
                     </span>
                   </div>
                   <h3 className="text-[16px] sm:text-[19px] font-bold text-[#263026] leading-tight">
-                    H₂S Gas Dosimetry Directorate
+                    {language === 'hi' ? 'H₂S गैस डोसीमेट्री निदेशालय' : 'H₂S Gas Dosimetry Directorate'}
                   </h3>
                   <p className="text-[11px] sm:text-[12px] text-[#596158]">
-                    Wearable Colorimetric Chemosensor Platform
+                    {language === 'hi' ? 'वियरेबल वर्णमितीय कीमोसेंसर प्लेटफ़ॉर्म' : 'Wearable Colorimetric Chemosensor Platform'}
                   </p>
                 </div>
               </div>
@@ -395,7 +397,7 @@ export function InstitutionalFooter() {
             {/* Team Members Grid */}
             <div className="p-4 sm:p-5 max-h-[68vh] overflow-y-auto space-y-3">
               <div className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-[#7A8178] flex items-center justify-between">
-                <span>Core Project Team (6 Leads)</span>
+                <span>{language === 'hi' ? 'परियोजना कोर टीम (6 लीड)' : 'Core Project Team (6 Leads)'}</span>
                 <span className="text-[#5C822D] font-mono">MRPL INVENT</span>
               </div>
 
@@ -441,10 +443,12 @@ export function InstitutionalFooter() {
               <div className="p-3 bg-[#EDF3E4] rounded-xl border border-[#C6DCC0] text-[11px] sm:text-[12px] space-y-1 text-[#35551F]">
                 <div className="font-bold flex items-center gap-1.5">
                   <CheckCircle2 size={14} className="text-[#5C822D]" />
-                  <span>Validated Innovation Principles</span>
+                  <span>{language === 'hi' ? 'सत्यापित नवाचार सिद्धांत' : 'Validated Innovation Principles'}</span>
                 </div>
                 <p className="opacity-90">
-                  Lead-free optical chemosensing (Copper-PAN & Bismuth matrix) · Bradford Chromatic Normalization under ISO/CIE D65.
+                  {language === 'hi' 
+                    ? 'लेड-मुक्त ऑप्टिकल कीमोसेंसिंग (Copper-PAN और Bismuth मैट्रिक्स) · ISO/CIE D65 के तहत Bradford क्रोमैटिक सामान्यीकरण।'
+                    : 'Lead-free optical chemosensing (Copper-PAN & Bismuth matrix) · Bradford Chromatic Normalization under ISO/CIE D65.'}
                 </p>
               </div>
             </div>
@@ -452,7 +456,7 @@ export function InstitutionalFooter() {
             {/* Modal Action Footer */}
             <div className="p-3 sm:p-4 bg-white border-t border-[#E8E2D5] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 text-[12px]">
               <div className="text-[#7A8178] text-center sm:text-left">
-                <span>National Gas Safety & Excellence</span>
+                <span>{language === 'hi' ? 'राष्ट्रीय गैस सुरक्षा एवं उत्कृष्टता' : 'National Gas Safety & Excellence'}</span>
               </div>
 
               <div className="flex items-center gap-2 justify-end">
@@ -465,7 +469,7 @@ export function InstitutionalFooter() {
                   className="gov-btn-primary text-[11px] sm:text-[12px] h-8 px-3.5 font-semibold flex items-center gap-1.5 shadow-md hover:shadow-lg active:scale-95 transition-all flex-1 sm:flex-initial justify-center cursor-pointer"
                 >
                   <span className="text-[14px]">🥳</span>
-                  <span>Celebrate Team</span>
+                  <span>{language === 'hi' ? 'टीम का अभिनंदन करें' : 'Celebrate Team'}</span>
                 </button>
 
                 <button
@@ -473,7 +477,7 @@ export function InstitutionalFooter() {
                   onClick={() => setTeamModalOpen(false)}
                   className="gov-btn-secondary text-[11px] sm:text-[12px] h-8 px-3 flex-1 sm:flex-initial justify-center cursor-pointer"
                 >
-                  <span>Close</span>
+                  <span>{language === 'hi' ? 'बंद करें' : 'Close'}</span>
                 </button>
               </div>
             </div>

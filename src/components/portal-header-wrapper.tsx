@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAppStore } from '@/stores/app-store';
@@ -12,12 +12,31 @@ import {
   Calendar as CalendarIcon,
   Clock,
   X,
+  Maximize2,
+  Share2,
+  PlusSquare,
 } from 'lucide-react';
 import { UniversalSearch } from './universal-search';
 import Image from 'next/image';
 import mrplLogo from '../../public/mrpl-logo.png';
 
 import { useMounted } from '@/hooks/use-mounted';
+import { sfx } from '@/lib/sound-effects';
+
+interface FullscreenDoc extends Document {
+  webkitFullscreenElement?: Element;
+  mozFullScreenElement?: Element;
+  msFullscreenElement?: Element;
+  webkitExitFullscreen?: () => Promise<void>;
+  mozCancelFullScreen?: () => Promise<void>;
+  msExitFullscreen?: () => Promise<void>;
+}
+
+interface FullscreenEl extends HTMLElement {
+  webkitRequestFullscreen?: () => Promise<void>;
+  mozRequestFullScreen?: () => Promise<void>;
+  msRequestFullscreen?: () => Promise<void>;
+}
 
 export function PortalHeaderWrapper() {
   const pathname = usePathname();
@@ -32,6 +51,12 @@ export function PortalHeaderWrapper() {
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [accessibilityBarOpen, setAccessibilityBarOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showIosPrompt, setShowIosPrompt] = useState(false);
+  const [fullscreenToast, setFullscreenToast] = useState<string | null>(null);
+
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isLongPressRef = useRef(false);
 
   const [currentTime, setCurrentTime] = useState<string>('');
   const [currentDate, setCurrentDate] = useState<string>('');
@@ -66,6 +91,116 @@ export function PortalHeaderWrapper() {
       document.documentElement.classList.remove('high-contrast');
     }
   }, [fontSize, highContrast, mounted]);
+
+  // Fullscreen state listener & synchronization
+  useEffect(() => {
+    if (!mounted) return;
+
+    const handleFullscreenChange = () => {
+      const doc = document as FullscreenDoc;
+      const active = Boolean(
+        doc.fullscreenElement ||
+        doc.webkitFullscreenElement ||
+        doc.mozFullScreenElement ||
+        doc.msFullscreenElement
+      );
+      setIsFullscreen(active);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
+  }, [mounted]);
+
+  const toggleFullscreen = async () => {
+    if (typeof window === 'undefined') return;
+
+    const doc = document as FullscreenDoc;
+    const docEl = document.documentElement as FullscreenEl;
+
+    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !('MSStream' in window);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as unknown as { standalone?: boolean }).standalone;
+
+    if (isIos && !isStandalone && !docEl.requestFullscreen && !docEl.webkitRequestFullscreen) {
+      setShowIosPrompt(true);
+      return;
+    }
+
+    try {
+      sfx.playClick();
+      if (
+        doc.fullscreenElement ||
+        doc.webkitFullscreenElement ||
+        doc.mozFullScreenElement ||
+        doc.msFullscreenElement
+      ) {
+        if (doc.exitFullscreen) {
+          await doc.exitFullscreen();
+        } else if (doc.webkitExitFullscreen) {
+          await doc.webkitExitFullscreen();
+        } else if (doc.mozCancelFullScreen) {
+          await doc.mozCancelFullScreen();
+        } else if (doc.msExitFullscreen) {
+          await doc.msExitFullscreen();
+        }
+        setFullscreenToast(language === 'hi' ? 'फुल स्क्रीन मोड से बाहर निकले' : 'Exited Full Screen');
+      } else {
+        if (docEl.requestFullscreen) {
+          await docEl.requestFullscreen();
+        } else if (docEl.webkitRequestFullscreen) {
+          await docEl.webkitRequestFullscreen();
+        } else if (docEl.mozRequestFullScreen) {
+          await docEl.mozRequestFullScreen();
+        } else if (docEl.msRequestFullscreen) {
+          await docEl.msRequestFullscreen();
+        } else if (isIos) {
+          setShowIosPrompt(true);
+          return;
+        }
+        setFullscreenToast(language === 'hi' ? 'फुल स्क्रीन मोड सक्रिय' : 'Full Screen Mode Enabled');
+      }
+      setTimeout(() => setFullscreenToast(null), 2200);
+    } catch (err) {
+      console.warn('Fullscreen toggle failed:', err);
+      if (isIos) {
+        setShowIosPrompt(true);
+      }
+    }
+  };
+
+  const handlePressStart = () => {
+    isLongPressRef.current = false;
+    longPressTimerRef.current = setTimeout(() => {
+      isLongPressRef.current = true;
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+      toggleFullscreen();
+    }, 500);
+  };
+
+  const handlePressEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+    }
+  };
+
+  const handleAccessibilityClick = () => {
+    if (isLongPressRef.current) {
+      isLongPressRef.current = false;
+      return;
+    }
+    sfx.playClick();
+    setAccessibilityBarOpen(!accessibilityBarOpen);
+  };
 
   const navLinks = [
     { href: '/', label: language === 'hi' ? 'होम' : 'Home' },
@@ -110,22 +245,40 @@ export function PortalHeaderWrapper() {
             </div>
           </Link>
 
-          {/* Right Controls: Accessibility Toggle & Search */}
+          {/* Right Controls: Accessibility Toggle (with Long-Press Full Screen / ESC) & Search */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
             
-            {/* Accessibility Drawer Toggle Button */}
+            {/* Accessibility Button with Long-Press Fullscreen Mode */}
             <button
-              onClick={() => setAccessibilityBarOpen(!accessibilityBarOpen)}
-              className={`flex items-center gap-1.5 p-2 sm:px-2.5 sm:py-1.5 rounded-lg text-[12px] sm:text-[13px] font-semibold transition-all border ${
+              onClick={handleAccessibilityClick}
+              onMouseDown={handlePressStart}
+              onMouseUp={handlePressEnd}
+              onMouseLeave={handlePressEnd}
+              onTouchStart={handlePressStart}
+              onTouchEnd={handlePressEnd}
+              onTouchCancel={handlePressEnd}
+              className={`relative flex items-center gap-1.5 p-2 sm:px-2.5 sm:py-1.5 rounded-lg text-[12px] sm:text-[13px] font-semibold transition-all border select-none active:scale-95 cursor-pointer ${
                 accessibilityBarOpen
                   ? 'bg-[#5C822D] text-white border-[#476722] shadow-2xs'
+                  : isFullscreen
+                  ? 'bg-[#EDF3E4] text-[#35551F] border-[#5C822D]'
                   : 'bg-[#F4EFE6] hover:bg-[#EBE4D8] text-[#263026] border-[#E8E2D5]'
               }`}
-              title="Accessibility & Language Options"
+              title={
+                language === 'hi' 
+                  ? 'सुगमता विकल्प (फुल स्क्रीन या बाहर निकलने के लिए दबाकर रखें)' 
+                  : 'Accessibility Options (Press & hold for Full Screen / ESC)'
+              }
               aria-expanded={accessibilityBarOpen}
             >
               <Accessibility size={16} className={accessibilityBarOpen ? 'text-white' : 'text-[#5C822D]'} />
               <span className="hidden lg:inline">{language === 'hi' ? 'सुगमता' : 'Accessibility'}</span>
+              {isFullscreen && (
+                <span 
+                  className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#5C822D] border-2 border-white rounded-full shadow-xs" 
+                  title="Full Screen Active" 
+                />
+              )}
             </button>
 
             {/* Quick Search */}
@@ -191,9 +344,9 @@ export function PortalHeaderWrapper() {
             {/* Right: Controls (Font Scale, Contrast, Language, and Close) */}
             <div className="flex items-center gap-2.5 ml-auto flex-wrap">
               
-              {/* Font Sizing */}
-              <div className="flex items-center gap-1">
-                <span className="text-[11px] text-[#7A8178] font-bold hidden xs:inline">{language === 'hi' ? 'आकार:' : 'Size:'}</span>
+              {/* Font Sizing (Desktop Only) */}
+              <div className="hidden sm:flex items-center gap-1">
+                <span className="text-[11px] text-[#7A8178] font-bold">{language === 'hi' ? 'आकार:' : 'Size:'}</span>
                 <div className="flex items-center border border-[#D8D0C0] rounded-lg bg-white overflow-hidden shadow-2xs">
                   <button
                     onClick={() => setFontSize('sm')}
@@ -286,6 +439,79 @@ export function PortalHeaderWrapper() {
 
       {/* 5. Universal Search Dialog */}
       <UniversalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+
+      {/* 6. Floating Fullscreen Feedback Notification Toast */}
+      {fullscreenToast && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-[#263026] text-white text-[12px] font-semibold px-4 py-2 rounded-full shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          <Maximize2 size={13} className="text-[#A3E635]" />
+          <span>{fullscreenToast}</span>
+        </div>
+      )}
+
+      {/* 7. iOS Safari "Add to Home Screen" instructions modal */}
+      {showIosPrompt && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-4"
+          onClick={() => setShowIosPrompt(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl p-5 max-w-sm w-full shadow-2xl border border-[#E8E2D5] space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-[#E8E2D5] pb-3">
+              <div className="flex items-center gap-2 text-[#35551F] font-bold text-[15px]">
+                <Maximize2 size={18} className="text-[#5C822D]" />
+                <span>Full Screen App Mode</span>
+              </div>
+              <button
+                onClick={() => setShowIosPrompt(false)}
+                className="p-1 text-[#7A8178] hover:text-[#263026] rounded-md transition-colors"
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="text-[13px] text-[#596158] leading-relaxed">
+              To hide all Safari browser bars and run this portal in full screen without screen cut-ins:
+            </p>
+
+            <div className="space-y-2.5 bg-[#FAF7F0] p-3 rounded-xl border border-[#E8E2D5] text-[12.5px] text-[#263026]">
+              <div className="flex items-start gap-2.5">
+                <span className="bg-[#EDF3E4] text-[#35551F] font-bold rounded-full w-5 h-5 flex items-center justify-center text-[11px] shrink-0 mt-0.5">
+                  1
+                </span>
+                <span>
+                  Tap the Safari <strong>Share button</strong> (<Share2 size={13} className="inline text-[#5C822D]" />) at the bottom.
+                </span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="bg-[#EDF3E4] text-[#35551F] font-bold rounded-full w-5 h-5 flex items-center justify-center text-[11px] shrink-0 mt-0.5">
+                  2
+                </span>
+                <span>
+                  Scroll down and tap <strong>&apos;Add to Home Screen&apos;</strong> (<PlusSquare size={13} className="inline text-[#5C822D]" />).
+                </span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="bg-[#EDF3E4] text-[#35551F] font-bold rounded-full w-5 h-5 flex items-center justify-center text-[11px] shrink-0 mt-0.5">
+                  3
+                </span>
+                <span>
+                  Open the app from your home screen for a <strong>100% borderless</strong> experience!
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowIosPrompt(false)}
+              className="gov-btn-primary w-full h-10 text-[13px] font-bold rounded-lg"
+            >
+              Got It
+            </button>
+          </div>
+        </div>
+      )}
 
     </header>
   );
