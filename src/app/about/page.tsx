@@ -10,7 +10,6 @@ import {
   Cpu, 
   Activity, 
   AlertTriangle, 
-  ChevronDown,
 } from 'lucide-react';
 import { useAppStore } from '@/stores/app-store';
 import { TRANSLATIONS } from '@/lib/i18n';
@@ -19,8 +18,6 @@ import { CADModelViewer } from '@/components/cad-model-viewer';
 export default function AboutPage() {
   const { language, setTeamModalOpen } = useAppStore();
   const t = TRANSLATIONS[language];
-  const [selectedPreviewDose, setSelectedPreviewDose] = useState<number>(3.2);
-  const [showSpecs, setShowSpecs] = useState<boolean>(false);
   const [tapCount, setTapCount] = useState(0);
   const lastTapRef = useRef<number>(0);
 
@@ -100,48 +97,8 @@ export default function AboutPage() {
         </p>
       </div>
 
-      {/* ───────────────────────────────────────────────────────────── */}
-      {/* SECTION 2: 3D CAD MODEL & HARDWARE SIMULATION                 */}
-      {/* ───────────────────────────────────────────────────────────── */}
-      <CADModelViewer
-        selectedDose={selectedPreviewDose}
-        onDoseChange={(val) => setSelectedPreviewDose(val)}
-      />
-
-      {/* Collapsible Specifications Toggle */}
-      <div className="gov-card p-3 sm:p-4 rounded-xl border border-[#E8E2D5] bg-white shadow-2xs">
-        <button
-          onClick={() => setShowSpecs(!showSpecs)}
-          className="w-full flex items-center justify-between text-[11px] sm:text-[12px] text-[#596158] font-semibold hover:text-[#263026] py-0.5 cursor-pointer"
-        >
-          <span className="flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-[#5C822D]" />
-            <span>{t.techSpecs}</span>
-          </span>
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showSpecs ? 'rotate-180' : ''}`} />
-        </button>
-
-        {showSpecs && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2.5 text-[11px] text-[#596158] animate-in fade-in duration-200 border-t border-[#E8E2D5] mt-2">
-            <div className="bg-[#FAF7F0] p-2 rounded-lg border border-[#E8E2D5]">
-              <span className="text-[#7A8178] text-[9px] uppercase font-bold block">{t.reagentMatrix}</span>
-              <strong className="text-[#263026] text-[11px]">Cu-PAN & Bi(III)</strong>
-            </div>
-            <div className="bg-[#FAF7F0] p-2 rounded-lg border border-[#E8E2D5]">
-              <span className="text-[#7A8178] text-[9px] uppercase font-bold block">{language === 'hi' ? 'प्रतिक्रिया' : language === 'kn' ? 'ಪ್ರತಿಕ್ರಿಯೆ' : language === 'gu' ? 'પ્રતિક્રિયા' : 'Reaction'}</span>
-              <span className="font-mono text-[10px]">CuS / Bi₂S₃↓</span>
-            </div>
-            <div className="bg-[#FAF7F0] p-2 rounded-lg border border-[#E8E2D5]">
-              <span className="text-[#7A8178] text-[9px] uppercase font-bold block">{language === 'hi' ? 'पर्यावरण सुरक्षा' : language === 'kn' ? 'ಪರಿಸರ ಸುರಕ್ಷತೆ' : language === 'gu' ? 'પર્યાવરણ સુરક્ષા' : 'Eco-Safety'}</span>
-              <span className="text-[#5C822D] font-bold text-[11px]">100% Lead-Free</span>
-            </div>
-            <div className="bg-[#FAF7F0] p-2 rounded-lg border border-[#E8E2D5]">
-              <span className="text-[#7A8178] text-[9px] uppercase font-bold block">{language === 'hi' ? 'वर्णमिति' : language === 'kn' ? 'ಕಲರ್ಮೆಟ್ರಿ' : language === 'gu' ? 'કલરીમેટ્રી' : 'Colorimetry'}</span>
-              <span className="text-[#5C822D] font-bold text-[11px]">Bradford D65</span>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* SECTION 2: 3D CAD MODEL VIEWER */}
+      <CADModelViewer />
 
       {/* ───────────────────────────────────────────────────────────── */}
       {/* SECTION 3: HOW IT WORKS & 4-STEP PIPELINE                     */}
@@ -264,12 +221,17 @@ export default function AboutPage() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* SECTION 5: TECHNOLOGY APPROACH                                */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="gov-card p-4 sm:p-5 rounded-xl sm:rounded-2xl border-2 border-[#E8E2D5] bg-white space-y-2.5 shadow-2xs">
-        <div className="flex items-center gap-2 text-[#5C822D]">
-          <FlaskConical className="w-4.5 h-4.5" />
-          <h2 className="text-[15px] sm:text-[17px] font-black text-[#263026]">
-            {language === 'hi' ? 'तकनीकी दृष्टिकोण' : language === 'kn' ? 'ತಾಂತ್ರಿಕ ವಿಧಾನ' : language === 'gu' ? 'ટેકનિકલ અભિગમ' : 'Technology Approach'}
-          </h2>
+      <div className="gov-card p-4 sm:p-5 rounded-xl sm:rounded-2xl border-2 border-[#E8E2D5] bg-white space-y-3 shadow-2xs">
+        <div className="flex items-center justify-between flex-wrap gap-1.5">
+          <div className="flex items-center gap-2 text-[#5C822D]">
+            <FlaskConical className="w-4.5 h-4.5" />
+            <h2 className="text-[15px] sm:text-[17px] font-black text-[#263026]">
+              {language === 'hi' ? 'तकनीकी दृष्टिकोण एवं विनिर्देश' : language === 'kn' ? 'ತಾಂತ್ರಿಕ ವಿಧಾನ ಮತ್ತು ವಿಶೇಷಣಗಳು' : language === 'gu' ? 'ટેકનિકલ અભિગમ અને સ્પષ્ટીકરણો' : 'Technology Approach & Specifications'}
+            </h2>
+          </div>
+          <span className="gov-badge gov-badge-normal text-[10px] sm:text-[11px] font-bold py-0.5 px-2">
+            ISO / CIE D65
+          </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 text-[12px] sm:text-[13px] text-[#596158]">
@@ -317,6 +279,45 @@ export default function AboutPage() {
                 ? 'દરેક બેજ પર 4-પેચ કેલિબ્રેશન ગ્રીડ આસપાસના પ્રકાશ અને પડછાયાઓને ISO/CIE D65 માનક સંદર્ભમાં સુધારે છે.'
                 : '4-patch calibration grid on every badge corrects for ambient refinery yellow lighting and shadows to ISO/CIE D65 standard reference.'}
             </p>
+          </div>
+        </div>
+
+        {/* 4 Sensor & Chemical Specification Parameter Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px] text-[#596158]">
+          <div className="bg-[#FAF7F0] p-2.5 rounded-lg border border-[#E8E2D5] space-y-0.5">
+            <span className="text-[#7A8178] text-[9px] uppercase font-bold tracking-wider block">
+              {t.reagentMatrix}
+            </span>
+            <strong className="text-[#263026] text-[11px] sm:text-[12px] font-mono block">
+              Cu-PAN & Bi(III)
+            </strong>
+          </div>
+
+          <div className="bg-[#FAF7F0] p-2.5 rounded-lg border border-[#E8E2D5] space-y-0.5">
+            <span className="text-[#7A8178] text-[9px] uppercase font-bold tracking-wider block">
+              {language === 'hi' ? 'प्रतिक्रिया' : language === 'kn' ? 'ಪ್ರತಿಕ್ರಿಯೆ' : language === 'gu' ? 'પ્રતિક્રિયા' : 'Reaction'}
+            </span>
+            <span className="font-mono text-[11px] sm:text-[12px] font-bold text-[#263026] block">
+              CuS / Bi₂S₃↓
+            </span>
+          </div>
+
+          <div className="bg-[#FAF7F0] p-2.5 rounded-lg border border-[#E8E2D5] space-y-0.5">
+            <span className="text-[#7A8178] text-[9px] uppercase font-bold tracking-wider block">
+              {language === 'hi' ? 'पर्यावरण सुरक्षा' : language === 'kn' ? 'ಪರಿಸರ ಸುರಕ್ಷತೆ' : language === 'gu' ? 'પર્યાવરણ સુરક્ષા' : 'Eco-Safety'}
+            </span>
+            <strong className="text-[#5C822D] text-[11px] sm:text-[12px] font-bold block">
+              100% Lead-Free
+            </strong>
+          </div>
+
+          <div className="bg-[#FAF7F0] p-2.5 rounded-lg border border-[#E8E2D5] space-y-0.5">
+            <span className="text-[#7A8178] text-[9px] uppercase font-bold tracking-wider block">
+              {language === 'hi' ? 'वर्णमिति' : language === 'kn' ? 'ಕಲರ್ಮೆಟ್ರಿ' : language === 'gu' ? 'કલરીમેટ્રી' : 'Colorimetry'}
+            </span>
+            <strong className="text-[#5C822D] text-[11px] sm:text-[12px] font-bold block">
+              Bradford D65
+            </strong>
           </div>
         </div>
       </div>
