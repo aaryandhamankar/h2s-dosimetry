@@ -94,6 +94,17 @@ export function InstitutionalFooter() {
   const particlesRef = useRef<Particle[]>([]);
   const isRunningRef = useRef<boolean>(false);
 
+  // Escape key listener for modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && teamModalOpen) {
+        setTeamModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [teamModalOpen, setTeamModalOpen]);
+
   // Resize canvas to match actual viewport
   const syncCanvasSize = useCallback(() => {
     const canvas = canvasRef.current;
@@ -355,8 +366,17 @@ export function InstitutionalFooter() {
 
       {/* EASTER EGG MODAL: Hackathon 2026 Project Team */}
       {teamModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div className="bg-[#FAF7F0] text-[#263026] rounded-2xl max-w-2xl w-full shadow-2xl border-2 border-[#5C822D] overflow-hidden animate-in zoom-in-95 duration-150 relative">
+        <div 
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+          onClick={() => setTeamModalOpen(false)}
+        >
+          <div 
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="commendation-modal-title"
+            className="bg-[#FAF7F0] text-[#263026] rounded-2xl max-w-2xl w-full shadow-2xl border-2 border-[#5C822D] overflow-hidden animate-in zoom-in-95 duration-150 relative"
+            onClick={e => e.stopPropagation()}
+          >
             
             {/* Indian Tricolor Ribbon Top Bar */}
             <div className="tricolor-ribbon h-1.5 w-full flex">
@@ -374,21 +394,39 @@ export function InstitutionalFooter() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] sm:text-[11px] font-bold text-[#5C822D] uppercase tracking-wider font-mono">
-                      {language === 'hi' ? 'प्रशंसा पत्र · 2026' : 'COMMENDATION · 2026'}
+                      {language === 'hi' 
+                        ? 'प्रशंसा पत्र · 2026' 
+                        : language === 'kn'
+                        ? 'ಪ್ರಶಂಸಾ ಪತ್ರ · 2026'
+                        : language === 'gu'
+                        ? 'પ્રશંસા પત્ર · 2026'
+                        : 'COMMENDATION · 2026'}
                     </span>
                   </div>
-                  <h3 className="text-[16px] sm:text-[19px] font-bold text-[#263026] leading-tight">
-                    {language === 'hi' ? 'H₂S गैस डोसीमेट्री निदेशालय' : 'H₂S Gas Dosimetry Directorate'}
+                  <h3 id="commendation-modal-title" className="text-[16px] sm:text-[19px] font-bold text-[#263026] leading-tight">
+                    {language === 'hi' 
+                      ? 'H₂S गैस डोसीमेट्री निदेशालय' 
+                      : language === 'kn'
+                      ? 'H₂S ಗ್ಯಾಸ್ ಡೋಸಿಮೆಟ್ರಿ ನಿರ್ದೇಶನಾಲಯ'
+                      : language === 'gu'
+                      ? 'H₂S ગેસ ડોસિમેટ્રી નિર્દેશાલય'
+                      : 'H₂S Gas Dosimetry Directorate'}
                   </h3>
                   <p className="text-[11px] sm:text-[12px] text-[#596158]">
-                    {language === 'hi' ? 'वियरेबल वर्णमितीय कीमोसेंसर प्लेटफ़ॉर्म' : 'Wearable Colorimetric Chemosensor Platform'}
+                    {language === 'hi' 
+                      ? 'वियरेबल वर्णमितीय कीमोसेंसर प्लेटफ़ॉर्म' 
+                      : language === 'kn'
+                      ? 'ಧರಿಸಬಹುದಾದ ಕಲರ್ಮೆಟ್ರಿಕ್ ಕೀಮೋಸೆನ್ಸರ್ ಪ್ಲಾಟ್‌ಫಾರ್ಮ್'
+                      : language === 'gu'
+                      ? 'પહેરી શકાય તેવું કલરીમેટ્રિક કીમોસેન્સર પ્લેટફોર્મ'
+                      : 'Wearable Colorimetric Chemosensor Platform'}
                   </p>
                 </div>
               </div>
 
               <button
                 onClick={() => setTeamModalOpen(false)}
-                className="text-[#7A8178] hover:text-[#263026] p-1.5 rounded-md hover:bg-[#F4EFE6] transition-colors"
+                className="text-[#7A8178] hover:text-[#263026] p-1.5 rounded-md hover:bg-[#F4EFE6] transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -397,7 +435,15 @@ export function InstitutionalFooter() {
             {/* Team Members Grid */}
             <div className="p-4 sm:p-5 max-h-[68vh] overflow-y-auto space-y-3">
               <div className="text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-[#7A8178] flex items-center justify-between">
-                <span>{language === 'hi' ? 'परियोजना कोर टीम (6 लीड)' : 'Core Project Team (6 Leads)'}</span>
+                <span>
+                  {language === 'hi' 
+                    ? 'परियोजना कोर टीम (6 लीड)' 
+                    : language === 'kn'
+                    ? 'ಯೋಜನಾ ಕೋರ್ ತಂಡ (6 ಲೀಡ್ಸ್)'
+                    : language === 'gu'
+                    ? 'પ્રોજેક્ટ કોર ટીમ (6 લીડ્સ)'
+                    : 'Core Project Team (6 Leads)'}
+                </span>
                 <span className="text-[#5C822D] font-mono">MRPL INVENT</span>
               </div>
 
@@ -443,11 +489,23 @@ export function InstitutionalFooter() {
               <div className="p-3 bg-[#EDF3E4] rounded-xl border border-[#C6DCC0] text-[11px] sm:text-[12px] space-y-1 text-[#35551F]">
                 <div className="font-bold flex items-center gap-1.5">
                   <CheckCircle2 size={14} className="text-[#5C822D]" />
-                  <span>{language === 'hi' ? 'सत्यापित नवाचार सिद्धांत' : 'Validated Innovation Principles'}</span>
+                  <span>
+                    {language === 'hi' 
+                      ? 'सत्यापित नवाचार सिद्धांत' 
+                      : language === 'kn'
+                      ? 'ಪರಿಶೀಲಿಸಿದ ನಾವೀನ್ಯತಾ ತತ್ವಗಳು'
+                      : language === 'gu'
+                      ? 'ચકાસાયેલ નવીનતા સિદ્ધાંતો'
+                      : 'Validated Innovation Principles'}
+                  </span>
                 </div>
                 <p className="opacity-90">
                   {language === 'hi' 
                     ? 'लेड-मुक्त ऑप्टिकल कीमोसेंसिंग (Copper-PAN और Bismuth मैट्रिक्स) · ISO/CIE D65 के तहत Bradford क्रोमैटिक सामान्यीकरण।'
+                    : language === 'kn'
+                    ? 'ಸೀಸ-ಮುಕ್ತ ಆಪ್ಟಿಕಲ್ ಕೀಮೋಸೆನ್ಸಿಂಗ್ (Copper-PAN & Bismuth ಮ್ಯಾಟ್ರಿಕ್ಸ್) · ISO/CIE D65 ಅಡಿಯಲ್ಲಿ Bradford ಕ್ರೊಮ್ಯಾಟಿಕ್ ನಾರ್ಮಲೈಸೇಶನ್.'
+                    : language === 'gu'
+                    ? 'લીડ-મુક્ત ઓપ્ટિકલ કીમોસેન્સિંગ (Copper-PAN & Bismuth મેટ્રિક્સ) · ISO/CIE D65 હેઠળ Bradford ક્રોમેટિક સામાન્યકરણ.'
                     : 'Lead-free optical chemosensing (Copper-PAN & Bismuth matrix) · Bradford Chromatic Normalization under ISO/CIE D65.'}
                 </p>
               </div>
@@ -456,7 +514,15 @@ export function InstitutionalFooter() {
             {/* Modal Action Footer */}
             <div className="p-3 sm:p-4 bg-white border-t border-[#E8E2D5] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 text-[12px]">
               <div className="text-[#7A8178] text-center sm:text-left">
-                <span>{language === 'hi' ? 'राष्ट्रीय गैस सुरक्षा एवं उत्कृष्टता' : 'National Gas Safety & Excellence'}</span>
+                <span>
+                  {language === 'hi' 
+                    ? 'राष्ट्रीय गैस सुरक्षा एवं उत्कृष्टता' 
+                    : language === 'kn'
+                    ? 'ರಾಷ್ಟ್ರೀಯ ಅನಿಲ ಸುರಕ್ಷತೆ & ಉತ್ಕೃಷ್ಟತೆ'
+                    : language === 'gu'
+                    ? 'રાષ્ટ્રીય ગેસ સુરક્ષા અને ઉત્કૃષ્ટતા'
+                    : 'National Gas Safety & Excellence'}
+                </span>
               </div>
 
               <div className="flex items-center gap-2 justify-end">
@@ -469,7 +535,15 @@ export function InstitutionalFooter() {
                   className="gov-btn-primary text-[11px] sm:text-[12px] h-8 px-3.5 font-semibold flex items-center gap-1.5 shadow-md hover:shadow-lg active:scale-95 transition-all flex-1 sm:flex-initial justify-center cursor-pointer"
                 >
                   <span className="text-[14px]">🥳</span>
-                  <span>{language === 'hi' ? 'टीम का अभिनंदन करें' : 'Celebrate Team'}</span>
+                  <span>
+                    {language === 'hi' 
+                      ? 'टीम का अभिनंदन करें' 
+                      : language === 'kn'
+                      ? 'ತಂಡವನ್ನು ಅಭಿನಂದಿಸಿ'
+                      : language === 'gu'
+                      ? 'ટીમને અભિનંદન આપો'
+                      : 'Celebrate Team'}
+                  </span>
                 </button>
 
                 <button
@@ -477,7 +551,15 @@ export function InstitutionalFooter() {
                   onClick={() => setTeamModalOpen(false)}
                   className="gov-btn-secondary text-[11px] sm:text-[12px] h-8 px-3 flex-1 sm:flex-initial justify-center cursor-pointer"
                 >
-                  <span>{language === 'hi' ? 'बंद करें' : 'Close'}</span>
+                  <span>
+                    {language === 'hi' 
+                      ? 'बंद करें' 
+                      : language === 'kn'
+                      ? 'ಮುಚ್ಚಿ'
+                      : language === 'gu'
+                      ? 'બંધ કરો'
+                      : 'Close'}
+                  </span>
                 </button>
               </div>
             </div>

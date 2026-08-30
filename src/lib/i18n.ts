@@ -1,6 +1,13 @@
 'use client';
 
-export type Language = 'en' | 'hi';
+export type Language = 'en' | 'hi' | 'kn' | 'gu';
+
+export const LANGUAGES: { code: Language; label: string; nativeName: string }[] = [
+  { code: 'en', label: 'English', nativeName: 'EN' },
+  { code: 'hi', label: 'Hindi', nativeName: 'हिंदी' },
+  { code: 'kn', label: 'Kannada', nativeName: 'ಕನ್ನಡ' },
+  { code: 'gu', label: 'Gujarati', nativeName: 'ગુજરાતી' },
+];
 
 export const TRANSLATIONS = {
   en: {
@@ -18,12 +25,14 @@ export const TRANSLATIONS = {
     navWorker: 'Worker',
     navDashboard: 'Dashboard',
     navOverview: 'Overview',
-    navRoster: 'Roster',
+    navWorkers: 'Workers',
+    navRoster: 'Workers',
     navTrends: 'Trends',
     navAlerts: 'Alerts',
+    navReports: 'Reports',
     navMetrology: 'Metrology',
-    navScan: 'Scan & Profile',
-    navHistory: 'History & Details',
+    navScan: 'Scanner',
+    navHistory: 'Profile & History',
     
     // Header
     appName: 'MRPL Gas Dosimetry Portal',
@@ -35,10 +44,12 @@ export const TRANSLATIONS = {
     homeBadge: 'Gas Safety & Occupational Health',
     homeTitle: 'Continuous Hydrogen Sulfide (H₂S) Personal Dosimetry',
     homeDescription: 'Wearable colorimetric sensor badges paired with ISO D65 optical analysis for real-time, deterministic chemical plant gas safety.',
-    enterWorker: 'Worker Terminal',
-    enterWorkerSub: 'Scan badge, log dose & view personal exposure',
-    openDashboard: 'HSE Dashboard',
-    openDashboardSub: 'Supervisory monitoring, triage & metrology',
+    enterWorker: 'Check Your Exposure',
+    enterWorkerSub: 'Scan your wristband to check your H₂S exposure.',
+    openDashboard: 'Safety Overview',
+    openDashboardSub: 'Monitor workforce exposure and alerts.',
+    openScannerBtn: 'Open Exposure Scanner',
+    openDashboardBtn: 'Open Safety Dashboard',
     
     // Wristband Simulator
     schematicTitle: 'Wearable Dosimeter Cartridge Interface',
@@ -132,12 +143,14 @@ export const TRANSLATIONS = {
     navWorker: 'श्रमिक',
     navDashboard: 'डैशबोर्ड',
     navOverview: 'अवलोकन',
-    navRoster: 'रोस्टर',
+    navWorkers: 'श्रमिक',
+    navRoster: 'श्रमिक',
     navTrends: 'रुझान',
     navAlerts: 'अलर्ट',
+    navReports: 'रिपोर्ट्स',
     navMetrology: 'मेट्रोलॉजी',
-    navScan: 'स्कैन और प्रोफ़ाइल',
-    navHistory: 'इतिहास और विवरण',
+    navScan: 'स्कैनर',
+    navHistory: 'प्रोफ़ाइल व इतिहास',
     
     // Header
     appName: 'एमआरपीएल गैस डोसीमेट्री पोर्टल',
@@ -149,10 +162,12 @@ export const TRANSLATIONS = {
     homeBadge: 'गैस सुरक्षा और व्यावसायिक स्वास्थ्य',
     homeTitle: 'निरंतर हाइड्रोजन सल्फाइड (H₂S) व्यक्तिगत डोसीमेट्री',
     homeDescription: 'रासायनिक संयंत्रों में रीयल-टाइम, सटीक गैस सुरक्षा हेतु पहनने योग्य रंगमितीय सेंसर बैज और आईएसओ D65 ऑप्टिकल विश्लेषण।',
-    enterWorker: 'श्रमिक टर्मिनल',
-    enterWorkerSub: 'बैज स्कैन करें, खुराक दर्ज करें और व्यक्तिगत डेटा देखें',
-    openDashboard: 'एचएसई डैशबोर्ड',
-    openDashboardSub: 'पर्यवेक्षी निगरानी, घटना निवारण और मेट्रोलॉजी',
+    enterWorker: 'अपना एक्सपोज़र जांचें',
+    enterWorkerSub: 'अपना H₂S एक्सपोज़र जांचने के लिए रिस्टबैंड स्कैन करें।',
+    openDashboard: 'सुरक्षा अवलोकन',
+    openDashboardSub: 'कार्यबल एक्सपोज़र और अलर्ट की निगरानी करें।',
+    openScannerBtn: 'एक्सपोज़र स्कैनर खोलें',
+    openDashboardBtn: 'सुरक्षा डैशबोर्ड खोलें',
     
     // Wristband Simulator
     schematicTitle: 'पहनने योग्य डोसीमीटर कार्ट्रिज इंटरफ़ेस',
@@ -230,7 +245,248 @@ export const TRANSLATIONS = {
     // Footer
     footerGov: 'भारत सरकार का उद्यम · पेट्रोलियम और प्राकृतिक गैस मंत्रालय',
     footerCopyright: '© 2026 मंगलूर रिफाइनरी एंड पेट्रोकेमिकल्स लिमिटेड। सर्वाधिकार सुरक्षित।',
+  },
+  kn: {
+    // Accessibility Bar
+    skipToContent: 'ಮುಖ್ಯ ವಿಷಯಕ್ಕೆ ಹೋಗಿ',
+    fontSize: 'ಫಾಂಟ್ ಗಾತ್ರ',
+    contrast: 'ಕಾಂಟ್ರಾಸ್ಟ್',
+    contrastHigh: 'ಹೆಚ್ಚಿನ ಕಾಂಟ್ರಾಸ್ಟ್',
+    contrastStandard: 'ಸಾಮಾನ್ಯ',
+    shiftA: 'ಶಿಫ್ಟ್ A (06:00 – 14:00 IST)',
+    language: 'ಭಾಷೆ',
+    
+    // Navigation
+    navHome: 'ಮುಖಪುಟ',
+    navWorker: 'ಕಾರ್ಮಿಕ',
+    navDashboard: 'ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',
+    navOverview: 'ಅವಲೋಕನ',
+    navWorkers: 'ಕಾರ್ಮಿಕರು',
+    navRoster: 'ಕಾರ್ಮಿಕರ ಪಟ್ಟಿ',
+    navTrends: 'ಪ್ರವೃತ್ತಿಗಳು',
+    navAlerts: 'ಎಚ್ಚರಿಕೆಗಳು',
+    navReports: 'ವರದಿಗಳು',
+    navMetrology: 'ಮೆಟ್ರಾಲಜಿ',
+    navScan: 'ಸ್ಕ್ಯಾನರ್',
+    navHistory: 'ಪ್ರೊಫೈಲ್ ಮತ್ತು ಇತಿಹಾಸ',
+    
+    // Header
+    appName: 'MRPL ಗ್ಯಾಸ್ ಡೋಸಿಮೆಟ್ರಿ ಪೋರ್ಟಲ್',
+    appSubtitle: 'ಮಂಗಳೂರು ರಿಫೈನರಿ & ಪೆಟ್ರೋಕೆಮಿಕಲ್ಸ್ ಲಿಮಿಟೆಡ್ · ಔದ್ಯೋಗಿಕ ಸುರಕ್ಷತೆ',
+    switchMode: 'ಮೋಡ್ ಬದಲಾಯಿಸಿ',
+    searchPlaceholder: 'ಸಿಬ್ಬಂದಿ, ಬ್ಯಾಡ್ಜ್‌ಗಳು, ಎಚ್ಚರಿಕೆಗಳನ್ನು ಹುಡುಕಿ...',
+    
+    // Home Page
+    homeBadge: 'ಅನಿಲ ಸುರಕ್ಷತೆ & ಔದ್ಯೋಗಿಕ ಆರೋಗ್ಯ',
+    homeTitle: 'ನಿರಂತರ ಹೈಡ್ರೋಜನ್ ಸಲ್ಫೈಡ್ (H₂S) ವೈಯಕ್ತಿಕ ಡೋಸಿಮೆಟ್ರಿ',
+    homeDescription: 'ನೈಜ-ಸಮಯದ, ರಾಸಾಯನಿಕ ಘಟಕದ ಅನಿಲ ಸುರಕ್ಷತೆಗಾಗಿ ISO D65 ಆಪ್ಟಿಕಲ್ ವಿಶ್ಲೇಷಣೆಯೊಂದಿಗೆ ಧರಿಸಬಹುದಾದ ಸೆನ್ಸರ್ ಬ್ಯಾಡ್ಜ್‌ಗಳು.',
+    enterWorker: 'ನಿಮ್ಮ ಎಕ್ಸ್‌ಪೋಶರ್ ಪರೀಕ್ಷಿಸಿ',
+    enterWorkerSub: 'ನಿಮ್ಮ H₂S ಎಕ್ಸ್‌ಪೋಶರ್ ಪರೀಕ್ಷಿಸಲು ರಿಸ್ಟ್‌ಬ್ಯಾಂಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ.',
+    openDashboard: 'ಸುರಕ್ಷತಾ ಅವಲೋಕನ',
+    openDashboardSub: 'ಕಾರ್ಯಪಡೆಯ ಎಕ್ಸ್‌ಪೋಶರ್ ಮತ್ತು ಎಚ್ಚರಿಕೆಗಳನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ.',
+    openScannerBtn: 'ಎಕ್ಸ್‌ಪೋಶರ್ ಸ್ಕ್ಯಾನರ್ ತೆರೆಯಿರಿ',
+    openDashboardBtn: 'ಸುರಕ್ಷತಾ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ತೆರೆಯಿರಿ',
+    
+    // Wristband Simulator
+    schematicTitle: 'ಧರಿಸಬಹುದಾದ ಡೋಸಿಮೀಟರ್ ಕಾರ್ಟ್ರಿಡ್ಜ್ ಇಂಟರ್ಫೇಸ್',
+    schematicSubtitle: 'ಸೀಸ-ಮುಕ್ತ Cu-PAN / Bi(III) ಸಾಲಿಡ್-ಸ್ಟೇಟ್ ಸೆನ್ಸಿಂಗ್ ಮ್ಯಾಟ್ರಿಕ್ಸ್',
+    simulateExposure: 'ಎಕ್ಸ್‌ಪೋಶರ್ ಸನ್ನಿವೇಶವನ್ನು ಅನುಕರಿಸಿ:',
+    normalDemo: 'ಸಾಮಾನ್ಯ (3.2 ppm·h)',
+    elevatedDemo: 'ಮಧ್ಯಮ (12.4 ppm·h)',
+    criticalDemo: 'ತುರ್ತು (24.8 ppm·h)',
+    
+    // Key Specifications
+    techSpecs: 'ತಾಂತ್ರಿಕ ಮತ್ತು ಸಂವೇದಕ ವಿಶೇಷಣಗಳು',
+    reagentMatrix: 'ರಾಸಾಯನಿಕ ಕಾರಕ ಮ್ಯಾಟ್ರಿಕ್ಸ್',
+    reagentDesc: 'ರಂಧ್ರಯುಕ್ತ ಸಿಲಿಕಾ ತಲಾಧಾರದಲ್ಲಿ ಸೀಸ-ಮುಕ್ತ ತಾಮ್ರ 1-(2-ಪಿರಿಡಿಲಾಜೊ)-2-ನಾಫ್ಥಾಲ್ (Cu-PAN) ಮತ್ತು ಬಿಸ್ಮತ್(III).',
+    dynamicRange: 'ವಿಶ್ಲೇಷಣಾತ್ಮಕ ಡೈನಾಮಿಕ್ ಶ್ರೇಣಿ',
+    dynamicRangeDesc: '0.0 ರಿಂದ 30.0 ppm·h ಒಟ್ಟು ಸಂಚಿತ ಎಕ್ಸ್‌ಪೋಶರ್, <0.5 ppm·h ಆಪ್ಟಿಕಲ್ ರೆಸಲ್ಯೂಶನ್‌ನೊಂದಿಗೆ.',
+    opticalEngine: 'ಆಪ್ಟಿಕಲ್ ಗೇಟಿಂಗ್ ಮತ್ತು ಮಾಪನಾಂಕ ನಿರ್ಣಯ',
+    opticalEngineDesc: 'ಬಹು-ಸ್ಪೆಕ್ಟ್ರಲ್ ಸುತ್ತಲಿನ ಬೆಳಕಿನಲ್ಲಿ ISO/CIE D65 ಬ್ರಾಡ್‌ಫೋರ್ಡ್ ಕ್ರೊಮ್ಯಾಟಿಕ್ ಅಳವಡಿಕೆ.',
+    
+    // Worker Scan & Profile
+    operatorProfile: 'ಆಪರೇಟರ್ ಪ್ರೊಫೈಲ್',
+    certifiedOperator: 'ಪ್ರಮಾಣೀಕೃತ ಆಪರೇಟರ್',
+    editProfile: 'ಪ್ರೊಫೈಲ್ ಸಂಪಾದಿಸಿ',
+    workerId: 'ಕಾರ್ಮಿಕ ID',
+    assignedUnit: 'ನಿಯೋಜಿತ ಘಟಕ',
+    refinerySite: 'ರಿಫೈನರಿ ತಾಣ',
+    captureBadge: 'ಬ್ಯಾಡ್ಜ್ ಸೆರೆಹಿಡಿಯಿರಿ & ರೀಡಿಂಗ್ ಪಡೆಯಿರಿ',
+    tapToCapture: 'ಕ್ಯಾಲಿಬ್ರೇಶನ್ ಬಾರ್ ಅನ್ನು ರೆಟಿಕಲ್ ಒಳಗೆ ಜೋಡಿಸಿ',
+    useFileUpload: 'ಬದಲಿಗೆ ಫೋಟೋ ಫೈಲ್ ಅಪ್ಲೋಡ್ ಮಾಡಿ',
+    selectTestSample: 'ಅಥವಾ ಕ್ಯಾಲಿಬ್ರೇಟೆಡ್ ಫೀಲ್ಡ್ ಪರೀಕ್ಷಾ ಮಾದರಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ:',
+    
+    // Risk & Status
+    riskNormal: 'ಸಾಮಾನ್ಯ ಎಕ್ಸ್‌ಪೋಶರ್',
+    riskElevated: 'ಮಧ್ಯಮ ಮಟ್ಟ',
+    riskHigh: 'ಅಧಿಕ ಎಕ್ಸ್‌ಪೋಶರ್',
+    riskCritical: 'ತುರ್ತು ಎಚ್ಚರಿಕೆ',
+    validityValid: 'ಮೆಟ್ರಾಲಜಿ ಮಾನ್ಯವಾಗಿದೆ',
+    validityInvalid: 'ಅಮಾನ್ಯ ಸ್ಕ್ಯಾನ್',
+    
+    // Scan Results
+    resultTitle: 'ಡೋಸಿಮೀಟರ್ ಎಕ್ಸ್‌ಪೋಶರ್ ರೀಡಿಂಗ್',
+    measuredDose: 'ಅಳೆಯಲಾದ ಸಂಚಿತ ಡೋಸ್',
+    statusBadge: 'ಸುರಕ್ಷತಾ ಸ್ಥಿತಿ',
+    actionRequired: 'ಅಗತ್ಯ ಕ್ರಮ',
+    twaLabel: 'ಅಂದಾಜು 8h TWA',
+    sensorSlotTitle: 'ಮಲ್ಟಿ-ಸ್ಪಾಟ್ ಡೋಸಿಮೀಟರ್ ಅರೇ (6 ರಲ್ಲಿ 1 ಸಕ್ರಿಯ)',
+    metrologyAccordion: 'ತಪಾಸಣಾ ಮೆಟ್ರಾಲಜಿ ಮತ್ತು ಕಲರ್ಮೆಟ್ರಿಕ್ ವೆಕ್ಟರ್‌ಗಳು',
+    saveAndReturn: 'ಸ್ಕ್ಯಾನ್ ದಾಖಲಿಸಿ ಮತ್ತು ಟರ್ಮಿನಲ್‌ಗೆ ಹಿಂತಿರುಗಿ',
+    scanAnother: 'ಇನ್ನೊಂದು ಬ್ಯಾಡ್ಜ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ',
+    
+    // Actions & Recommendations
+    actionNormal: 'ವಲಯ A ನಲ್ಲಿ ಸಾಮಾನ್ಯ ಶಿಫ್ಟ್ ಕಾರ್ಯಾಚರಣೆಗಳನ್ನು ಮುಂದುವರಿಸಲು ಸುರಕ್ಷಿತವಾಗಿದೆ.',
+    actionElevated: 'ಎಚ್ಚರಿಕೆ ಅಗತ್ಯ — ಪ್ರದೇಶದ ಗಾಳಿ ಸಂಚಾರ ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಶಿಫ್ಟ್ ಲೀಡ್‌ಗೆ ತಿಳಿಸಿ.',
+    actionHigh: 'ಕಡ್ಡಾಯ ಕ್ರಮ — ಉಸಿರಾಟದ ಉಪಕರಣವನ್ನು (SCBA) ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಇರುವ ಸಮಯ ಮಿತಿಗೊಳಿಸಿ.',
+    actionCritical: 'ತಕ್ಷಣ ಕಡ್ಡಾಯ ಸ್ಥಳಾಂತರ — ವಲಯ A ಯಿಂದ ಹೊರಬನ್ನಿ, ತುರ್ತು ರೆಸ್ಪಿರೇಟರ್ ಧರಿಸಿ ಮತ್ತು ಮಸ್ಟರ್ ಪಾಯಿಂಟ್‌ಗೆ ವರದಿ ಮಾಡಿ.',
+    
+    // Worker History
+    lastScanTitle: 'ಇತ್ತೀಚಿನ ಎಕ್ಸ್‌ಪೋಶರ್ ಸ್ಕ್ಯಾನ್',
+    workerDossier: 'ಆಪರೇಟರ್ ಡೋಸಿಯರ್ ಮತ್ತು ಹಾರ್ಡ್‌ವೇರ್ ಹಂಚಿಕೆ',
+    historyLedger: 'ಶಿಫ್ಟ್ ಎಕ್ಸ್‌ಪೋಶರ್ ಇತಿಹಾಸ',
+    noScansRecorded: 'ಈ ಶಿಫ್ಟ್‌ಗೆ ಯಾವುದೇ ಸ್ಕ್ಯಾನ್‌ಗಳು ದಾಖಲಾಗಿಲ್ಲ.',
+    viewCertificate: 'ಪ್ರಮಾಣಪತ್ರ ವೀಕ್ಷಿಸಿ',
+    
+    // HSE Dashboard
+    dashboardTitle: 'ಪ್ಲಾಂಟ್ ಸುರಕ್ಷತೆ ಮತ್ತು ಎಕ್ಸ್‌ಪೋಶರ್ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',
+    monitoredStaff: 'ಮೇಲ್ವಿಚಾರಣೆಯಲ್ಲಿರುವ ಸಿಬ್ಬಂದಿ',
+    totalScans: 'ಒಟ್ಟು ದಾಖಲಾದ ಸ್ಕ್ಯಾನ್‌ಗಳು',
+    exceedances: 'ಮಿತಿ ಮೀರಿದ್ದು (>10 ppm)',
+    activeAlerts: 'ಸಕ್ರಿಯ ಎಚ್ಚರಿಕೆಗಳು',
+    riskDistribution: 'ಕಾರ್ಯಪಡೆಯ ಅಪಾಯ ವಿತರಣೆ',
+    recentScansFeed: 'ನೈಜ-ಸಮಯದ ಸಿಬ್ಬಂದಿ ಪರಿಶೀಲನಾ ಫೀಡ್',
+    incidentQueue: 'ಘಟನೆ ಮತ್ತು ಎಚ್ಚರಿಕೆ ಸರತಿ ಸಾಲು',
+    acknowledge: 'ದೃಢೀಕರಿಸಿ',
+    acknowledged: 'ದೃಢೀಕರಿಸಲಾಗಿದೆ',
+    
+    // Footer
+    footerGov: 'ಭಾರತ ಸರ್ಕಾರದ ಉದ್ಯಮ · ಪೆಟ್ರೋಲಿಯಂ ಮತ್ತು ನೈಸರ್ಗಿಕ ಅನಿಲ ಸಚಿವಾಲಯ',
+    footerCopyright: '© 2026 ಮಂಗಳೂರು ರಿಫೈನರಿ ಮತ್ತು ಪೆಟ್ರೋಕೆಮಿಕಲ್ಸ್ ಲಿಮಿಟೆಡ್. ಎಲ್ಲ ಹಕ್ಕುಗಳನ್ನು ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ.',
+  },
+  gu: {
+    // Accessibility Bar
+    skipToContent: 'મુખ્ય સામગ્રી પર જાઓ',
+    fontSize: 'ફોન્ટ માપ',
+    contrast: 'કોન્ટ્રાસ્ટ',
+    contrastHigh: 'ઉચ્ચ કોન્ટ્રાસ્ટ',
+    contrastStandard: 'સામાન્ય',
+    shiftA: 'શિફ્ટ A (06:00 – 14:00 IST)',
+    language: 'ભાષા',
+    
+    // Navigation
+    navHome: 'હોમ',
+    navWorker: 'શ્રમિક',
+    navDashboard: 'ડેશબોર્ડ',
+    navOverview: 'ઝાંખી',
+    navWorkers: 'શ્રમિકો',
+    navRoster: 'શ્રમિકો',
+    navTrends: 'વલણો',
+    navAlerts: 'ચેતવણીઓ',
+    navReports: 'અહેવાલો',
+    navMetrology: 'મેટ્રોલોજી',
+    navScan: 'સ્કેનર',
+    navHistory: 'પ્રોફાઇલ અને ઇતિહાસ',
+    
+    // Header
+    appName: 'MRPL ગેસ ડોસિમેટ્રી પોર્ટલ',
+    appSubtitle: 'મેંગલોર રિફાઇનરી એન્ડ પેટ્રોકેમિકલ્સ લિમિટેડ · વ્યવસાયિક સુરક્ષા',
+    switchMode: 'મોડ બદલો',
+    searchPlaceholder: 'કર્મચારીઓ, બેજ, ચેતવણીઓ શોધો...',
+    
+    // Home Page
+    homeBadge: 'ગેસ સુરક્ષા અને વ્યવસાયિક સ્વાસ્થ્ય',
+    homeTitle: 'સતત હાઇડ્રોજન સલ્ફાઇડ (H₂S) વ્યક્તિગત ડોસિમેટ્રી',
+    homeDescription: 'રાસાયણિક પ્લાન્ટની ગેસ સુરક્ષા માટે ISO D65 ઓપ્ટિકલ વિશ્લેષણ સાથે પહેરી શકાય તેવા સેન્સર બેજ.',
+    enterWorker: 'તમારું એક્સપોઝર તપાસો',
+    enterWorkerSub: 'તમારું H₂S એક્સપોઝર તપાસવા કાંડાનો પટ્ટો સ્કેન કરો.',
+    openDashboard: 'સુરક્ષા ઝાંખી',
+    openDashboardSub: 'કાર્યબળના એક્સપોઝર અને ચેતવણીઓની દેખરેખ રાખો.',
+    openScannerBtn: 'એક્સપોઝર સ્કેનર ખોલો',
+    openDashboardBtn: 'સુરક્ષા ડેશબોર્ડ ખોલો',
+    
+    // Wristband Simulator
+    schematicTitle: 'પહેરી શકાય તેવા ડોસિમીટર કારતૂસ ઈન્ટરફેસ',
+    schematicSubtitle: 'લીડ-મુક્ત Cu-PAN / Bi(III) સોલિડ-સ્ટેટ કલરીમેટ્રિક સેન્સિંગ મેટ્રિક્સ',
+    simulateExposure: 'એક્સપોઝર દૃશ્યનું અનુકરણ કરો:',
+    normalDemo: 'સામાન્ય (3.2 ppm·h)',
+    elevatedDemo: 'મધ્યમ (12.4 ppm·h)',
+    criticalDemo: 'ગંભીર (24.8 ppm·h)',
+    
+    // Key Specifications
+    techSpecs: 'તકનીકી અને સેન્સર સ્પષ્ટીકરણો',
+    reagentMatrix: 'રાસાયણિક પ્રતિક્રિયા મેટ્રિક્સ',
+    reagentDesc: 'છિદ્રાળુ સિલિકા સબસ્ટ્રેટમાં સીસા-મુક્ત કોપર PAN (Cu-PAN) અને બિસ્મથ(III).',
+    dynamicRange: 'વિશ્લેષણાત્મક ગતિશીલ શ્રેણી',
+    dynamicRangeDesc: '0.0 થી 30.0 ppm·h સંચિત એક્સપોઝર, <0.5 ppm·h ઓપ્ટિકલ રિઝોલ્યુશન સાથે.',
+    opticalEngine: 'ઓપ્ટિકલ ગેટિંગ અને માપાંકન',
+    opticalEngineDesc: 'આસપાસના પ્રકાશમાં ISO/CIE D65 બ્રેડફોર્ડ ક્રોમેટિક અનુકૂલન.',
+    
+    // Worker Scan & Profile
+    operatorProfile: 'ઓપરેટર પ્રોફાઇલ',
+    certifiedOperator: 'પ્રમાણિત ઓપરેટર',
+    editProfile: 'પ્રોફાઇલ સંપાદિત કરો',
+    workerId: 'શ્રમિક ID',
+    assignedUnit: 'સોંપેલ એકમ',
+    refinerySite: 'રિફાઇનરી સાઇટ',
+    captureBadge: 'બેજ કેપ્ચર કરો અને રીડિંગ મેળવો',
+    tapToCapture: 'રેટિકલની અંદર કેલિબ્રેશન બારને ગોઠવો',
+    useFileUpload: 'તેના બદલે ફોટો ફાઇલ અપલોડ કરો',
+    selectTestSample: 'અથવા કેલિબ્રેટેડ ફીલ્ડ ટેસ્ટ સેમ્પલ પસંદ કરો:',
+    
+    // Risk & Status
+    riskNormal: 'સામાન્ય એક્સપોઝર',
+    riskElevated: 'મધ્યમ સ્તર',
+    riskHigh: 'ઉચ્ચ એક્સપોઝર',
+    riskCritical: 'ગંભીર ચેતવણી',
+    validityValid: 'મેટ્રોલોજી માન્ય છે',
+    validityInvalid: 'અમાન્ય સ્કેન',
+    
+    // Scan Results
+    resultTitle: 'ડોસિમીટર એક્સપોઝર રીડિંગ',
+    measuredDose: 'માપવામાં આવેલ સંચિત ડોઝ',
+    statusBadge: 'સુરક્ષા સ્થિતિ',
+    actionRequired: 'જરૂરી પગલાં',
+    twaLabel: 'અંદાજિત 8 કલાક TWA',
+    sensorSlotTitle: 'મલ્ટી-સ્પોટ ડોસિમીટર એરે (6 માંથી 1 સક્રિય)',
+    metrologyAccordion: 'તપાસ મેટ્રોલોજી અને કલરીમેટ્રિક વેક્ટર્સ',
+    saveAndReturn: 'સ્કેન સાચવો અને ટર્મિનલ પર પાછા ફરો',
+    scanAnother: 'બીજો બેજ સ્કેન કરો',
+    
+    // Actions & Recommendations
+    actionNormal: 'ઝોન A માં સામાન્ય શિફ્ટ કામગીરી ચાલુ રાખવી સુરક્ષિત છે.',
+    actionElevated: 'સાવચેતીની સલાહ — વિસ્તારના વેન્ટિલેશનની તપાસ કરો અને શિફ્ટ ઇન્ચાર્જને જાણ કરો.',
+    actionHigh: 'ફરજિયાત પગલાં — શ્વાસ લેવાના ઉપકરણ (SCBA) ની તપાસ કરો અને રોકાણ મર્યાદિત કરો.',
+    actionCritical: 'તાત્કાલિક ફરજિયાત સ્થળાંતર — ઝોન A માંથી બહાર નીકળો, કટોકટી શ્વસન યંત્ર પહેરો અને મસ્ટર પોઇન્ટ પર પહોંચો.',
+    
+    // Worker History
+    lastScanTitle: 'તાજેતરનું એક્સપોઝર સ્કેન',
+    workerDossier: 'ઓપરેટર ડોઝિયર અને હાર્ડવેર સોંપણી',
+    historyLedger: 'શિફ્ટ એક્સપોઝર ઇતિહાસ',
+    noScansRecorded: 'આ શિફ્ટ માટે કોઈ સ્કેન નોંધાયેલ નથી.',
+    viewCertificate: 'પ્રમાણપત્ર જુઓ',
+    
+    // HSE Dashboard
+    dashboardTitle: 'પ્લાન્ટ સુરક્ષા અને એક્સપોઝર ડેશબોર્ડ',
+    monitoredStaff: 'મોનિટર કરેલ સ્ટાફ',
+    totalScans: 'કુલ નોંધાયેલ સ્કેન',
+    exceedances: 'મર્યાદા બહાર (>10 ppm)',
+    activeAlerts: 'સક્રિય ચેતવણીઓ',
+    riskDistribution: 'કર્મચારી જોખમ વિતરણ',
+    recentScansFeed: 'વાસ્તવિક સમયનું કર્મચારી ચકાસણી ફીડ',
+    incidentQueue: 'ઘટના અને ચેતવણી કતાર',
+    acknowledge: 'સ્વીકારો',
+    acknowledged: 'સ્વીકારેલ',
+    
+    // Footer
+    footerGov: 'ભારત સરકારનું સાહસ · પેટ્રોલિયમ અને કુદરતી ગેસ મંત્રાલય',
+    footerCopyright: '© 2026 મેંગલોર રિફાઇનરી એન્ડ પેટ્રોકેમિકલ્સ લિમિટેડ. સર્વાધિકાર સુરક્ષિત.',
   }
 } as const;
 
 export type TranslationKey = keyof typeof TRANSLATIONS.en;
+
+export function getTranslation(lang: Language, key: TranslationKey): string {
+  const dict = (TRANSLATIONS as Record<string, Record<string, string>>)[lang] || TRANSLATIONS.en;
+  return dict[key] || TRANSLATIONS.en[key] || key;
+}

@@ -37,9 +37,12 @@ export function AccessibilityBar() {
     return () => clearInterval(interval);
   }, [language]);
 
-  // Sync DOM classes with Zustand state
+  // Sync DOM classes and language with Zustand state
   useEffect(() => {
     if (!mounted) return;
+
+    // Document language attribute sync for screen readers (WCAG 3.1.1 / 3.1.2)
+    document.documentElement.lang = language;
 
     // Font scaling
     document.documentElement.classList.remove('font-scale-sm', 'font-scale-md', 'font-scale-lg');
@@ -52,7 +55,7 @@ export function AccessibilityBar() {
     } else {
       document.documentElement.classList.remove('high-contrast');
     }
-  }, [fontSize, highContrast, mounted]);
+  }, [fontSize, highContrast, language, mounted]);
 
   const handleFontSizeChange = (size: 'sm' | 'md' | 'lg') => {
     setFontSize(size);
@@ -140,7 +143,7 @@ export function AccessibilityBar() {
             <span className="text-[10px] sm:text-[11px]">{t.contrast}</span>
           </button>
 
-          {/* Language Switcher (EN / हिंदी) */}
+          {/* Language Switcher (EN / हिंदी / ಕನ್ನಡ / ગુજરાતી) */}
           <div className="flex items-center border border-[#D5D2C9] rounded bg-white overflow-hidden shadow-2xs text-[10px] sm:text-[11px]">
             <button
               onClick={() => setLanguage('en')}
@@ -152,7 +155,7 @@ export function AccessibilityBar() {
               title="English"
               aria-label="Switch to English"
             >
-              English
+              EN
             </button>
             <button
               onClick={() => setLanguage('hi')}
@@ -165,6 +168,30 @@ export function AccessibilityBar() {
               aria-label="हिंदी भाषा चुनें"
             >
               हिंदी
+            </button>
+            <button
+              onClick={() => setLanguage('kn')}
+              className={`px-2 py-0.5 transition-colors font-semibold border-l border-[#D5D2C9] ${
+                language === 'kn' 
+                  ? 'bg-[#5C822D] text-white font-bold' 
+                  : 'text-[#263026] hover:bg-[#F0EFE9]'
+              }`}
+              title="ಕನ್ನಡ (Kannada)"
+              aria-label="ಕನ್ನಡ ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ"
+            >
+              ಕನ್ನಡ
+            </button>
+            <button
+              onClick={() => setLanguage('gu')}
+              className={`px-2 py-0.5 transition-colors font-semibold border-l border-[#D5D2C9] ${
+                language === 'gu' 
+                  ? 'bg-[#5C822D] text-white font-bold' 
+                  : 'text-[#263026] hover:bg-[#F0EFE9]'
+              }`}
+              title="ગુજરાતી (Gujarati)"
+              aria-label="ગુજરાતી ભાષા પસંદ કરો"
+            >
+              ગુજરાતી
             </button>
           </div>
 

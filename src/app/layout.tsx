@@ -9,15 +9,48 @@ import { BottomNav } from '@/components/bottom-nav';
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: 'cover',
   themeColor: '#35551F',
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://h2s-dosimeter.mrpl.co.in'),
   title: 'H₂S Exposure Monitoring Portal | MRPL',
-  description: 'Mangalore Refinery and Petrochemicals Limited — Occupational Health & Safety Dosimeter Verification System',
+  description: 'Mangalore Refinery and Petrochemicals Limited — Wearable Zero-Power H₂S Gas Dosimeter Verification System with ISO D65 Optical Normalization.',
+  keywords: [
+    'H2S Dosimetry',
+    'MRPL',
+    'Petrochemical Safety',
+    'Occupational Health',
+    'Hydrogen Sulfide Sensor',
+    'Cu-PAN',
+    'Bradford D65',
+    'Colorimetry'
+  ],
+  authors: [{ name: 'MRPL Industrial Health & Safety Innovation Team' }],
+  creator: 'Mangalore Refinery and Petrochemicals Limited',
+  publisher: 'MRPL / Ministry of Petroleum and Natural Gas',
+  openGraph: {
+    title: 'H₂S Exposure Monitoring Portal | MRPL',
+    description: 'Real-time personal gas dosimetry verification and supervisory surveillance for petrochemical refinery personnel.',
+    type: 'website',
+    locale: 'en_IN',
+    siteName: 'MRPL H₂S Dosimetry Portal',
+    images: [
+      {
+        url: '/icon.png',
+        width: 512,
+        height: 512,
+        alt: 'MRPL H2S Dosimeter Portal Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'H₂S Exposure Monitoring Portal | MRPL',
+    description: 'Occupational health & safety dosimeter verification system with ISO D65 optical normalization.',
+    images: ['/icon.png'],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -25,6 +58,10 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
+  },
+  icons: {
+    icon: '/icon.png',
+    apple: '/icon.png',
   },
 };
 

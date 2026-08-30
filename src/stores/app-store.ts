@@ -176,8 +176,20 @@ export const useAppStore = create<AppState>()(
 
       setShiftElapsedMinutes: (elapsedMinutes: number) => {
         set(state => {
-          if (!state.activeShift) return state;
           const newStart = new Date(Date.now() - elapsedMinutes * 60 * 1000).toISOString();
+          if (!state.activeShift) {
+            const newShift: Shift = {
+              id: `shift-${Date.now()}`,
+              workerId: state.currentUser?.id || 'worker-001',
+              startTime: newStart,
+              endTime: null,
+              status: ShiftStatus.ACTIVE,
+            };
+            return {
+              activeShift: newShift,
+              shifts: [...state.shifts, newShift],
+            };
+          }
           const updated = {
             ...state.activeShift,
             startTime: newStart,

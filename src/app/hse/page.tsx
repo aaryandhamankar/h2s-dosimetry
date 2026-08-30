@@ -23,7 +23,17 @@ export default function HSEOverviewPage() {
   const t = TRANSLATIONS[language];
 
   if (!mounted) {
-    return <div className="text-[13px] text-[#7A8178]">{language === 'hi' ? 'सुरक्षा डैशबोर्ड लोड हो रहा है...' : 'Loading safety dashboard...'}</div>;
+    return (
+      <div className="text-[13px] text-[#7A8178]">
+        {language === 'hi' 
+          ? 'सुरक्षा डैशबोर्ड लोड हो रहा है...' 
+          : language === 'kn'
+          ? 'ಸುರಕ್ಷತಾ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಲೋಡ್ ಆಗುತ್ತಿದೆ...'
+          : language === 'gu'
+          ? 'સુરક્ષા ડેશબોર્ડ લોડ થઈ રહ્યું છે...'
+          : 'Loading safety dashboard...'}
+      </div>
+    );
   }
 
   const validScans = scans.filter(s => s.exposureResult?.validityStatus === ValidityStatus.VALID);
@@ -49,23 +59,37 @@ export default function HSEOverviewPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7E5DE] pb-3 sm:pb-4">
         <div>
           <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
-            {language === 'hi' ? 'पर्यवेक्षी कमांड सेंटर' : 'Supervisory Command Center'}
+            {language === 'hi' 
+              ? 'पर्यवेक्षी कमांड सेंटर' 
+              : language === 'kn'
+              ? 'ಮೇಲ್ವಿಚಾರಣಾ ಕಮಾಂಡ್ ಸೆಂಟರ್'
+              : language === 'gu'
+              ? 'સુપરવાઇઝરી કમાન્ડ સેન્ટર'
+              : 'Supervisory Command Center'}
           </span>
           <h1 className="text-[18px] sm:text-[24px] font-bold text-[#263026]">
             {t.dashboardTitle}
           </h1>
           <p className="text-[12px] sm:text-[14px] text-[#596158] mt-0.5">
-            {language === 'hi' ? 'रिफाइनरी ज़ोन ए · गैस डोसीमेट्री निगरानी' : 'Refinery Zone A · Gas Dosimetry Surveillance'}
+            {language === 'hi' 
+              ? 'रिफाइनरी ज़ोन ए · गैस डोसीमेट्री निगरानी' 
+              : language === 'kn'
+              ? 'ರಿಫೈನರಿ ವಲಯ A · ಗ್ಯಾಸ್ ಡೋಸಿಮೆಟ್ರಿ ಕಣ್ಗಾವಲು'
+              : language === 'gu'
+              ? 'રિફાઇનરી ઝોન A · ગેસ ડોસિમેટ્રી દેખરેખ'
+              : 'Refinery Zone A · Gas Dosimetry Surveillance'}
           </p>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
             onClick={() => window.print()}
-            className="gov-btn-secondary text-[12px] sm:text-[13px] h-9"
+            className="gov-btn-secondary text-[12px] sm:text-[13px] h-9 cursor-pointer"
           >
             <Printer size={14} />
-            <span>{language === 'hi' ? 'रिपोर्ट प्रिंट करें' : 'Print Report'}</span>
+            <span>
+              {language === 'hi' ? 'रिपोर्ट प्रिंट करें' : language === 'kn' ? 'ವರದಿ ಮುದ್ರಿಸಿ' : language === 'gu' ? 'રિપોર્ટ પ્રિન્ટ કરો' : 'Print Report'}
+            </span>
           </button>
         </div>
       </div>
@@ -79,21 +103,31 @@ export default function HSEOverviewPage() {
               <strong className="text-[14px] block">
                 {language === 'hi'
                   ? `${openAlerts.length} अपुष्ट सुरक्षा सीमा अलर्ट`
+                  : language === 'kn'
+                  ? `${openAlerts.length} ದೃಢೀಕರಿಸದ ಸುರಕ್ಷತಾ ಮಿತಿ ಎಚ್ಚರಿಕೆಗಳು`
+                  : language === 'gu'
+                  ? `${openAlerts.length} અચકાસાયેલ સુરક્ષા મર્યાદા ચેતવણીઓ`
                   : `${openAlerts.length} Unacknowledged Safety Limit Alert${openAlerts.length > 1 ? 's' : ''}`}
               </strong>
               <span className="text-[12px] text-[#A94442]/90">
                 {language === 'hi'
                   ? 'कर्मचारी डोसीमीटर सीमा उल्लंघन पर पर्यवेक्षी कार्रवाई की आवश्यकता है।'
+                  : language === 'kn'
+                  ? 'ಸಿಬ್ಬಂದಿ ಡೋಸಿಮೀಟರ್ ಮಿತಿ ಉಲ್ಲಂಘನೆಗೆ ಮೇಲ್ವಿಚಾರಣಾ ಕ್ರಮ ಅಗತ್ಯವಿದೆ.'
+                  : language === 'gu'
+                  ? 'કર્મચારી ડોસિમીટર મર્યાદા ઉલ્લંઘન માટે સુપરવાઇઝરી પગલાંની જરૂર છે.'
                   : 'Personnel dosimeter threshold exceedances require supervisory triage.'}
               </span>
             </div>
           </div>
 
           <Link
-            href="/hse"
-            className="gov-btn-primary bg-[#A94442] hover:bg-[#8F3331] text-white text-[12px] sm:text-[13px] h-8 px-3.5 self-start sm:self-auto shadow-xs"
+            href="/hse/alerts"
+            className="gov-btn-primary bg-[#A94442] hover:bg-[#8F3331] text-white text-[12px] sm:text-[13px] h-8 px-3.5 self-start sm:self-auto shadow-xs cursor-pointer"
           >
-            <span>{language === 'hi' ? 'समीक्षा व स्वीकार करें →' : 'Review & Acknowledge →'}</span>
+            <span>
+              {language === 'hi' ? 'समीक्षा व स्वीकार करें →' : language === 'kn' ? 'ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಒಪ್ಪಿಕೊಳ್ಳಿ →' : language === 'gu' ? 'સમીક્ષા કરો અને સ્વીકારો →' : 'Review & Acknowledge →'}
+            </span>
           </Link>
         </div>
       )}
@@ -109,7 +143,7 @@ export default function HSEOverviewPage() {
             {uniqueWorkers || 5}
           </div>
           <span className="text-[11px] sm:text-[12px] text-[#596158] block truncate pt-0.5">
-            {language === 'hi' ? 'ज़ोन ए में सक्रिय' : 'Active in Zone A'}
+            {language === 'hi' ? 'ज़ोन ए में सक्रिय' : language === 'kn' ? 'ವಲಯ A ನಲ್ಲಿ ಸಕ್ರಿಯ' : language === 'gu' ? 'ઝોન A માં સક્રિય' : 'Active in Zone A'}
           </span>
         </div>
 
@@ -121,7 +155,7 @@ export default function HSEOverviewPage() {
             {scans.length}
           </div>
           <span className="text-[11px] sm:text-[12px] text-[#35551F] font-semibold block truncate pt-0.5">
-            {validScans.length} {language === 'hi' ? 'वैध' : 'Valid'} ({((validScans.length / Math.max(1, scans.length)) * 100).toFixed(0)}%)
+            {validScans.length} {language === 'hi' ? 'वैध' : language === 'kn' ? 'ಮಾನ್ಯ' : language === 'gu' ? 'માન્ય' : 'Valid'} ({((validScans.length / Math.max(1, scans.length)) * 100).toFixed(0)}%)
           </span>
         </div>
 
@@ -133,7 +167,7 @@ export default function HSEOverviewPage() {
             {riskCounts.high + riskCounts.critical}
           </div>
           <span className="text-[11px] sm:text-[12px] text-[#A94442] font-semibold block truncate pt-0.5">
-            {riskCounts.critical} {language === 'hi' ? 'गंभीर (>20 ppm·h)' : 'Critical (>20 ppm·h)'}
+            {riskCounts.critical} {language === 'hi' ? 'गंभीर (>20 ppm·h)' : language === 'kn' ? 'ತುರ್ತು (>20 ppm·h)' : language === 'gu' ? 'ગંભીર (>20 ppm·h)' : 'Critical (>20 ppm·h)'}
           </span>
         </div>
 
@@ -145,7 +179,9 @@ export default function HSEOverviewPage() {
             {openAlerts.length}
           </div>
           <span className="text-[11px] sm:text-[12px] text-[#596158] block truncate pt-0.5">
-            {openAlerts.length > 0 ? (language === 'hi' ? 'कार्रवाई आवश्यक' : 'Requires Action') : (language === 'hi' ? 'सभी सामान्य' : 'All Clear')}
+            {openAlerts.length > 0 
+              ? (language === 'hi' ? 'कार्रवाई आवश्यक' : language === 'kn' ? 'ಕ್ರಮ ಅಗತ್ಯ' : language === 'gu' ? 'પગલું જરૂરી' : 'Requires Action') 
+              : (language === 'hi' ? 'सभी सामान्य' : language === 'kn' ? 'ಎಲ್ಲವೂ ಸಾಮಾನ್ಯ' : language === 'gu' ? 'બધું સામાન્ય' : 'All Clear')}
           </span>
         </div>
 

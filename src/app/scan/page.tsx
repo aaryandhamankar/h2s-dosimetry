@@ -21,13 +21,11 @@ import {
   Printer, 
   ChevronDown, 
   Cpu, 
-  User, 
-  History, 
   X, 
   XCircle, 
   Edit3, 
   Save, 
-  BarChart3 
+  History as HistoryIcon 
 } from 'lucide-react';
 import { useAppStore } from '@/stores/app-store';
 import { DemoScenario, RiskStatus, ValidityStatus, ProcessingStatus, Scan } from '@/types';
@@ -36,6 +34,29 @@ import { formatDateTime, formatDose, getValidityLabel } from '@/lib/utils';
 import { sfx } from '@/lib/sound-effects';
 import Image from 'next/image';
 import mrplLogo from '../../../public/mrpl-logo.png';
+
+function getScenarioBadgeImage(scenario: DemoScenario): string {
+  const colors: Record<DemoScenario, string> = {
+    [DemoScenario.NORMAL]: '#E8ECE2',
+    [DemoScenario.ELEVATED]: '#C8B18A',
+    [DemoScenario.HIGH]: '#8B6237',
+    [DemoScenario.CRITICAL]: '#3B2818',
+    [DemoScenario.INVALID]: '#E0DCD4',
+    [DemoScenario.OUT_OF_RANGE]: '#1F140D',
+  };
+  const sensorColor = colors[scenario] || '#E8ECE2';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="240" height="180" viewBox="0 0 240 180">
+    <rect width="240" height="180" rx="14" fill="#1C241C"/>
+    <rect x="15" y="15" width="210" height="150" rx="10" fill="#FAF6EE" stroke="#D8D0C0" stroke-width="2"/>
+    <rect x="25" y="30" width="85" height="115" rx="6" fill="${sensorColor}" stroke="#596158" stroke-width="1.5"/>
+    <rect x="125" y="30" width="40" height="50" rx="3" fill="#FFFFFF" stroke="#D8D0C0" stroke-width="1.5"/>
+    <rect x="175" y="30" width="40" height="50" rx="3" fill="#7A8178" stroke="#D8D0C0" stroke-width="1.5"/>
+    <rect x="125" y="95" width="40" height="50" rx="3" fill="#00A3E0" stroke="#D8D0C0" stroke-width="1.5"/>
+    <rect x="175" y="95" width="40" height="50" rx="3" fill="#E4007C" stroke="#D8D0C0" stroke-width="1.5"/>
+    <text x="32" y="138" font-family="monospace" font-size="9" fill="#263026" font-weight="bold">H2S SENSOR</text>
+  </svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
 
 const STAGE_ORDER: ProcessingStatus[] = [
   ProcessingStatus.VALIDATING_IMAGE,
@@ -48,7 +69,7 @@ const STAGE_ORDER: ProcessingStatus[] = [
   ProcessingStatus.VALIDATING_RESULT,
 ];
 
-const STAGE_LABELS: Record<'en' | 'hi', Record<ProcessingStatus, string>> = {
+const STAGE_LABELS: Record<'en' | 'hi' | 'kn' | 'gu', Record<ProcessingStatus, string>> = {
   en: {
     [ProcessingStatus.CAPTURED]: 'Photo Captured',
     [ProcessingStatus.VALIDATING_IMAGE]: '1. Validating Sharpness & Glare',
@@ -76,6 +97,34 @@ const STAGE_LABELS: Record<'en' | 'hi', Record<ProcessingStatus, string>> = {
     [ProcessingStatus.COMPLETE]: 'सत्यापन पूर्ण',
     [ProcessingStatus.INVALID]: 'गुणवत्ता अस्वीकृति',
     [ProcessingStatus.ERROR]: 'प्रसंस्करण त्रुटि',
+  },
+  kn: {
+    [ProcessingStatus.CAPTURED]: 'ಫೋಟೋ ಸೆರೆಹಿಡಿಯಲಾಗಿದೆ',
+    [ProcessingStatus.VALIDATING_IMAGE]: '1. ತೀಕ್ಷ್ಣತೆ ಮತ್ತು ಹೊಳಪಿನ ಮೌಲ್ಯಮಾಪನ',
+    [ProcessingStatus.DETECTING_DOSIMETER]: '2. ಸಂವೇದಕ ಗಡಿ ಪತ್ತೆ',
+    [ProcessingStatus.EXTRACTING_ROI]: '3. 4-ಪ್ಯಾಚ್ ಗ್ರಿಡ್ ಹೊರತೆಗೆಯುವಿಕೆ',
+    [ProcessingStatus.ANALYZING_REFERENCES]: '4. Bradford ಹೊಂದಾಣಿಕೆ ಲೆಕ್ಕಾಚಾರ',
+    [ProcessingStatus.CORRECTING_COLOR]: '5. ISO D65 ಗೆ ಸಾಮಾನ್ಯೀಕರಣ',
+    [ProcessingStatus.EXTRACTING_FEATURES]: '6. CIELAB ΔE*ab ಮಾಪನ',
+    [ProcessingStatus.RUNNING_INFERENCE]: '7. ಎಕ್ಸ್‌ಪೋಶರ್ ಡೋಸ್ ಲೆಕ್ಕಾಚಾರ',
+    [ProcessingStatus.VALIDATING_RESULT]: '8. ಸುರಕ್ಷತಾ ಅನುಸರಣೆ ಪ್ರಮಾಣೀಕರಣ',
+    [ProcessingStatus.COMPLETE]: 'ಪರಿಶೀಲನೆ ಪೂರ್ಣಗೊಂಡಿದೆ',
+    [ProcessingStatus.INVALID]: 'ಗುಣಮಟ್ಟ ತಿರಸ್ಕಾರ',
+    [ProcessingStatus.ERROR]: 'ಪ್ರಕ್ರಿಯೆ ದೋಷ',
+  },
+  gu: {
+    [ProcessingStatus.CAPTURED]: 'ફોટો કેપ્ચર કર્યો',
+    [ProcessingStatus.VALIDATING_IMAGE]: '1. તીક્ષ્ણતા અને ચમકની ચકાસણી',
+    [ProcessingStatus.DETECTING_DOSIMETER]: '2. સેન્સર સીમા નક્કી કરવી',
+    [ProcessingStatus.EXTRACTING_ROI]: '3. 4-પેચ ગ્રીડ નિષ્કર્ષણ',
+    [ProcessingStatus.ANALYZING_REFERENCES]: '4. Bradford અનુકૂલન ગણતરી',
+    [ProcessingStatus.CORRECTING_COLOR]: '5. ISO D65 સામાન્યકરણ',
+    [ProcessingStatus.EXTRACTING_FEATURES]: '6. CIELAB ΔE*ab માપન',
+    [ProcessingStatus.RUNNING_INFERENCE]: '7. એક્સપોઝર ડોઝની ગણતરી',
+    [ProcessingStatus.VALIDATING_RESULT]: '8. સુરક્ષા અનુપાલન પ્રમાણીકરણ',
+    [ProcessingStatus.COMPLETE]: 'ચકાસણી પૂર્ણ',
+    [ProcessingStatus.INVALID]: 'ગુણવત્તા અસ્વીકાર',
+    [ProcessingStatus.ERROR]: 'પ્રક્રિયા ભૂલ',
   },
 };
 
@@ -124,7 +173,27 @@ function ScanPageContent() {
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [cameraRetryCount, setCameraRetryCount] = useState(0);
 
+  const turnOffTorch = async () => {
+    if (mediaStream) {
+      const track = mediaStream.getVideoTracks()[0];
+      if (track) {
+        try {
+          const capabilities = (track.getCapabilities ? track.getCapabilities() : {}) as { torch?: boolean };
+          if (capabilities.torch) {
+            await track.applyConstraints({
+              advanced: [{ torch: false } as MediaTrackConstraintSet]
+            });
+          }
+        } catch (e) {
+          console.warn('Torch turn-off error:', e);
+        }
+      }
+    }
+    setTorchOn(false);
+  };
+
   const stopCamera = () => {
+    turnOffTorch();
     if (mediaStream) {
       mediaStream.getTracks().forEach(track => track.stop());
       setMediaStream(null);
@@ -168,7 +237,8 @@ function ScanPageContent() {
     stopCamera();
     setCurrentScan(null);
     setActiveScenarioTitle(title);
-    setCapturedPhotoUrl(imageUrl || null);
+    const finalImageUrl = imageUrl || getScenarioBadgeImage(scenario);
+    setCapturedPhotoUrl(finalImageUrl);
     setCompletedStages([]);
     setCurrentStage(ProcessingStatus.VALIDATING_IMAGE);
     setScreenState('processing');
@@ -192,7 +262,7 @@ function ScanPageContent() {
             sfx.playStepTick(stepIdx + 1);
           }
         },
-        imageUrl || null
+        finalImageUrl
       );
 
       // Ensure all 8 stage labels are marked complete on finished
@@ -226,6 +296,8 @@ function ScanPageContent() {
   // Live Camera Capture with Shutter Sound
   const handleCapture = () => {
     sfx.playCameraShutter();
+    // Turn off torch automatically after clicking a picture
+    turnOffTorch();
 
     if (!videoRef.current || !canvasRef.current) {
       executePipeline(
@@ -341,6 +413,7 @@ function ScanPageContent() {
   }, [scenarioParam, timestampParam, language]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    turnOffTorch();
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
@@ -466,24 +539,13 @@ function ScanPageContent() {
       {screenState === 'viewfinder' && (
         <div className="space-y-4">
           
-          {/* Header Bar */}
-          <div className="flex items-center justify-between">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#596158] hover:text-[#263026] p-1 rounded-md transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>{language === 'hi' ? 'होम' : 'Home'}</span>
-            </Link>
-          </div>
-
-          {/* Clean Title */}
-          <div className="text-center space-y-0.5">
+          {/* Clean Title & Guidance */}
+          <div className="text-center space-y-0.5 pt-1">
             <h1 className="text-[22px] sm:text-[26px] font-black text-[#263026]">
               {language === 'hi' ? 'रिस्टबैंड स्कैन करें' : 'Scan Wristband'}
             </h1>
-            <p className="text-[13px] text-[#596158]">
-              {language === 'hi' ? 'रिस्टबैंड को फ्रेम के अंदर रखें' : 'Align the wristband inside the frame'}
+            <p className="text-[13px] sm:text-[14px] text-[#596158]">
+              {language === 'hi' ? 'रिस्टबैंड को फ्रेम के अंदर रखें।' : 'Position the wristband inside the frame.'}
             </p>
           </div>
 
@@ -581,39 +643,6 @@ function ScanPageContent() {
                 <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
               </label>
             </div>
-          </div>
-
-          {/* Clean Dedicated Worker Ledger & Profile Option */}
-          <div className="pt-2 border-t border-[#E8E2D5]">
-            <button
-              onClick={() => {
-                setEditName(currentUser?.displayName || 'Rajesh Kumar');
-                setEditDept(currentUser?.department || 'Operations');
-                setEditSite(currentUser?.site || 'Refinery Zone A');
-                setEditCode(currentUser?.workerCode || 'W-001');
-                setWorkerModalOpen(true);
-              }}
-              className="w-full p-3 bg-white hover:bg-[#FAF7F0] border border-[#E8E2D5] hover:border-[#5C822D] rounded-xl flex items-center justify-between gap-3 text-left transition-all shadow-2xs group"
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-lg bg-[#EDF3E4] text-[#5C822D] flex items-center justify-center font-bold text-[13px] flex-shrink-0 group-hover:bg-[#5C822D] group-hover:text-white transition-colors">
-                  <User size={16} />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[13px] font-bold text-[#263026] group-hover:text-[#35551F] truncate transition-colors">
-                    {currentUser?.displayName || 'Rajesh Kumar'} ({currentUser?.workerCode || 'W-001'})
-                  </div>
-                  <div className="text-[11px] text-[#7A8178] truncate">
-                    {currentUser?.department || 'Operations'} · {currentUser?.site || 'Zone A'} · {workerScans.length} {language === 'hi' ? 'दर्ज स्कैन' : 'logged scans'}
-                  </div>
-                </div>
-              </div>
-
-              <span className="text-[11px] font-bold text-[#5C822D] group-hover:underline flex items-center gap-1 flex-shrink-0 transition-colors">
-                <History size={13} />
-                <span>{language === 'hi' ? 'इतिहास व प्रोफ़ाइल देखें →' : 'View History & Profile →'}</span>
-              </span>
-            </button>
           </div>
 
         </div>
@@ -841,11 +870,11 @@ function ScanPageContent() {
               </button>
 
               <Link
-                href="/dashboard"
+                href="/worker/history"
                 className="gov-btn-secondary h-12 text-[15px] font-bold justify-center rounded-xl border-2 border-[#D8D0C0] hover:border-[#5C822D] hover:text-[#263026] hover:bg-[#FAF7F0] transition-all"
               >
-                <BarChart3 className="w-5 h-5 text-[#5C822D]" />
-                <span>{language === 'hi' ? 'डैशबोर्ड स्नैपशॉट देखें' : 'View Dashboard Snapshot'}</span>
+                <HistoryIcon className="w-5 h-5 text-[#5C822D]" />
+                <span>{language === 'hi' ? 'इतिहास देखें' : 'View History'}</span>
               </Link>
             </div>
 
