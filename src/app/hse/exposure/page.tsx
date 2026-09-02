@@ -48,7 +48,7 @@ export default function HSEExposurePage() {
     workerTotals[workerKey].maxDose = Math.max(workerTotals[workerKey].maxDose, dose);
   });
 
-  const workerBarData = Object.entries(workerTotals).map(([workerId, stats]) => ({
+  const workerBarData = Object.values(workerTotals).map((stats) => ({
     workerId: stats.displayName,
     avgDose: Math.round((stats.sumDose / stats.count) * 10) / 10,
     maxDose: stats.maxDose,

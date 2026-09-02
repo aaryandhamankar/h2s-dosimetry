@@ -29,6 +29,152 @@ const ALL_SCENARIOS = Object.values(DemoScenario);
 
 type AdminTab = 'scenarios' | 'sequence' | 'mapping' | 'shift';
 
+interface SequenceTabContentProps {
+  demoSequence: DemoScenario[];
+  sequenceCursor: number;
+  setDemoSequence: (seq: DemoScenario[]) => void;
+  setSequenceCursor: (cur: number) => void;
+}
+
+function SequenceTabContent({
+  demoSequence,
+  sequenceCursor,
+  setDemoSequence,
+  setSequenceCursor,
+}: SequenceTabContentProps) {
+  const [localSequence, setLocalSequence] = useState<DemoScenario[]>([...demoSequence]);
+
+  const saveSequence = () => {
+    if (localSequence.length === 0) return;
+    setDemoSequence(localSequence);
+    sfx.playClick();
+  };
+
+  const removeFromSequence = (idx: number) => {
+    setLocalSequence(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const addToSequence = (scenario: DemoScenario) => {
+    setLocalSequence(prev => [...prev, scenario]);
+  };
+
+  const moveUp = (idx: number) => {
+    if (idx === 0) return;
+    setLocalSequence(prev => {
+      const next = [...prev];
+      [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
+      return next;
+    });
+  };
+
+  const moveDown = (idx: number) => {
+    setLocalSequence(prev => {
+      if (idx === prev.length - 1) return prev;
+      const next = [...prev];
+      [next[idx + 1], next[idx]] = [next[idx], next[idx + 1]];
+      return next;
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="font-bold text-[#263026] text-[13px]">Demo Scan Sequence</div>
+          <div className="text-[11.5px] text-[#596158] mt-0.5">
+            Reorder, add, or remove scenarios. The cursor advances after each scan.
+          </div>
+        </div>
+        <button
+          onClick={() => { setLocalSequence([...DEFAULT_DEMO_SEQUENCE]); sfx.playClick(); }}
+          className="gov-btn-secondary text-[11px] h-7 px-2.5 flex items-center gap-1 shrink-0 cursor-pointer"
+        >
+          <RotateCcw size={11} /> Default
+        </button>
+      </div>
+
+      {/* Sequence list */}
+      <div className="space-y-1.5">
+        {localSequence.map((scenario, idx) => {
+          const meta = SCENARIO_META[scenario];
+          const isCurrent = idx === sequenceCursor;
+          return (
+            <div
+              key={idx}
+              className={`flex items-center gap-2 p-2 rounded-lg border ${isCurrent ? 'border-[#5C822D] bg-[#EDF3E4]' : 'border-[#E8E2D5] bg-[#FAF7F0]'}`}
+            >
+              <GripVertical size={14} className="text-[#D8D2C2] shrink-0" />
+              <span className="w-5 text-[11px] text-[#7A8178] font-mono text-center shrink-0">{idx + 1}</span>
+              <div className="flex-1 font-semibold text-[12px]" style={{ color: meta.color }}>{meta.label}</div>
+              {isCurrent && <span className="text-[9px] font-bold text-[#5C822D] bg-white border border-[#5C822D] rounded px-1 shrink-0">CURSOR</span>}
+              <div className="flex items-center gap-1 shrink-0">
+                <button onClick={() => moveUp(idx)} disabled={idx === 0} className="p-1 rounded hover:bg-[#E8E2D5] disabled:opacity-30 cursor-pointer" title="Move up">↑</button>
+                <button onClick={() => moveDown(idx)} disabled={idx === localSequence.length - 1} className="p-1 rounded hover:bg-[#E8E2D5] disabled:opacity-30 cursor-pointer" title="Move down">↓</button>
+                <button
+                  onClick={() => removeFromSequence(idx)}
+                  className="p-1 rounded hover:bg-[#F8ECEC] text-[#A94442] cursor-pointer"
+                  title="Remove"
+                >
+                  <X size={13} />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Add scenario */}
+      <div className="space-y-1.5">
+        <div className="text-[11.5px] font-bold text-[#596158]">Add to sequence:</div>
+        <div className="flex flex-wrap gap-1.5">
+          {ALL_SCENARIOS.map(scenario => {
+            const meta = SCENARIO_META[scenario];
+            return (
+              <button
+                key={scenario}
+                onClick={() => { addToSequence(scenario); sfx.playClick(); }}
+                className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full border border-[#E8E2D5] bg-white hover:border-[#BCCFB0] transition-colors cursor-pointer"
+                style={{ color: meta.color }}
+              >
+                + {meta.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Jump to step */}
+      <div className="flex items-center gap-2 p-3 bg-[#FAF7F0] border border-[#E8E2D5] rounded-xl">
+        <div className="font-bold text-[#263026] text-[12.5px] shrink-0">Jump to step:</div>
+        <div className="flex flex-wrap gap-1.5">
+          {localSequence.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => { sfx.playClick(); setSequenceCursor(idx); }}
+              className={`w-7 h-7 rounded-lg text-[11px] font-bold border transition-colors cursor-pointer ${
+                idx === sequenceCursor
+                  ? 'bg-[#5C822D] border-[#5C822D] text-white'
+                  : 'bg-white border-[#E8E2D5] text-[#263026] hover:border-[#BCCFB0]'
+              }`}
+            >
+              {idx + 1}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Save */}
+      <button
+        onClick={saveSequence}
+        disabled={localSequence.length === 0}
+        className="w-full py-2 rounded-xl bg-[#5C822D] text-white font-bold text-[13px] hover:bg-[#4A6B24] transition-colors disabled:opacity-40 cursor-pointer"
+      >
+        Save Sequence
+      </button>
+    </div>
+  );
+}
+
 // ─── Main component ──────────────────────────────────────────────────────────
 
 export function DemoControlPanel() {
@@ -36,6 +182,7 @@ export function DemoControlPanel() {
   const [adminOpen, setAdminOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<AdminTab>('scenarios');
   const router = useRouter();
+  const navSeqRef = useRef(0);
 
   const { resetDemo, setShiftElapsedMinutes, language } = useAppStore();
 
@@ -78,10 +225,11 @@ export function DemoControlPanel() {
   }, []);
 
   // ── Trigger scenario ─────────────────────────────────────────────────────
-  const triggerScenario = (scenario: DemoScenario) => {
+  const handleTriggerScenario = (scenario: DemoScenario) => {
     sfx.playClick();
     setOpen(false);
-    router.push(`/scan?scenario=${scenario}&t=${Date.now()}`);
+    navSeqRef.current += 1;
+    router.push(`/scan?scenario=${scenario}&t=${navSeqRef.current}`);
   };
 
   const handleReset = () => {
@@ -91,42 +239,6 @@ export function DemoControlPanel() {
     setOpen(false);
     setAdminOpen(false);
     router.push('/');
-  };
-
-  // ── Sequence editor state ─────────────────────────────────────────────────
-  const [localSequence, setLocalSequence] = useState<DemoScenario[]>([...demoSequence]);
-  useEffect(() => { setLocalSequence([...demoSequence]); }, [demoSequence, adminOpen]);
-
-  const saveSequence = () => {
-    if (localSequence.length === 0) return;
-    setDemoSequence(localSequence);
-    sfx.playClick();
-  };
-
-  const removeFromSequence = (idx: number) => {
-    setLocalSequence(prev => prev.filter((_, i) => i !== idx));
-  };
-
-  const addToSequence = (scenario: DemoScenario) => {
-    setLocalSequence(prev => [...prev, scenario]);
-  };
-
-  const moveUp = (idx: number) => {
-    if (idx === 0) return;
-    setLocalSequence(prev => {
-      const next = [...prev];
-      [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
-      return next;
-    });
-  };
-
-  const moveDown = (idx: number) => {
-    setLocalSequence(prev => {
-      if (idx === prev.length - 1) return prev;
-      const next = [...prev];
-      [next[idx + 1], next[idx]] = [next[idx], next[idx + 1]];
-      return next;
-    });
   };
 
   // ── Mapping editor state ──────────────────────────────────────────────────
@@ -220,7 +332,7 @@ export function DemoControlPanel() {
                 return (
                   <button
                     key={scenario}
-                    onClick={() => triggerScenario(scenario)}
+                    onClick={() => handleTriggerScenario(scenario)}
                     className={`p-3 rounded-xl border text-left transition-all space-y-0.5 cursor-pointer relative ${
                       isCurrentSeq
                         ? 'bg-[#EDF3E4] border-[#5C822D] ring-1 ring-[#5C822D]'
@@ -428,101 +540,12 @@ export function DemoControlPanel() {
 
               {/* ── Tab: Sequence ── */}
               {activeTab === 'sequence' && (
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="font-bold text-[#263026] text-[13px]">Demo Scan Sequence</div>
-                      <div className="text-[11.5px] text-[#596158] mt-0.5">
-                        Reorder, add, or remove scenarios. The cursor advances after each scan.
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => { setLocalSequence([...DEFAULT_DEMO_SEQUENCE]); sfx.playClick(); }}
-                      className="gov-btn-secondary text-[11px] h-7 px-2.5 flex items-center gap-1 shrink-0 cursor-pointer"
-                    >
-                      <RotateCcw size={11} /> Default
-                    </button>
-                  </div>
-
-                  {/* Sequence list */}
-                  <div className="space-y-1.5">
-                    {localSequence.map((scenario, idx) => {
-                      const meta = SCENARIO_META[scenario];
-                      const isCurrent = idx === sequenceCursor;
-                      return (
-                        <div
-                          key={idx}
-                          className={`flex items-center gap-2 p-2 rounded-lg border ${isCurrent ? 'border-[#5C822D] bg-[#EDF3E4]' : 'border-[#E8E2D5] bg-[#FAF7F0]'}`}
-                        >
-                          <GripVertical size={14} className="text-[#D8D2C2] shrink-0" />
-                          <span className="w-5 text-[11px] text-[#7A8178] font-mono text-center shrink-0">{idx + 1}</span>
-                          <div className="flex-1 font-semibold text-[12px]" style={{ color: meta.color }}>{meta.label}</div>
-                          {isCurrent && <span className="text-[9px] font-bold text-[#5C822D] bg-white border border-[#5C822D] rounded px-1 shrink-0">CURSOR</span>}
-                          <div className="flex items-center gap-1 shrink-0">
-                            <button onClick={() => moveUp(idx)} disabled={idx === 0} className="p-1 rounded hover:bg-[#E8E2D5] disabled:opacity-30 cursor-pointer" title="Move up">↑</button>
-                            <button onClick={() => moveDown(idx)} disabled={idx === localSequence.length - 1} className="p-1 rounded hover:bg-[#E8E2D5] disabled:opacity-30 cursor-pointer" title="Move down">↓</button>
-                            <button
-                              onClick={() => removeFromSequence(idx)}
-                              className="p-1 rounded hover:bg-[#F8ECEC] text-[#A94442] cursor-pointer"
-                              title="Remove"
-                            >
-                              <X size={13} />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Add scenario */}
-                  <div className="space-y-1.5">
-                    <div className="text-[11.5px] font-bold text-[#596158]">Add to sequence:</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {ALL_SCENARIOS.map(scenario => {
-                        const meta = SCENARIO_META[scenario];
-                        return (
-                          <button
-                            key={scenario}
-                            onClick={() => { addToSequence(scenario); sfx.playClick(); }}
-                            className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full border border-[#E8E2D5] bg-white hover:border-[#BCCFB0] transition-colors cursor-pointer"
-                            style={{ color: meta.color }}
-                          >
-                            + {meta.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Jump to step */}
-                  <div className="flex items-center gap-2 p-3 bg-[#FAF7F0] border border-[#E8E2D5] rounded-xl">
-                    <div className="font-bold text-[#263026] text-[12.5px] shrink-0">Jump to step:</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {localSequence.map((_, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => { sfx.playClick(); setSequenceCursor(idx); }}
-                          className={`w-7 h-7 rounded-lg text-[11px] font-bold border transition-colors cursor-pointer ${
-                            idx === sequenceCursor
-                              ? 'bg-[#5C822D] border-[#5C822D] text-white'
-                              : 'bg-white border-[#E8E2D5] text-[#263026] hover:border-[#BCCFB0]'
-                          }`}
-                        >
-                          {idx + 1}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Save */}
-                  <button
-                    onClick={saveSequence}
-                    disabled={localSequence.length === 0}
-                    className="w-full py-2 rounded-xl bg-[#5C822D] text-white font-bold text-[13px] hover:bg-[#4A6B24] transition-colors disabled:opacity-40 cursor-pointer"
-                  >
-                    Save Sequence
-                  </button>
-                </div>
+                <SequenceTabContent
+                  demoSequence={demoSequence}
+                  sequenceCursor={sequenceCursor}
+                  setDemoSequence={setDemoSequence}
+                  setSequenceCursor={setSequenceCursor}
+                />
               )}
 
               {/* ── Tab: Code Mapping ── */}

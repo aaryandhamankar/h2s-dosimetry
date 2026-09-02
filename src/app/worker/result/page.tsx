@@ -19,7 +19,6 @@ import { useState, Suspense } from 'react';
 import { formatDateTime, formatDose, getValidityLabel } from '@/lib/utils';
 import { ValidityStatus, RiskStatus, DemoScenario } from '@/types';
 import Link from 'next/link';
-import Image from 'next/image';
 
 function getFallbackBadgeThumbnail(riskStatus?: RiskStatus): string {
   const colors: Record<string, string> = {

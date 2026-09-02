@@ -1,24 +1,16 @@
 'use client';
 
 import { useState, useEffect, useMemo, useSyncExternalStore } from 'react';
-import { usePathname } from 'next/navigation';
 import { useAppStore } from '@/stores/app-store';
-import { ShiftStatus } from '@/types';
 import { sfx } from '@/lib/sound-effects';
 import { useMounted } from '@/hooks/use-mounted';
-import { determineActiveShift, ShiftConfig, DEFAULT_SHIFT_CONFIGS } from '@/services/shift-service';
+import { determineActiveShift, DEFAULT_SHIFT_CONFIGS } from '@/services/shift-service';
 import { 
   Timer, 
-  Play, 
-  Pause, 
-  Square, 
   Edit3, 
   Check, 
   X,
-  Clock,
-  Sparkles,
-  Calendar,
-  Layers
+  Sparkles
 } from 'lucide-react';
 
 // Stable global second ticker to guarantee zero infinite render loops
@@ -47,18 +39,142 @@ function getServerSnapshot() {
   return 0;
 }
 
+interface ShiftScheduleFormProps {
+  shiftAConfig: { startTime: string; endTime: string };
+  shiftBConfig: { startTime: string; endTime: string };
+  onSave: (a: { startTime: string; endTime: string }, b: { startTime: string; endTime: string }) => void;
+  onCancel: () => void;
+  onResetDefaults: () => void;
+  language: string;
+}
+
+function ShiftScheduleForm({
+  shiftAConfig,
+  shiftBConfig,
+  onSave,
+  onCancel,
+  onResetDefaults,
+  language,
+}: ShiftScheduleFormProps) {
+  const [shiftAStart, setShiftAStart] = useState(shiftAConfig.startTime);
+  const [shiftAEnd, setShiftAEnd] = useState(shiftAConfig.endTime);
+  const [shiftBStart, setShiftBStart] = useState(shiftBConfig.startTime);
+  const [shiftBEnd, setShiftBEnd] = useState(shiftBConfig.endTime);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    sfx.playClick();
+    onSave({ startTime: shiftAStart, endTime: shiftAEnd }, { startTime: shiftBStart, endTime: shiftBEnd });
+  };
+
+  const handleReset = () => {
+    sfx.playClick();
+    setShiftAStart('06:00');
+    setShiftAEnd('14:00');
+    setShiftBStart('14:00');
+    setShiftBEnd('06:00');
+    onResetDefaults();
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 bg-[#FAFBF9] p-4 rounded-2xl border border-[#E7E5DE] animate-in fade-in duration-150">
+      <div className="flex items-center justify-between border-b border-[#E7E5DE] pb-2">
+        <span className="font-bold text-[13px] text-[#263026]">
+          {language === 'hi' ? 'शिफ्ट समय अनुकूलन' : 'Configure Shift Hours'}
+        </span>
+        <button
+          type="button"
+          onClick={handleReset}
+          className="text-[11px] text-[#5C822D] hover:underline font-semibold cursor-pointer"
+        >
+          Reset Defaults
+        </button>
+      </div>
+
+      {/* Shift A Inputs */}
+      <div className="space-y-1.5">
+        <span className="text-[12px] font-bold text-[#35551F] block">
+          Shift A (Morning/Day):
+        </span>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="text-[10.5px] text-[#7A8178] block font-medium mb-1">Start Time</label>
+            <input 
+              type="time" 
+              value={shiftAStart}
+              onChange={(e) => setShiftAStart(e.target.value)}
+              className="w-full p-2 border border-[#D8D2C2] rounded-lg text-[13px] font-mono bg-white text-[#263026] focus:outline-2 focus:outline-[#5C822D]"
+              required
+            />
+          </div>
+          <div>
+            <label className="text-[10.5px] text-[#7A8178] block font-medium mb-1">End Time</label>
+            <input 
+              type="time" 
+              value={shiftAEnd}
+              onChange={(e) => setShiftAEnd(e.target.value)}
+              className="w-full p-2 border border-[#D8D2C2] rounded-lg text-[13px] font-mono bg-white text-[#263026] focus:outline-2 focus:outline-[#5C822D]"
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Shift B Inputs */}
+      <div className="space-y-1.5">
+        <span className="text-[12px] font-bold text-[#C96B32] block">
+          Shift B (Evening/Night):
+        </span>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="text-[10.5px] text-[#7A8178] block font-medium mb-1">Start Time</label>
+            <input 
+              type="time" 
+              value={shiftBStart}
+              onChange={(e) => setShiftBStart(e.target.value)}
+              className="w-full p-2 border border-[#D8D2C2] rounded-lg text-[13px] font-mono bg-white text-[#263026] focus:outline-2 focus:outline-[#5C822D]"
+              required
+            />
+          </div>
+          <div>
+            <label className="text-[10.5px] text-[#7A8178] block font-medium mb-1">End Time (Next Day)</label>
+            <input 
+              type="time" 
+              value={shiftBEnd}
+              onChange={(e) => setShiftBEnd(e.target.value)}
+              className="w-full p-2 border border-[#D8D2C2] rounded-lg text-[13px] font-mono bg-white text-[#263026] focus:outline-2 focus:outline-[#5C822D]"
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Buttons */}
+      <div className="flex gap-2 pt-2 border-t border-[#E7E5DE]">
+        <button
+          type="submit"
+          className="gov-btn-primary flex-1 h-10 text-[13px] font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+        >
+          <Check size={16} />
+          <span>{language === 'hi' ? 'सहेजें व लागू करें' : 'Save & Apply Schedule'}</span>
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="gov-btn-secondary h-10 px-4 text-[13px] rounded-xl cursor-pointer"
+        >
+          {language === 'hi' ? 'रद्द' : 'Cancel'}
+        </button>
+      </div>
+    </form>
+  );
+}
+
 export function ShiftTimer() {
   const mounted = useMounted();
-  const pathname = usePathname();
   const { 
     shiftConfigs,
     updateShiftConfig,
-    activeShift, 
-    currentUser, 
-    startShift, 
-    endShift, 
-    pauseShift, 
-    resumeShift, 
     shiftTimerModalOpen,
     setShiftTimerModalOpen,
     language 
@@ -83,19 +199,6 @@ export function ShiftTimer() {
     return (shiftConfigs || DEFAULT_SHIFT_CONFIGS).find(c => c.id === 'SHIFT-B') || DEFAULT_SHIFT_CONFIGS[1];
   }, [shiftConfigs]);
 
-  const [shiftAStart, setShiftAStart] = useState(shiftAConfig.startTime);
-  const [shiftAEnd, setShiftAEnd] = useState(shiftAConfig.endTime);
-  const [shiftBStart, setShiftBStart] = useState(shiftBConfig.startTime);
-  const [shiftBEnd, setShiftBEnd] = useState(shiftBConfig.endTime);
-
-  // Synchronize inputs when modal opens or configs change
-  useEffect(() => {
-    setShiftAStart(shiftAConfig.startTime);
-    setShiftAEnd(shiftAConfig.endTime);
-    setShiftBStart(shiftBConfig.startTime);
-    setShiftBEnd(shiftBConfig.endTime);
-  }, [shiftAConfig, shiftBConfig, shiftTimerModalOpen]);
-
   // Escape key listener for modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -109,20 +212,13 @@ export function ShiftTimer() {
 
   const { activeShift: currentShift, remainingFormatted, progressPercent, elapsedFormatted, isEndingSoon } = activeShiftData;
 
-  const handleSaveConfigs = (e: React.FormEvent) => {
-    e.preventDefault();
-    sfx.playClick();
-    updateShiftConfig('SHIFT-A', { startTime: shiftAStart, endTime: shiftAEnd });
-    updateShiftConfig('SHIFT-B', { startTime: shiftBStart, endTime: shiftBEnd });
+  const handleSaveConfigs = (a: { startTime: string; endTime: string }, b: { startTime: string; endTime: string }) => {
+    updateShiftConfig('SHIFT-A', a);
+    updateShiftConfig('SHIFT-B', b);
     setEditMode(false);
   };
 
   const handleResetDefaults = () => {
-    sfx.playClick();
-    setShiftAStart('06:00');
-    setShiftAEnd('14:00');
-    setShiftBStart('14:00');
-    setShiftBEnd('06:00');
     updateShiftConfig('SHIFT-A', { startTime: '06:00', endTime: '14:00' });
     updateShiftConfig('SHIFT-B', { startTime: '14:00', endTime: '06:00' });
     setEditMode(false);
@@ -298,97 +394,14 @@ export function ShiftTimer() {
                 </button>
               </div>
             ) : (
-              /* Editable Schedule Form */
-              <form onSubmit={handleSaveConfigs} className="space-y-4 bg-[#FAFBF9] p-4 rounded-2xl border border-[#E7E5DE] animate-in fade-in duration-150">
-                <div className="flex items-center justify-between border-b border-[#E7E5DE] pb-2">
-                  <span className="font-bold text-[13px] text-[#263026]">
-                    {language === 'hi' ? 'शिफ्ट समय अनुकूलन' : 'Configure Shift Hours'}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleResetDefaults}
-                    className="text-[11px] text-[#5C822D] hover:underline font-semibold cursor-pointer"
-                  >
-                    Reset Defaults
-                  </button>
-                </div>
-
-                {/* Shift A Inputs */}
-                <div className="space-y-1.5">
-                  <span className="text-[12px] font-bold text-[#35551F] block">
-                    Shift A (Morning/Day):
-                  </span>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[10.5px] text-[#7A8178] block font-medium mb-1">Start Time</label>
-                      <input 
-                        type="time" 
-                        value={shiftAStart}
-                        onChange={(e) => setShiftAStart(e.target.value)}
-                        className="w-full p-2 border border-[#D8D2C2] rounded-lg text-[13px] font-mono bg-white text-[#263026] focus:outline-2 focus:outline-[#5C822D]"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10.5px] text-[#7A8178] block font-medium mb-1">End Time</label>
-                      <input 
-                        type="time" 
-                        value={shiftAEnd}
-                        onChange={(e) => setShiftAEnd(e.target.value)}
-                        className="w-full p-2 border border-[#D8D2C2] rounded-lg text-[13px] font-mono bg-white text-[#263026] focus:outline-2 focus:outline-[#5C822D]"
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Shift B Inputs */}
-                <div className="space-y-1.5">
-                  <span className="text-[12px] font-bold text-[#C96B32] block">
-                    Shift B (Evening/Night):
-                  </span>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[10.5px] text-[#7A8178] block font-medium mb-1">Start Time</label>
-                      <input 
-                        type="time" 
-                        value={shiftBStart}
-                        onChange={(e) => setShiftBStart(e.target.value)}
-                        className="w-full p-2 border border-[#D8D2C2] rounded-lg text-[13px] font-mono bg-white text-[#263026] focus:outline-2 focus:outline-[#5C822D]"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10.5px] text-[#7A8178] block font-medium mb-1">End Time (Next Day)</label>
-                      <input 
-                        type="time" 
-                        value={shiftBEnd}
-                        onChange={(e) => setShiftBEnd(e.target.value)}
-                        className="w-full p-2 border border-[#D8D2C2] rounded-lg text-[13px] font-mono bg-white text-[#263026] focus:outline-2 focus:outline-[#5C822D]"
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Buttons */}
-                <div className="flex gap-2 pt-2 border-t border-[#E7E5DE]">
-                  <button
-                    type="submit"
-                    className="gov-btn-primary flex-1 h-10 text-[13px] font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
-                  >
-                    <Check size={16} />
-                    <span>{language === 'hi' ? 'सहेजें व लागू करें' : 'Save & Apply Schedule'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditMode(false)}
-                    className="gov-btn-secondary h-10 px-4 text-[13px] rounded-xl cursor-pointer"
-                  >
-                    {language === 'hi' ? 'रद्द' : 'Cancel'}
-                  </button>
-                </div>
-              </form>
+              <ShiftScheduleForm
+                shiftAConfig={shiftAConfig}
+                shiftBConfig={shiftBConfig}
+                onSave={handleSaveConfigs}
+                onCancel={() => setEditMode(false)}
+                onResetDefaults={handleResetDefaults}
+                language={language}
+              />
             )}
 
             {/* End-of-shift scanning reminder note */}

@@ -12,7 +12,7 @@ import {
   ShiftStatus
 } from '@/types';
 import { getDemoScans, getDemoAlerts, DEMO_WORKERS, DEMO_DOSIMETERS, DEMO_SHIFTS, HSE_USER } from '@/data/demo-data';
-import { ShiftConfig, DEFAULT_SHIFT_CONFIGS, determineActiveShift } from '@/services/shift-service';
+import { ShiftConfig, DEFAULT_SHIFT_CONFIGS } from '@/services/shift-service';
 
 import { Language } from '@/lib/i18n';
 

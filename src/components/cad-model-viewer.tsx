@@ -83,7 +83,9 @@ export function CADModelViewer({}: CADModelViewerProps = {}) {
   const [modelLoading, setModelLoading] = useState<boolean>(true);
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
   const [glbLoadError, setGlbLoadError] = useState<string | null>(null);
-  const [modelViewerReady, setModelViewerReady] = useState<boolean>(false);
+  const [modelViewerReady, setModelViewerReady] = useState<boolean>(
+    () => typeof window !== 'undefined' && Boolean(window.customElements?.get('model-viewer'))
+  );
 
   // Controls & Camera State (Default: Perspective, spinning, calibrated coordinates)
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>('perspective');
@@ -95,23 +97,20 @@ export function CADModelViewer({}: CADModelViewerProps = {}) {
 
   // 1. Dynamic Script Loading for Google Model-Viewer
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (customElements.get('model-viewer')) {
-        setModelViewerReady(true);
-      } else {
-        const existingScript = document.getElementById('google-model-viewer-script');
-        if (!existingScript) {
-          const script = document.createElement('script');
-          script.id = 'google-model-viewer-script';
-          script.type = 'module';
-          script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js';
-          script.async = true;
-          script.onload = () => setModelViewerReady(true);
-          document.head.appendChild(script);
-        } else {
-          existingScript.addEventListener('load', () => setModelViewerReady(true));
-        }
-      }
+    if (typeof window === 'undefined') return;
+    if (customElements.get('model-viewer')) return;
+
+    const existingScript = document.getElementById('google-model-viewer-script');
+    if (!existingScript) {
+      const script = document.createElement('script');
+      script.id = 'google-model-viewer-script';
+      script.type = 'module';
+      script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js';
+      script.async = true;
+      script.onload = () => setModelViewerReady(true);
+      document.head.appendChild(script);
+    } else {
+      existingScript.addEventListener('load', () => setModelViewerReady(true));
     }
   }, []);
 

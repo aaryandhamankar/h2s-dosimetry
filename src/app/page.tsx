@@ -2,28 +2,26 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { 
   Camera, 
   BarChart3, 
   ScanLine, 
-  LayoutDashboard, 
-  ArrowRight, 
-  Loader2 
+  ArrowRight,
+  LayoutDashboard
 } from 'lucide-react';
 import { useAppStore } from '@/stores/app-store';
 import { TRANSLATIONS } from '@/lib/i18n';
 import { sfx } from '@/lib/sound-effects';
 
 export default function HomePage() {
-  const router = useRouter();
   const { language } = useAppStore();
   const [navigatingTo, setNavigatingTo] = useState<'scanner' | 'hse' | null>(null);
 
   const t = TRANSLATIONS[language] || TRANSLATIONS.en;
 
-  const handleNavigate = () => {
+  const handleNavigate = (dest: 'scanner' | 'hse') => {
     sfx.playClick();
+    setNavigatingTo(dest);
     if (typeof window !== 'undefined' && 'vibrate' in navigator) {
       try {
         navigator.vibrate(20);
@@ -75,7 +73,7 @@ export default function HomePage() {
           {/* ════════════════════════════════════════════════════════════ */}
           <Link
             href="/scan"
-            onClick={handleNavigate}
+            onClick={() => handleNavigate('scanner')}
             className="group relative flex flex-col justify-between p-5 sm:p-6 md:p-7 rounded-3xl bg-gradient-to-br from-[#4D7324] via-[#3D5E1C] to-[#2E4814] text-white shadow-md hover:shadow-2xl hover:shadow-[#3D5E1C]/25 active:scale-[0.97] transition-all duration-300 text-left border-2 border-[#5E8A2C]/60 hover:border-[#86B84A] hover:-translate-y-1.5 overflow-hidden min-h-[215px] sm:min-h-[235px] md:min-h-[250px] cursor-pointer touch-manipulation"
           >
             {/* Ambient Radial Sheen */}
@@ -140,7 +138,7 @@ export default function HomePage() {
           {/* ════════════════════════════════════════════════════════════ */}
           <Link
             href="/hse"
-            onClick={handleNavigate}
+            onClick={() => handleNavigate('hse')}
             className="group relative flex flex-col justify-between p-5 sm:p-6 md:p-7 rounded-3xl bg-white hover:bg-[#FAF7F0] text-[#263026] shadow-md hover:shadow-2xl hover:shadow-[#5C822D]/15 active:scale-[0.97] transition-all duration-300 text-left border-2 border-[#E8E2D5] hover:border-[#5C822D] hover:-translate-y-1.5 overflow-hidden min-h-[215px] sm:min-h-[235px] md:min-h-[250px] cursor-pointer touch-manipulation"
           >
             {/* Ambient Soft Green Glow */}

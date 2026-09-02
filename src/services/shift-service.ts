@@ -1,5 +1,3 @@
-import { Shift, ShiftStatus } from '@/types';
-
 export interface ShiftConfig {
   id: string; // 'SHIFT-A' | 'SHIFT-B'
   name: string; // 'Shift A' | 'Shift B'

@@ -24,15 +24,13 @@ import {
   X, 
   XCircle, 
   Edit3, 
-  Save, 
-  History as HistoryIcon 
+  Save
 } from 'lucide-react';
 import { useAppStore } from '@/stores/app-store';
 import { DemoScenario, RiskStatus, ValidityStatus, ProcessingStatus, Scan } from '@/types';
 import { getScanPipeline } from '@/services/scientific/scan-processing-pipeline';
 import { formatDateTime, formatDose, getValidityLabel } from '@/lib/utils';
 import { sfx } from '@/lib/sound-effects';
-import Image from 'next/image';
 import { validateImage } from '@/services/scientific/image-validation-layer';
 import { resolveCode } from '@/services/scientific/demo-code-engine';
 import { useDemoConfigStore } from '@/stores/demo-config-store';
@@ -138,7 +136,6 @@ function ScanPageContent() {
 
   const { 
     currentUser, 
-    activeShift, 
     activeDosimeter, 
     shiftConfigs,
     scans, 
