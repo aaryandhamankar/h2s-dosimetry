@@ -11,6 +11,8 @@ import {
   ArrowRight, 
   Loader2 
 } from 'lucide-react';
+import Image from 'next/image';
+import brandLogo from '../../public/app-logo.png';
 import { useAppStore } from '@/stores/app-store';
 import { TRANSLATIONS } from '@/lib/i18n';
 import { sfx } from '@/lib/sound-effects';
@@ -42,9 +44,17 @@ export default function HomePage() {
       <div className="space-y-4 sm:space-y-5 md:space-y-6 text-center">
         
         {/* ───────────────────────────────────────────────────────────── */}
-        {/* HERO TITLE: CLEAN & MINIMAL (NO GIANT REPEATED LOGO)         */}
+        {/* HERO TITLE: ANCHORED BY CLEAN BRAND EMBLEM                    */}
         {/* ───────────────────────────────────────────────────────────── */}
-        <div className="flex flex-col items-center justify-center space-y-1 max-w-xl mx-auto">
+        <div className="flex flex-col items-center justify-center space-y-2 max-w-xl mx-auto">
+          <div className="w-13 h-13 sm:w-15 sm:h-15 rounded-2xl bg-[#FAF8F3] border border-[#E7E2D5] shadow-xs p-1 flex items-center justify-center">
+            <Image 
+              src={brandLogo} 
+              alt="H2S Dosimeter Logo" 
+              className="w-11 h-11 sm:w-13 sm:h-13 object-contain rounded-xl block" 
+              priority 
+            />
+          </div>
           <h1 className="text-[24px] sm:text-[30px] md:text-[34px] font-black text-[#263026] leading-tight tracking-tight">
             {language === 'hi' 
               ? 'H₂S डोसीमेट्री प्लेटफॉर्म' 

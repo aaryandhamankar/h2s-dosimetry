@@ -25,7 +25,7 @@ import {
   FileText
 } from 'lucide-react';
 import Image from 'next/image';
-import brandLogo from '../../public/mrpl-logo.png';
+import brandLogo from '../../public/app-logo.png';
 import { UniversalSearch } from './universal-search';
 import { sfx } from '@/lib/sound-effects';
 import { useMounted } from '@/hooks/use-mounted';
@@ -222,11 +222,11 @@ export function PortalHeaderWrapper() {
           
           {/* Desktop Brand */}
           <Link href="/" className="hidden sm:flex items-center gap-2.5 sm:gap-3 group min-w-0 pr-1 flex-shrink-0 select-none">
-            <div className="h-9 sm:h-10 w-9 sm:w-10 flex-shrink-0 flex items-center justify-center p-1 bg-white rounded-lg border border-[#E7E5DE] shadow-xs group-hover:border-[#5C822D] group-hover:shadow-sm transition-all overflow-hidden">
+            <div className="h-10 w-10 flex-shrink-0 flex items-center justify-center p-0.5 bg-[#FAF8F3] rounded-xl border border-[#E7E2D5] shadow-xs group-hover:border-[#5C822D] group-hover:shadow-sm transition-all overflow-hidden">
               <Image 
                 src={brandLogo} 
-                alt="Institutional Logo" 
-                className="h-7 sm:h-8 w-auto object-contain rounded-md block"
+                alt="H2S Dosimeter Logo" 
+                className="h-9 w-auto object-contain rounded-lg block"
                 priority
               />
             </div>
@@ -271,11 +271,11 @@ export function PortalHeaderWrapper() {
               </Link>
             ) : (
               <Link href="/" className="flex items-center gap-2 group min-w-0 pr-1 flex-shrink-0">
-                <div className="h-8 w-8 flex-shrink-0 flex items-center justify-center p-0.5 bg-white rounded-lg border border-[#E7E5DE] shadow-xs">
+                <div className="h-8 w-8 flex-shrink-0 flex items-center justify-center p-0.5 bg-[#FAF8F3] rounded-lg border border-[#E7E2D5] shadow-xs">
                   <Image 
                     src={brandLogo} 
-                    alt="Institutional Logo" 
-                    className="h-6 w-auto object-contain rounded block"
+                    alt="H2S Dosimeter Logo" 
+                    className="h-7 w-auto object-contain rounded-md block"
                     priority
                   />
                 </div>
