@@ -9,7 +9,8 @@ import {
   X, 
   Save, 
   Clock, 
-  Sparkles
+  Sparkles,
+  ArrowLeft
 } from 'lucide-react';
 import { formatDateTime, formatDose } from '@/lib/utils';
 import { ValidityStatus, RiskStatus, Scan } from '@/types';
@@ -99,8 +100,29 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-[840px] mx-auto w-full">
+    <div className="space-y-4 sm:space-y-6 max-w-[840px] mx-auto w-full pb-20 sm:pb-6">
       
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-[#E8E2D5] pb-2.5 sm:pb-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <Link
+            href="/"
+            className="p-1.5 rounded-lg bg-white border border-[#E8E2D5] text-[#596158] hover:text-[#263026] hover:bg-[#F4EFE6] transition-colors shadow-2xs cursor-pointer flex-shrink-0"
+            title={language === 'hi' ? 'होम पर वापस जाएं' : 'Back to Home'}
+          >
+            <ArrowLeft className="w-4 h-4 text-[#596158]" />
+          </Link>
+          <div>
+            <span className="text-[10px] sm:text-[11px] font-bold text-[#5C822D] uppercase tracking-wider block">
+              {language === 'hi' ? 'फील्ड कार्मिक · इतिहास' : 'Field Personnel · Exposure Log'}
+            </span>
+            <h1 className="text-[18px] sm:text-[22px] font-black text-[#263026] leading-tight">
+              {t.navHistory}
+            </h1>
+          </div>
+        </div>
+      </div>
+
       {/* ════════════════════════════════════════════════════════════ */}
       {/* 1. TOP: OPERATOR PROFILE DOSSIER (Sleek & Non-Redundant)     */}
       {/* ════════════════════════════════════════════════════════════ */}

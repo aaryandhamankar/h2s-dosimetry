@@ -33,7 +33,7 @@ export function AccessibilityBar() {
       setCurrentDate(now.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' }));
     };
     updateDateTime();
-    const interval = setInterval(updateDateTime, 1000);
+    const interval = setInterval(updateDateTime, 15000);
     return () => clearInterval(interval);
   }, [language]);
 

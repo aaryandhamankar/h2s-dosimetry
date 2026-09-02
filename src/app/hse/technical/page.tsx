@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, Suspense } from 'react';
+import Link from 'next/link';
 import { useAppStore } from '@/stores/app-store';
 import { useSearchParams } from 'next/navigation';
 import { 
   Database, 
   Layers, 
-  Cpu
+  Cpu,
+  ArrowLeft
 } from 'lucide-react';
 import { formatDose } from '@/lib/utils';
 import { MODEL_CONFIG, CALIBRATION_CONFIG } from '@/config';
@@ -25,14 +27,23 @@ function TechnicalContent() {
     <div className="space-y-4 sm:space-y-6">
       
       {/* Header */}
-      <div className="border-b border-[#E7E5DE] pb-3 sm:pb-4">
-        <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
-          Metrology Audit & Traceability
-        </span>
-        <h1 className="text-[18px] sm:text-[24px] font-bold text-[#263026]">Metrology & Scientific Provenance</h1>
-        <p className="text-[13px] sm:text-[14px] text-[#596158]">
-          Audit review for optical image validation, CIELAB colorimetry, & calibration curve traceability
-        </p>
+      <div className="border-b border-[#E7E5DE] pb-3 sm:pb-4 flex items-center gap-2.5 sm:gap-3">
+        <Link
+          href="/"
+          className="p-1.5 rounded-lg bg-white border border-[#E8E2D5] text-[#596158] hover:text-[#263026] hover:bg-[#F4EFE6] transition-colors shadow-2xs cursor-pointer flex-shrink-0"
+          title="Back to Home"
+        >
+          <ArrowLeft className="w-4 h-4 text-[#596158]" />
+        </Link>
+        <div>
+          <span className="text-[10px] sm:text-[11px] font-bold text-[#5C822D] uppercase tracking-wider block">
+            Metrology Audit & Traceability
+          </span>
+          <h1 className="text-[18px] sm:text-[22px] font-black text-[#263026] leading-tight">Metrology & Scientific Provenance</h1>
+          <p className="text-[12px] sm:text-[13px] text-[#596158] mt-0.5">
+            Audit review for optical image validation, CIELAB colorimetry, & calibration curve traceability
+          </p>
+        </div>
       </div>
 
       {/* Registry Standards Summary Cards */}

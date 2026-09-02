@@ -705,26 +705,46 @@ function ScanPageContent() {
   }
 
   return (
-    <div className="flex-1 flex flex-col justify-center py-4 sm:py-8 px-3 sm:px-6 max-w-[760px] mx-auto w-full">
+    <div className="flex-1 flex flex-col py-3 sm:py-6 px-3 sm:px-6 pb-20 sm:pb-6 max-w-[580px] mx-auto w-full space-y-3 sm:space-y-4">
       
       {/* ───────────────────────────────────────────────────────────── */}
       {/* 1. INITIAL CAMERA-FIRST SCANNER STATE                         */}
       {/* ───────────────────────────────────────────────────────────── */}
       {screenState === 'viewfinder' && (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           
-          {/* Clean Title & Guidance */}
+          {/* Top Row: Back Button */}
+          <div className="flex items-center justify-between">
+            <Link
+              href="/"
+              className="p-1.5 px-2.5 rounded-lg bg-white border border-[#E8E2D5] text-[#596158] hover:text-[#263026] hover:bg-[#F4EFE6] transition-colors shadow-2xs cursor-pointer inline-flex items-center gap-1.5 text-[12px] font-semibold"
+              title={language === 'hi' ? 'होम पर वापस जाएं' : 'Back to Home'}
+            >
+              <ArrowLeft className="w-4 h-4 text-[#596158]" />
+              <span>{language === 'hi' ? 'वापस' : 'Back'}</span>
+            </Link>
+          </div>
+
+          {/* Scanner Title & Essential Guidance on top of camera */}
           <div className="text-center space-y-0.5 pt-1">
-            <h1 className="text-[22px] sm:text-[26px] font-black text-[#263026]">
-              {language === 'hi' ? 'रिस्टबैंड स्कैन करें' : 'Scan Wristband'}
+            <h1 className="text-[20px] sm:text-[24px] font-black text-[#263026] leading-tight">
+              {language === 'hi' 
+                ? 'रिस्टबैंड स्कैन करें' 
+                : language === 'kn'
+                ? 'ರಿಸ್ಟ್‌ಬ್ಯಾಂಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ'
+                : language === 'gu'
+                ? 'રિસ્ટબેન્ડ સ્કેન કરો'
+                : 'Scan Wristband'}
             </h1>
-            <p className="text-[13px] sm:text-[14px] text-[#596158]">
-              {language === 'hi' ? 'रिस्टबैंड को फ्रेम के अंदर रखें।' : 'Position the wristband inside the frame.'}
+            <p className="text-[12.5px] sm:text-[13.5px] text-[#596158]">
+              {language === 'hi' 
+                ? 'सत्यापन के लिए रिस्टबैंड को फ्रेम के अंदर रखें।' 
+                : 'Position the dosimeter badge inside the camera frame'}
             </p>
           </div>
 
           {/* Large Camera Viewfinder */}
-          <div className="relative bg-[#131A13] rounded-2xl overflow-hidden min-h-[320px] sm:min-h-[380px] flex items-center justify-center border-2 border-[#D8D0C0] shadow-inner">
+          <div className="relative bg-[#131A13] rounded-2xl overflow-hidden min-h-[300px] sm:min-h-[360px] flex items-center justify-center border border-[#D8D0C0] shadow-sm">
             
             {/* Top-Right Corner Torch Toggle (Icon Only) */}
             <button
@@ -751,7 +771,7 @@ function ScanPageContent() {
               playsInline
               autoPlay
               muted
-              className={`w-full h-full object-cover max-h-[380px] ${cameraActive ? 'block' : 'hidden'}`}
+              className={`w-full h-full object-cover max-h-[360px] ${cameraActive ? 'block' : 'hidden'}`}
             />
             <canvas ref={canvasRef} className="hidden" />
 
@@ -759,18 +779,18 @@ function ScanPageContent() {
             <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 z-10">
               {/* Central Reticle */}
               <div className="flex items-center justify-center flex-1">
-                <div className="w-48 sm:w-56 h-40 sm:h-48 border-2 border-dashed border-white/90 rounded-2xl flex items-center justify-center relative shadow-lg">
-                  <div className="w-5 h-5 border-t-2 border-l-2 border-[#5C822D] absolute -top-1 -left-1 rounded-tl-sm" />
-                  <div className="w-5 h-5 border-t-2 border-r-2 border-[#5C822D] absolute -top-1 -right-1 rounded-tr-sm" />
-                  <div className="w-5 h-5 border-b-2 border-l-2 border-[#5C822D] absolute -bottom-1 -left-1 rounded-bl-sm" />
-                  <div className="w-5 h-5 border-b-2 border-r-2 border-[#5C822D] absolute -bottom-1 -right-1 rounded-br-sm" />
-                  <Crosshair className="w-8 h-8 text-white/80 animate-pulse" />
+                <div className="w-48 sm:w-56 h-36 sm:h-44 border border-white/50 rounded-2xl flex items-center justify-center relative shadow-xs">
+                  <div className="w-4 h-4 border-t-2 border-l-2 border-[#5C822D] absolute -top-1 -left-1 rounded-tl-xs" />
+                  <div className="w-4 h-4 border-t-2 border-r-2 border-[#5C822D] absolute -top-1 -right-1 rounded-tr-xs" />
+                  <div className="w-4 h-4 border-b-2 border-l-2 border-[#5C822D] absolute -bottom-1 -left-1 rounded-bl-xs" />
+                  <div className="w-4 h-4 border-b-2 border-r-2 border-[#5C822D] absolute -bottom-1 -right-1 rounded-br-xs" />
+                  <Crosshair className="w-6 h-6 text-white/70" />
                 </div>
               </div>
 
               <div className="text-center">
-                <span className="text-[11px] text-white/80 font-medium bg-black/60 px-2.5 py-0.5 rounded-md">
-                  {language === 'hi' ? 'बैज को फ्रेम में स्थिर रखें' : 'HOLD STEADY OVER BADGE'}
+                <span className="text-[11px] text-white/90 font-medium bg-black/60 px-3 py-1 rounded-full backdrop-blur-xs">
+                  {language === 'hi' ? 'बैज को फ्रेम में स्थिर रखें' : 'Hold steady over badge'}
                 </span>
               </div>
             </div>
@@ -828,9 +848,9 @@ function ScanPageContent() {
           <div className="space-y-2 pt-1">
             <button
               onClick={handleCapture}
-              className="gov-btn-primary w-full h-14 text-[16px] sm:text-[17px] font-bold rounded-xl shadow-lg hover:shadow-xl active:scale-[0.99] transition-all flex items-center justify-center gap-2.5"
+              className="gov-btn-primary w-full h-12 text-[15px] sm:text-[16px] font-bold rounded-xl shadow-md hover:shadow-lg active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Camera className="w-6 h-6 stroke-[2.2]" />
+              <Camera className="w-5 h-5 stroke-[2.2]" />
               <span>{language === 'hi' ? 'बैज कैप्चर व स्कैन करें' : 'Scan & Verify Badge'}</span>
             </button>
 

@@ -99,7 +99,17 @@ The platform bridges physical chemical dosimetry and enterprise petrochemical sa
   - Affirmative success chime for safe exposures.
   - Cautionary and emergency pulsating alarms for elevated, high, and critical levels.
 
-### E. 4-Language Localization Engine
+### E. Tactile Floating Pill Navigation & Fluid Physics
+- **Floating Island Navigation Pill**: Mobile-first navigation control with hardware-accelerated fluid indicator capsule.
+- **Physical Spring Dynamics**: Tuned spring easing (`cubic-bezier(0.2, 0.9, 0.3, 1.15)`) with inertial velocity squash & stretch.
+- **Dual-Theme & High-Contrast Harmonization**:
+  - *Light Theme*: Pure white card surface (`#FFFFFF`) with warm neutral border (`#E8E2D5`), pale brand green indicator (`#EDF3E4`), and deep forest green typography (`#35551F`).
+  - *Dark Theme*: Deep obsidian forest glass (`#1C251C`) with luminous forest green indicator (`#35551F`).
+  - *Accessibility Mode*: Full WCAG AAA high-contrast black/green compliance.
+- **Uniform Header & Back-Nav Hierarchy**: Standardized top-left back navigation and institutional brand-tap home routing.
+- **Unified Easter Egg Controls**: The **About** button supports standard navigation (single tap), Team Commendation Dossier modal (3 taps), and Demo Admin Panel (long press).
+
+### F. 4-Language Localization Engine
 - Full native coverage across English (`en`), Hindi (`hi`), Kannada (`kn`), and Gujarati (`gu`).
 - Preserves universal scientific and industrial units ($H_2S$, $\text{ppm}\cdot\text{h}$, $\text{CIELAB}$, $\Delta E^*_{ab}$, $\text{ISO D65}$, $\text{TWA}$, $\text{PEL}$, $\text{STEL}$).
 
@@ -109,7 +119,7 @@ The platform bridges physical chemical dosimetry and enterprise petrochemical sa
 
 | Route | Role | Purpose |
 |---|---|---|
-| `/` | Public | Master landing portal with unified hero modules and national identity header |
+| `/` | Public | Master landing portal with responsive hero modules and national identity header |
 | `/scan` | Field Worker | Optical scanner with live camera viewfinder, torch, and file upload |
 | `/worker/result` | Field Worker | Mobile-first calibrated exposure result, safety action guidance, and metrology drawer |
 | `/worker/history` | Field Worker | Personal chronological scan ledger and operator profile dossier |
@@ -122,28 +132,35 @@ The platform bridges physical chemical dosimetry and enterprise petrochemical sa
 
 ---
 
-## 5. Technology Stack
+## 5. Technology Stack & Performance Architecture
 
 - **Framework**: Next.js 16 (App Router, React 19, TypeScript)
 - **Styling**: Tailwind CSS v4 with Indian national safety tokens & high-contrast themes
-- **State Management**: Zustand with persistent client-side storage
+- **State Management**: Zustand with persistent client-side storage and fine-grained selectors
 - **OCR Engine**: Tesseract.js
 - **Charts & Visualizations**: Recharts
 - **Icons**: Lucide React
 - **Audio**: Web Audio API (zero external sound file dependencies)
+- **Rendering Performance**:
+  - Isolated leaf timer components to eliminate subtree re-renders.
+  - GPU compositor layer promotion (`translate3d`, `will-change: transform`).
+  - Zero-latency touch interactions with `-webkit-tap-highlight-color: transparent`.
 
 ---
 
 ## 6. Verification & Build Instructions
 
 ```bash
-# 1. Check TypeScript types
-npx tsc --noEmit
+# 1. Run ESLint code quality suite
+npm run lint
 
-# 2. Compile optimized production build
+# 2. Run scientific pipeline unit and integration tests
+npm test
+
+# 3. Compile optimized production build
 npm run build
 
-# 3. Start development server
+# 4. Start development server
 npm run dev
 ```
 

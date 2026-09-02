@@ -60,6 +60,11 @@
     min-height: 100dvh;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
+    text-rendering: optimizeLegibility;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* Accessible Focus Ring for Keyboard Users across buttons, links & inputs */

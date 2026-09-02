@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   Cpu,
   ChevronDown,
+  ArrowLeft,
 } from 'lucide-react';
 import { formatDose, formatDateTime } from '@/lib/utils';
 import { useMounted } from '@/hooks/use-mounted';
@@ -57,28 +58,37 @@ export default function HSEOverviewPage() {
       
       {/* Page Title Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7E5DE] pb-3 sm:pb-4">
-        <div>
-          <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
-            {language === 'hi' 
-              ? 'पर्यवेक्षी कमांड सेंटर' 
-              : language === 'kn'
-              ? 'ಮೇಲ್ವಿಚಾರಣಾ ಕಮಾಂಡ್ ಸೆಂಟರ್'
-              : language === 'gu'
-              ? 'સુપરવાઇઝરી કમાન્ડ સેન્ટર'
-              : 'Supervisory Command Center'}
-          </span>
-          <h1 className="text-[18px] sm:text-[24px] font-bold text-[#263026]">
-            {t.dashboardTitle}
-          </h1>
-          <p className="text-[12px] sm:text-[14px] text-[#596158] mt-0.5">
-            {language === 'hi' 
-              ? 'रिफाइनरी ज़ोन ए · गैस डोसीमेट्री निगरानी' 
-              : language === 'kn'
-              ? 'ರಿಫೈನರಿ ವಲಯ A · ಗ್ಯಾಸ್ ಡೋಸಿಮೆಟ್ರಿ ಕಣ್ಗಾವಲು'
-              : language === 'gu'
-              ? 'રિફાઇનરી ઝોન A · ગેસ ડોસિમેટ્રી દેખરેખ'
-              : 'Refinery Zone A · Gas Dosimetry Surveillance'}
-          </p>
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <Link
+            href="/"
+            className="p-1.5 rounded-lg bg-white border border-[#E8E2D5] text-[#596158] hover:text-[#263026] hover:bg-[#F4EFE6] transition-colors shadow-2xs cursor-pointer"
+            title={language === 'hi' ? 'होम पर वापस जाएं' : 'Back to Home'}
+          >
+            <ArrowLeft className="w-4 h-4 text-[#596158]" />
+          </Link>
+          <div>
+            <span className="text-[10px] sm:text-[11px] font-bold text-[#5C822D] uppercase tracking-wider block">
+              {language === 'hi' 
+                ? 'पर्यवेक्षी कमांड सेंटर' 
+                : language === 'kn'
+                ? 'ಮೇಲ್ವಿಚಾರಣಾ ಕಮಾಂಡ್ ಸೆಂಟರ್'
+                : language === 'gu'
+                ? 'સુપરવાઇઝરી કમાન્ડ સેન્ટર'
+                : 'Supervisory Command Center'}
+            </span>
+            <h1 className="text-[18px] sm:text-[22px] font-black text-[#263026] leading-tight">
+              {t.dashboardTitle}
+            </h1>
+            <p className="text-[12px] sm:text-[13px] text-[#596158] mt-0.5">
+              {language === 'hi' 
+                ? 'रिफाइनरी ज़ोन ए · गैस डोसीमेट्री निगरानी' 
+                : language === 'kn'
+                ? 'ರಿಫೈನರಿ ವಲಯ A · ಗ್ಯಾಸ್ ಡೋಸಿಮೆಟ್ರಿ ಕಣ್ಗಾವಲು'
+                : language === 'gu'
+                ? 'રિફાઇનરી ઝોન A · ગેસ ડોસિમેટ્રી દેખરેખ'
+                : 'Refinery Zone A · Gas Dosimetry Surveillance'}
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -88,7 +98,7 @@ export default function HSEOverviewPage() {
           >
             <Printer size={14} />
             <span>
-              {language === 'hi' ? 'रिपोर्ट प्रिंट करें' : language === 'kn' ? 'ವರದಿ ಮುದ್ರಿಸಿ' : language === 'gu' ? 'રિપોર્ટ પ્રિન્ટ કરો' : 'Print Report'}
+              {language === 'hi' ? 'प्रिंट रिपोर्ट' : language === 'kn' ? 'ವರದಿ ಮುದ್ರಿಸಿ' : language === 'gu' ? 'રિપોર્ટ પ્રિન્ટ કરો' : 'Print Report'}
             </span>
           </button>
         </div>

@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useAppStore } from '@/stores/app-store';
 import { AlertStatus, AlertSeverity } from '@/types';
-import { AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 
 import { useMounted } from '@/hooks/use-mounted';
@@ -48,12 +49,21 @@ export default function HSEAlertsPage() {
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7E5DE] pb-3 sm:pb-4">
-        <div>
-          <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
-            Incident Triage Dispatch
-          </span>
-          <h1 className="text-[18px] sm:text-[24px] font-bold text-[#263026]">Safety Incident & Alert Queue</h1>
-          <p className="text-[13px] sm:text-[14px] text-[#596158]">Review and acknowledge exposure limit exceedance notifications</p>
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <Link
+            href="/"
+            className="p-1.5 rounded-lg bg-white border border-[#E8E2D5] text-[#596158] hover:text-[#263026] hover:bg-[#F4EFE6] transition-colors shadow-2xs cursor-pointer flex-shrink-0"
+            title="Back to Home"
+          >
+            <ArrowLeft className="w-4 h-4 text-[#596158]" />
+          </Link>
+          <div>
+            <span className="text-[10px] sm:text-[11px] font-bold text-[#5C822D] uppercase tracking-wider block">
+              Incident Triage Dispatch
+            </span>
+            <h1 className="text-[18px] sm:text-[22px] font-black text-[#263026] leading-tight">Safety Incident & Alert Queue</h1>
+            <p className="text-[12px] sm:text-[13px] text-[#596158] mt-0.5">Review and acknowledge exposure limit exceedance notifications</p>
+          </div>
         </div>
 
         {/* Filter Pills */}

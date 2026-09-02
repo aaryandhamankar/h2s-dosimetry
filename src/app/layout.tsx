@@ -88,7 +88,7 @@ export default function RootLayout({
         <ShiftTicker />
 
         {/* Main Content Area with Adaptive Mobile/Desktop Zero-Scroll Padding */}
-        <main id="main-content" className="flex-1 flex flex-col justify-center min-h-0 pb-16 sm:pb-0">
+        <main id="main-content" className="flex-1 flex flex-col min-h-0">
           {children}
         </main>
 

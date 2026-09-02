@@ -5,9 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAppStore } from '@/stores/app-store';
 import { TRANSLATIONS } from '@/lib/i18n';
-import { determineActiveShift } from '@/services/shift-service';
+import { determineActiveShift, ShiftConfig } from '@/services/shift-service';
 import { 
-  Search, 
   Accessibility,
   Sun,
   Calendar as CalendarIcon,
@@ -16,17 +15,16 @@ import {
   Maximize2,
   Share2,
   PlusSquare,
-  ArrowLeft,
   Camera,
   User,
   Activity,
   Users,
   AlertTriangle,
-  FileText
+  FileText,
+  Info
 } from 'lucide-react';
 import Image from 'next/image';
 import brandLogo from '../../public/app-logo.png';
-import { UniversalSearch } from './universal-search';
 import { sfx } from '@/lib/sound-effects';
 import { useMounted } from '@/hooks/use-mounted';
 
@@ -45,6 +43,39 @@ interface FullscreenEl extends HTMLElement {
   msRequestFullscreen?: () => Promise<void>;
 }
 
+function HeaderClockAndDate({ language, shiftConfigs }: { language: string; shiftConfigs: ShiftConfig[] }) {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date());
+    }, 15000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const activeShiftData = determineActiveShift(shiftConfigs, now);
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const dateStr = now.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+  return (
+    <div className="flex items-center gap-2.5 text-[11px] sm:text-[12px]">
+      <span className="flex items-center gap-1">
+        <CalendarIcon size={12} className="text-[#5C822D]" />
+        <span>{dateStr}</span>
+      </span>
+      <span className="text-[#D8D0C0]">|</span>
+      <span className="flex items-center gap-1 font-mono">
+        <Clock size={12} className="text-[#5C822D]" />
+        <span>{timeStr}</span>
+      </span>
+      <span className="text-[#D8D0C0] hidden sm:inline">|</span>
+      <span className="hidden sm:inline text-[#35551F] font-semibold">
+        {activeShiftData.activeShift.name} ({activeShiftData.activeShift.startTime}–{activeShiftData.activeShift.endTime}) · Zone A
+      </span>
+    </div>
+  );
+}
+
 export function PortalHeaderWrapper() {
   const pathname = usePathname();
   const { 
@@ -55,10 +86,10 @@ export function PortalHeaderWrapper() {
     highContrast, 
     toggleHighContrast,
     shiftConfigs,
-    alerts 
+    alerts,
+    setTeamModalOpen 
   } = useAppStore();
 
-  const [searchOpen, setSearchOpen] = useState(false);
   const [accessibilityBarOpen, setAccessibilityBarOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showIosPrompt, setShowIosPrompt] = useState(false);
@@ -67,27 +98,53 @@ export function PortalHeaderWrapper() {
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isLongPressRef = useRef(false);
 
-  const searchLongPressTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const isSearchLongPressRef = useRef(false);
+  const [aboutTapCount, setAboutTapCount] = useState(0);
+  const lastAboutTapTimeRef = useRef<number>(0);
+  const aboutLongPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isAboutLongPressRef = useRef(false);
 
-  const [currentTime, setCurrentTime] = useState<string>('');
-  const [currentDate, setCurrentDate] = useState<string>('');
   const mounted = useMounted();
-
   const t = TRANSLATIONS[language];
 
-  useEffect(() => {
-    const updateDateTime = () => {
-      const now = new Date();
-      setCurrentTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-      setCurrentDate(now.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' }));
-    };
-    updateDateTime();
-    const interval = setInterval(updateDateTime, 1000);
-    return () => clearInterval(interval);
-  }, [language]);
+  const handleAboutPressStart = () => {
+    isAboutLongPressRef.current = false;
+    aboutLongPressTimerRef.current = setTimeout(() => {
+      isAboutLongPressRef.current = true;
+      sfx.playClick();
+      window.dispatchEvent(new CustomEvent('h2s:open-demo-admin'));
+    }, 650);
+  };
 
-  const activeShiftData = determineActiveShift(shiftConfigs, new Date());
+  const handleAboutPressEnd = () => {
+    if (aboutLongPressTimerRef.current) {
+      clearTimeout(aboutLongPressTimerRef.current);
+      aboutLongPressTimerRef.current = null;
+    }
+  };
+
+  const handleAboutClick = (e: React.MouseEvent) => {
+    if (isAboutLongPressRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
+    sfx.playClick();
+    const now = e.timeStamp;
+    if (now - lastAboutTapTimeRef.current < 900) {
+      const newCount = aboutTapCount + 1;
+      setAboutTapCount(newCount);
+      if (newCount >= 3) {
+        e.preventDefault();
+        setTeamModalOpen(true);
+        setAboutTapCount(0);
+        return;
+      }
+    } else {
+      setAboutTapCount(1);
+    }
+    lastAboutTapTimeRef.current = now;
+  };
 
   // Sync DOM classes with Zustand state
   useEffect(() => {
@@ -207,32 +264,6 @@ export function PortalHeaderWrapper() {
     setAccessibilityBarOpen(!accessibilityBarOpen);
   };
 
-  const handleSearchPressStart = () => {
-    isSearchLongPressRef.current = false;
-    searchLongPressTimerRef.current = setTimeout(() => {
-      isSearchLongPressRef.current = true;
-      sfx.playClick();
-      window.dispatchEvent(new CustomEvent('h2s:open-demo-admin'));
-    }, 650);
-  };
-
-  const handleSearchPressEnd = () => {
-    if (searchLongPressTimerRef.current) {
-      clearTimeout(searchLongPressTimerRef.current);
-      searchLongPressTimerRef.current = null;
-    }
-  };
-
-  const handleSearchClick = (e: React.MouseEvent) => {
-    if (isSearchLongPressRef.current) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-    sfx.playClick();
-    setSearchOpen(true);
-  };
-
   const isFieldPersonnel = pathname === '/scan' || pathname.startsWith('/worker');
   const isHSE = pathname.startsWith('/hse') || pathname.startsWith('/dashboard');
   const navLinks = [
@@ -270,49 +301,25 @@ export function PortalHeaderWrapper() {
             </div>
           </Link>
 
-          {/* Mobile-Only Header Brand / Section Back Context */}
+          {/* Mobile-Only Header Brand (Tap to return Home) */}
           <div className="sm:hidden flex items-center gap-2 min-w-0 flex-1">
-            {isFieldPersonnel ? (
-              <Link 
-                href="/" 
-                className="flex items-center gap-2 group text-[#263026] hover:text-[#5C822D] transition-colors py-1 select-none"
-                title={language === 'hi' ? 'होम पर वापस जाएं' : language === 'kn' ? 'ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ' : language === 'gu' ? 'હોમ પર પાછા જાઓ' : 'Return to Home'}
-              >
-                <div className="w-8 h-8 rounded-lg bg-[#FAF6EE] border border-[#E8E2D5] group-hover:border-[#5C822D] group-hover:bg-[#EDF3E4] flex items-center justify-center transition-all shadow-2xs">
-                  <ArrowLeft size={16} className="text-[#35551F] group-hover:-translate-x-0.5 transition-transform" />
-                </div>
-                <span className="font-bold text-[15px] text-[#263026] leading-tight truncate">
-                  {language === 'hi' ? 'H2S डोसीमीटर' : 'H2S Dosimeter'}
-                </span>
-              </Link>
-            ) : isHSE ? (
-              <Link 
-                href="/" 
-                className="flex items-center gap-2 group text-[#263026] hover:text-[#5C822D] transition-colors py-1 select-none"
-                title={language === 'hi' ? 'होम पर वापस जाएं' : language === 'kn' ? 'ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ' : language === 'gu' ? 'હોમ પર પાછા જાઓ' : 'Return to Home'}
-              >
-                <div className="w-8 h-8 rounded-lg bg-[#FAF6EE] border border-[#E8E2D5] group-hover:border-[#5C822D] group-hover:bg-[#EDF3E4] flex items-center justify-center transition-all shadow-2xs">
-                  <ArrowLeft size={16} className="text-[#35551F] group-hover:-translate-x-0.5 transition-transform" />
-                </div>
-                <span className="font-bold text-[15px] text-[#263026] leading-tight truncate">
-                  {language === 'hi' ? 'H2S डोसीमीटर' : 'H2S Dosimeter'}
-                </span>
-              </Link>
-            ) : (
-              <Link href="/" className="flex items-center gap-2 group min-w-0 pr-1 flex-shrink-0">
-                <div className="h-8 w-8 flex-shrink-0 flex items-center justify-center">
-                  <Image 
-                    src={brandLogo} 
-                    alt="H2S Dosimeter Logo" 
-                    className="h-7 w-auto object-contain block"
-                    priority
-                  />
-                </div>
-                <span className="font-bold text-[14px] text-[#263026] leading-tight truncate">
-                  {language === 'hi' ? 'H2S डोसीमीटर' : 'H2S Dosimeter'}
-                </span>
-              </Link>
-            )}
+            <Link 
+              href="/" 
+              className="flex items-center gap-2 group min-w-0 pr-1 flex-shrink-0 select-none cursor-pointer"
+              title={language === 'hi' ? 'होम पर जाएं' : 'Return to Home'}
+            >
+              <div className="h-8 w-8 flex-shrink-0 flex items-center justify-center transition-transform group-hover:scale-105">
+                <Image 
+                  src={brandLogo} 
+                  alt="H2S Dosimeter Logo" 
+                  className="h-7 w-auto object-contain block"
+                  priority
+                />
+              </div>
+              <span className="font-bold text-[14px] text-[#263026] leading-tight truncate group-hover:text-[#5C822D] transition-colors">
+                {language === 'hi' ? 'H2S डोसीमीटर' : language === 'kn' ? 'H2S ಡೋಸಿಮೀಟರ್' : language === 'gu' ? 'H2S ડોસિમીટર' : 'H2S Dosimeter'}
+              </span>
+            </Link>
           </div>
 
           {/* Right Controls: Accessibility Toggle & Search */}
@@ -358,34 +365,38 @@ export function PortalHeaderWrapper() {
               )}
             </button>
 
-            {/* Quick Search (Short Tap: Search Portal, Long Press: Demo Admin Panel) */}
-            <button
-              onClick={handleSearchClick}
-              onMouseDown={handleSearchPressStart}
-              onMouseUp={handleSearchPressEnd}
-              onMouseLeave={handleSearchPressEnd}
-              onTouchStart={handleSearchPressStart}
-              onTouchEnd={handleSearchPressEnd}
-              onTouchCancel={handleSearchPressEnd}
+            {/* About Button (Short Tap: About page, 3-Tap: Team Dossier, Long Press: Demo Admin Panel) */}
+            <Link
+              href="/about"
+              onClick={handleAboutClick}
+              onMouseDown={handleAboutPressStart}
+              onMouseUp={handleAboutPressEnd}
+              onMouseLeave={handleAboutPressEnd}
+              onTouchStart={handleAboutPressStart}
+              onTouchEnd={handleAboutPressEnd}
+              onTouchCancel={handleAboutPressEnd}
               onContextMenu={(e) => e.preventDefault()}
-              className="flex items-center gap-1.5 bg-[#F4EFE6] hover:bg-[#EBE4D8] active:scale-95 text-[#263026] font-semibold p-2 sm:px-2.5 sm:py-1.5 rounded-lg text-[12px] sm:text-[13px] transition-all border border-[#E8E2D5] select-none touch-manipulation cursor-pointer"
+              className={`flex items-center gap-1.5 bg-[#F4EFE6] hover:bg-[#EBE4D8] active:scale-95 text-[#263026] font-semibold p-2 sm:px-2.5 sm:py-1.5 rounded-lg text-[12px] sm:text-[13px] transition-all border select-none touch-manipulation cursor-pointer ${
+                pathname === '/about'
+                  ? 'bg-[#EDF3E4] text-[#35551F] border-[#5C822D] shadow-2xs'
+                  : 'border-[#E8E2D5]'
+              }`}
               title={
-                language === 'hi' 
-                  ? 'पोर्टल खोजें (शॉर्टकट: /, डेमो पैनल के लिए दबाकर रखें)' 
+                language === 'hi'
+                  ? 'परियोजना विवरण (3 बार दबाएं: टीम, दबाकर रखें: डेमो)'
                   : language === 'kn'
-                  ? 'ಪೋರ್ಟಲ್ ಹುಡುಕಿ (ಡೆಮೊ ಪ್ಯಾನೆಲ್‌ಗಾಗಿ ಒತ್ತಿ ಹಿಡಿಯಿರಿ)'
+                  ? 'ಯೋಜನೆ ವಿವರಣೆ (3 ಬಾರಿ: ತಂಡ, ಹಿಡಿದುಕೊಳ್ಳಿ: ಡೆಮೊ)'
                   : language === 'gu'
-                  ? 'પોર્ટલ શોધો (ડેમો પેનલ માટે દબાવી રાખો)'
-                  : 'Search Portal (Shortcut: /, Press & hold for Demo Panel)'
+                  ? 'પ્રોજેક્ટ વિગતો (3 વખત: ટીમ, દબાવી રાખો: ડેમો)'
+                  : 'About Project (3-tap: Team Dossier, Hold: Demo Panel)'
               }
-              aria-label="Search Portal"
+              aria-label="About"
             >
-              <Search size={15} className="text-[#5C822D]" />
+              <Info size={15} className={pathname === '/about' ? 'text-[#35551F]' : 'text-[#5C822D]'} />
               <span className="hidden md:inline">
-                {language === 'hi' ? 'खोजें' : language === 'kn' ? 'ಹುಡುಕಿ' : language === 'gu' ? 'શોધો' : 'Search'}
+                {language === 'hi' ? 'विवरण' : language === 'kn' ? 'ವಿವರಣೆ' : language === 'gu' ? 'વિગતો' : 'About'}
               </span>
-              <kbd className="bg-white px-1 py-0.2 rounded border border-[#E8E2D5] text-[10px] font-mono text-[#7A8178] hidden lg:inline">/</kbd>
-            </button>
+            </Link>
 
           </div>
         </div>
@@ -396,22 +407,8 @@ export function PortalHeaderWrapper() {
         <div className="bg-[#F8F4EC] border-t border-b border-[#5C822D]/40 px-3 sm:px-8 py-2 text-[12px] text-[#596158] shadow-inner animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="max-w-[1240px] mx-auto flex items-center justify-between gap-3 flex-wrap">
             
-            {/* Left: Shift & Date Info */}
-            <div className="flex items-center gap-2.5 text-[11px] sm:text-[12px]">
-              <span className="flex items-center gap-1">
-                <CalendarIcon size={12} className="text-[#5C822D]" />
-                <span>{currentDate || '30 Aug 2026'}</span>
-              </span>
-              <span className="text-[#D8D0C0]">|</span>
-              <span className="flex items-center gap-1 font-mono">
-                <Clock size={12} className="text-[#5C822D]" />
-                <span>{currentTime || '11:20'}</span>
-              </span>
-              <span className="text-[#D8D0C0] hidden sm:inline">|</span>
-              <span className="hidden sm:inline text-[#35551F] font-semibold">
-                {activeShiftData.activeShift.name} ({activeShiftData.activeShift.startTime}–{activeShiftData.activeShift.endTime}) · Zone A
-              </span>
-            </div>
+            {/* Left: Shift & Date Info (Isolated lightweight timer) */}
+            <HeaderClockAndDate language={language} shiftConfigs={shiftConfigs} />
 
             {/* Right: Controls (Font Scale, Contrast, 4 Languages, and Close) */}
             <div className="flex items-center gap-2 sm:gap-2.5 ml-auto flex-wrap">
@@ -680,10 +677,7 @@ export function PortalHeaderWrapper() {
       {/* 4. Indian Tricolor Horizontal Accent Ribbon */}
       <div className="tricolor-ribbon" />
 
-      {/* 5. Universal Search Dialog */}
-      <UniversalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
-
-      {/* 6. Floating Fullscreen Feedback Notification Toast */}
+      {/* 5. Floating Fullscreen Feedback Notification Toast */}
       {fullscreenToast && (
         <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-[#263026] text-white text-[12px] font-semibold px-4 py-2 rounded-full shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
           <Maximize2 size={13} className="text-[#A3E635]" />
