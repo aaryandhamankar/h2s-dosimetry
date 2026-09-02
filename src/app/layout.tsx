@@ -52,6 +52,16 @@ export const metadata: Metadata = {
     description: 'Occupational health & safety dosimeter verification system with ISO D65 optical normalization.',
     images: ['/icon.png'],
   },
+  icons: {
+    icon: [
+      { url: '/icon.png', sizes: 'any' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -59,10 +69,6 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
-  },
-  icons: {
-    icon: '/icon.png',
-    apple: '/icon.png',
   },
 };
 
