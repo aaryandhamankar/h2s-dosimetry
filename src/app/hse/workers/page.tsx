@@ -15,26 +15,51 @@ export default function HSEWorkersPage() {
 
   if (!mounted) return <div className="text-[13px] text-[#7A8178]">Loading personnel directory...</div>;
 
-  const workerStats = DEMO_WORKERS.map(worker => {
+  const allWorkerMap = new Map<string, { id: string; displayName: string; workerCode: string; department: string; site: string }>();
+
+  DEMO_WORKERS.forEach(w => {
+    allWorkerMap.set(w.id, {
+      id: w.id,
+      displayName: w.displayName,
+      workerCode: w.workerCode,
+      department: w.department,
+      site: w.site,
+    });
+  });
+
+  scans.forEach(s => {
+    if (s.workerId && !allWorkerMap.has(s.workerId)) {
+      allWorkerMap.set(s.workerId, {
+        id: s.workerId,
+        displayName: s.workerName || s.workerId,
+        workerCode: s.workerId.toUpperCase(),
+        department: 'Operations',
+        site: s.location || 'Refinery Zone A',
+      });
+    }
+  });
+
+  const workerStats = Array.from(allWorkerMap.values()).map(worker => {
     const workerScans = scans.filter(s => s.workerId === worker.id);
     const latestScan = workerScans.sort((a, b) =>
-      new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime()
+      new Date(b.capturedAt || b.timestamp || 0).getTime() - new Date(a.capturedAt || a.timestamp || 0).getTime()
     )[0];
 
     return {
       ...worker,
       totalScans: workerScans.length,
       latestScan,
-      latestDose: latestScan?.exposureResult?.estimatedDose ?? null,
-      latestRisk: latestScan?.exposureResult?.riskStatus ?? null,
-      latestTime: latestScan?.capturedAt ?? null,
+      latestDose: latestScan?.h2sReading ?? latestScan?.exposureResult?.estimatedDose ?? null,
+      latestRisk: latestScan?.riskLevel ?? latestScan?.exposureResult?.riskStatus ?? null,
+      latestTime: latestScan?.capturedAt ?? latestScan?.timestamp ?? null,
+      latestShift: latestScan?.shiftName ?? 'Shift A (Morning)',
     };
   });
 
   const selected = selectedWorker ? workerStats.find(w => w.id === selectedWorker) : workerStats[0];
   const selectedScans = selectedWorker
     ? scans.filter(s => s.workerId === selectedWorker).sort((a, b) =>
-        new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime()
+        new Date(b.capturedAt || b.timestamp || 0).getTime() - new Date(a.capturedAt || a.timestamp || 0).getTime()
       )
     : [];
 
@@ -135,11 +160,17 @@ export default function HSEWorkersPage() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-[13px]">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 sm:gap-3 text-[13px]">
                 <div className="bg-[#FAFBF9] p-3 sm:p-3.5 rounded border border-[#E7E5DE]">
                   <span className="text-[#7A8178] text-[10px] sm:text-[11px] uppercase font-bold block">Assigned Cartridge</span>
                   <span className="font-bold text-[#263026] text-[14px] sm:text-[15px] font-mono mt-0.5 block">
-                    {selected.latestScan?.dosimeterId || 'DOS-001'}
+                    {selected.latestScan?.dosimeterCode || selected.latestScan?.dosimeterId || 'DOS-001'}
+                  </span>
+                </div>
+                <div className="bg-[#FAFBF9] p-3 sm:p-3.5 rounded border border-[#E7E5DE]">
+                  <span className="text-[#7A8178] text-[10px] sm:text-[11px] uppercase font-bold block">Active Shift</span>
+                  <span className="font-bold text-[#263026] text-[13px] sm:text-[14px] mt-0.5 block truncate">
+                    {selected.latestScan?.shiftName || selected.latestShift || 'Shift A (Morning)'}
                   </span>
                 </div>
                 <div className="bg-[#FAFBF9] p-3 sm:p-3.5 rounded border border-[#E7E5DE]">
@@ -151,7 +182,7 @@ export default function HSEWorkersPage() {
                 <div className="bg-[#FAFBF9] p-3 sm:p-3.5 rounded border border-[#E7E5DE]">
                   <span className="text-[#7A8178] text-[10px] sm:text-[11px] uppercase font-bold block">Cumulative Dose</span>
                   <span className="font-bold text-[#5C822D] text-[14px] sm:text-[15px] font-mono mt-0.5 block">
-                    {selected.latestDose !== null ? `${formatDose(selected.latestDose)} ppm·h` : '0.0 ppm·h'}
+                    {selected.latestDose !== null ? `${formatDose(selected.latestDose, 1)} ppm·h` : '0.0 ppm·h'}
                   </span>
                 </div>
               </div>
@@ -174,31 +205,35 @@ export default function HSEWorkersPage() {
                 <div className="divide-y divide-[#E7E5DE]">
                   {selectedScans.map(s => {
                     const r = s.exposureResult;
+                    const dose = s.h2sReading ?? r?.estimatedDose;
                     return (
                       <div key={s.id} className="p-4 flex items-center justify-between hover:bg-[#FAFBF9]">
                         <div className="space-y-0.5">
-                          <div className="font-bold text-[14px] text-[#263026]">
-                            {formatDateTime(s.capturedAt)}
+                          <div className="font-bold text-[14px] text-[#263026] flex items-center gap-2">
+                            <span>{formatDateTime(s.capturedAt || s.timestamp || '')}</span>
+                            <span className="text-[10px] font-mono font-medium text-[#5C822D] bg-[#EDF3E4] px-1.5 py-0.2 rounded">
+                              {s.shiftName || 'Shift A'}
+                            </span>
                           </div>
                           <div className="text-[12px] text-[#596158] font-mono">
-                            Scan: {s.id.substring(0, 14)}... · Badge: {s.dosimeterId}
+                            Badge: {s.dosimeterCode || s.dosimeterId} · ID: {s.id.substring(0, 14)}...
                           </div>
                         </div>
 
                         <div className="flex items-center gap-4">
                           <div className="text-right">
                             <div className="font-bold text-[15px] text-[#263026] font-mono">
-                              {r?.estimatedDose !== null && r?.estimatedDose !== undefined
-                                ? `${formatDose(r.estimatedDose)} ${r.doseUnit}`
+                              {dose !== null && dose !== undefined
+                                ? `${formatDose(dose, 1)} ${s.doseUnit || r?.doseUnit || 'ppm·h'}`
                                 : 'Unverified'}
                             </div>
                             <div className="text-[11px] text-[#7A8178]">
-                              8h TWA: {r?.estimatedTwa !== null && r?.estimatedTwa !== undefined ? `${formatDose(r.estimatedTwa)} ppm` : '—'}
+                              8h TWA: {r?.estimatedTwa !== null && r?.estimatedTwa !== undefined ? `${formatDose(r.estimatedTwa, 1)} ppm` : '—'}
                             </div>
                           </div>
 
                           <Link
-                            href={`/hse/technical?scanId=${s.id}`}
+                            href={`/worker/result?scanId=${s.id}`}
                             className="gov-btn-secondary text-[12px] h-8 px-2.5"
                           >
                             Inspect

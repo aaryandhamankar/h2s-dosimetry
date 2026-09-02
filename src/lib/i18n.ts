@@ -35,8 +35,8 @@ export const TRANSLATIONS = {
     navHistory: 'Profile & History',
     
     // Header
-    appName: 'MRPL Gas Dosimetry Portal',
-    appSubtitle: 'Mangalore Refinery & Petrochemicals Ltd · Occupational Safety',
+    appName: 'H2S Dosimeter',
+    appSubtitle: 'Hydrogen Sulfide Gas Dosimetry System',
     switchMode: 'Switch Mode',
     searchPlaceholder: 'Search personnel, badges, alerts...',
     
@@ -153,8 +153,8 @@ export const TRANSLATIONS = {
     navHistory: 'प्रोफ़ाइल व इतिहास',
     
     // Header
-    appName: 'एमआरपीएल गैस डोसीमेट्री पोर्टल',
-    appSubtitle: 'मंगलूर रिफाइनरी एंड पेट्रोकेमिकल्स लिमिटेड · व्यावसायिक सुरक्षा',
+    appName: 'H2S डोसीमीटर',
+    appSubtitle: 'हाइड्रोजन सल्फाइड गैस डोसीमेट्री प्रणाली',
     switchMode: 'मोड बदलें',
     searchPlaceholder: 'कर्मचारी, बैज, अलर्ट खोजें...',
     
@@ -271,8 +271,8 @@ export const TRANSLATIONS = {
     navHistory: 'ಪ್ರೊಫೈಲ್ ಮತ್ತು ಇತಿಹಾಸ',
     
     // Header
-    appName: 'MRPL ಗ್ಯಾಸ್ ಡೋಸಿಮೆಟ್ರಿ ಪೋರ್ಟಲ್',
-    appSubtitle: 'ಮಂಗಳೂರು ರಿಫೈನರಿ & ಪೆಟ್ರೋಕೆಮಿಕಲ್ಸ್ ಲಿಮಿಟೆಡ್ · ಔದ್ಯೋಗಿಕ ಸುರಕ್ಷತೆ',
+    appName: 'H2S ಡೋಸಿಮೀಟರ್',
+    appSubtitle: 'ಹೈಡ್ರೋಜನ್ ಸಲ್ಫೈಡ್ ಅನಿಲ ಡೋಸಿಮೆಟ್ರಿ ವ್ಯವಸ್ಥೆ',
     switchMode: 'ಮೋಡ್ ಬದಲಾಯಿಸಿ',
     searchPlaceholder: 'ಸಿಬ್ಬಂದಿ, ಬ್ಯಾಡ್ಜ್‌ಗಳು, ಎಚ್ಚರಿಕೆಗಳನ್ನು ಹುಡುಕಿ...',
     
@@ -389,8 +389,8 @@ export const TRANSLATIONS = {
     navHistory: 'પ્રોફાઇલ અને ઇતિહાસ',
     
     // Header
-    appName: 'MRPL ગેસ ડોસિમેટ્રી પોર્ટલ',
-    appSubtitle: 'મેંગલોર રિફાઇનરી એન્ડ પેટ્રોકેમિકલ્સ લિમિટેડ · વ્યવસાયિક સુરક્ષા',
+    appName: 'H2S ડોસિમીટર',
+    appSubtitle: 'હાઇડ્રોજન સલ્ફાઇડ ગેસ ડોસિમેટ્રી સિસ્ટમ',
     switchMode: 'મોડ બદલો',
     searchPlaceholder: 'કર્મચારીઓ, બેજ, ચેતવણીઓ શોધો...',
     

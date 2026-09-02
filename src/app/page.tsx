@@ -9,7 +9,6 @@ import {
   ScanLine, 
   LayoutDashboard, 
   ArrowRight, 
-  Activity, 
   Loader2 
 } from 'lucide-react';
 import { useAppStore } from '@/stores/app-store';
@@ -23,23 +22,13 @@ export default function HomePage() {
 
   const t = TRANSLATIONS[language] || TRANSLATIONS.en;
 
-  const handleNavigate = (dest: 'scanner' | 'hse', href: string, e: React.MouseEvent) => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    e.preventDefault();
-    if (navigatingTo) return;
-
+  const handleNavigate = () => {
     sfx.playClick();
     if (typeof window !== 'undefined' && 'vibrate' in navigator) {
       try {
         navigator.vibrate(20);
       } catch {}
     }
-
-    setNavigatingTo(dest);
-
-    setTimeout(() => {
-      router.push(href);
-    }, 200);
   };
 
   return (
@@ -86,14 +75,8 @@ export default function HomePage() {
           {/* ════════════════════════════════════════════════════════════ */}
           <Link
             href="/scan"
-            onClick={(e) => handleNavigate('scanner', '/scan', e)}
-            className={`group relative flex flex-col justify-between p-5 sm:p-6 md:p-7 rounded-3xl bg-gradient-to-br from-[#4D7324] via-[#3D5E1C] to-[#2E4814] text-white shadow-md hover:shadow-2xl hover:shadow-[#3D5E1C]/25 active:scale-[0.97] transition-all duration-300 text-left border-2 overflow-hidden min-h-[215px] sm:min-h-[235px] md:min-h-[250px] cursor-pointer touch-manipulation ${
-              navigatingTo === 'scanner'
-                ? 'scale-[0.97] ring-4 ring-[#86B84A] border-white shadow-2xl brightness-105'
-                : navigatingTo === 'hse'
-                ? 'opacity-40 scale-[0.98] pointer-events-none border-[#5E8A2C]/60'
-                : 'hover:-translate-y-1.5 border-[#5E8A2C]/60 hover:border-[#86B84A]'
-            }`}
+            onClick={handleNavigate}
+            className="group relative flex flex-col justify-between p-5 sm:p-6 md:p-7 rounded-3xl bg-gradient-to-br from-[#4D7324] via-[#3D5E1C] to-[#2E4814] text-white shadow-md hover:shadow-2xl hover:shadow-[#3D5E1C]/25 active:scale-[0.97] transition-all duration-300 text-left border-2 border-[#5E8A2C]/60 hover:border-[#86B84A] hover:-translate-y-1.5 overflow-hidden min-h-[215px] sm:min-h-[235px] md:min-h-[250px] cursor-pointer touch-manipulation"
           >
             {/* Ambient Radial Sheen */}
             <div className="absolute top-0 right-0 -mt-10 -mr-10 w-44 h-44 rounded-full bg-white/10 blur-2xl group-hover:scale-150 group-hover:bg-white/20 transition-all duration-700 pointer-events-none" />
@@ -102,11 +85,7 @@ export default function HomePage() {
               
               {/* Header Icon & Category Badge */}
               <div className="flex items-center justify-between">
-                <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 text-white flex items-center justify-center shadow-md transition-all duration-300 ${
-                  navigatingTo === 'scanner' 
-                    ? 'scale-110 bg-white text-[#35551F] shadow-lg' 
-                    : 'group-hover:scale-108 group-hover:-translate-y-0.5 group-hover:bg-white group-hover:text-[#35551F] group-active:scale-95'
-                }`}>
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 text-white flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-108 group-hover:-translate-y-0.5 group-hover:bg-white group-hover:text-[#35551F] group-active:scale-95">
                   <Camera className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
                 </div>
 
@@ -136,35 +115,21 @@ export default function HomePage() {
             {/* Bottom Action Footer Bar */}
             <div className="pt-3 sm:pt-3.5 mt-3 sm:mt-3.5 flex items-center justify-between border-t border-white/20 text-[12.5px] sm:text-[13.5px] font-bold relative z-10">
               <span className="flex items-center gap-2 text-white/95 group-hover:text-white transition-colors duration-300">
-                <ScanLine className={`w-4 h-4 text-white/90 ${navigatingTo === 'scanner' ? 'animate-pulse' : 'group-hover:scale-110'} transition-transform duration-300`} />
+                <ScanLine className="w-4 h-4 text-white/90 group-hover:scale-110 transition-transform duration-300" />
                 <span>
-                  {navigatingTo === 'scanner' 
-                    ? (language === 'hi' 
-                        ? 'स्कैनर खोला जा रहा है...' 
-                        : language === 'kn'
-                        ? 'ಸ್ಕ್ಯಾನರ್ ತೆರೆಯಲಾಗುತ್ತಿದೆ...'
-                        : language === 'gu'
-                        ? 'સ્કેનર ખોલાઈ રહ્યું છે...'
-                        : 'Opening Exposure Scanner...')
-                    : (language === 'hi' 
-                        ? 'एक्सपोज़र स्कैनर खोलें' 
-                        : language === 'kn'
-                        ? 'ಎಕ್ಸ್‌ಪೋಶರ್ ಸ್ಕ್ಯಾನರ್ ತೆರೆಯಿರಿ'
-                        : language === 'gu'
-                        ? 'એક્સપોઝર સ્કેનર ખોલો'
-                        : 'Open Exposure Scanner')}
+                  {language === 'hi' 
+                    ? 'एक्सपोज़र स्कैनर खोलें' 
+                    : language === 'kn'
+                    ? 'ಎಕ್ಸ್‌ಪೋಶರ್ ಸ್ಕ್ಯಾನರ್ ತೆರೆಯಿರಿ'
+                    : language === 'gu'
+                    ? 'એક્સપોઝર સ્કેનર ખોલો'
+                    : 'Open Exposure Scanner'}
                 </span>
               </span>
               
               {/* Action Arrow Button */}
-              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white text-[#35551F] flex items-center justify-center shadow-md transition-all duration-300 ${
-                navigatingTo === 'scanner' ? 'scale-105 shadow-lg' : 'group-hover:translate-x-1.5 group-hover:scale-105 group-hover:shadow-lg group-active:scale-95'
-              }`}>
-                {navigatingTo === 'scanner' ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-[#35551F]" />
-                ) : (
-                  <ArrowRight className="w-4 h-4 stroke-[2.6]" />
-                )}
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white text-[#35551F] flex items-center justify-center shadow-md transition-all duration-300 group-hover:translate-x-1.5 group-hover:scale-105 group-hover:shadow-lg group-active:scale-95">
+                <ArrowRight className="w-4 h-4 stroke-[2.6]" />
               </div>
             </div>
 
@@ -175,14 +140,8 @@ export default function HomePage() {
           {/* ════════════════════════════════════════════════════════════ */}
           <Link
             href="/hse"
-            onClick={(e) => handleNavigate('hse', '/hse', e)}
-            className={`group relative flex flex-col justify-between p-5 sm:p-6 md:p-7 rounded-3xl bg-white hover:bg-[#FAF7F0] text-[#263026] shadow-md hover:shadow-2xl hover:shadow-[#5C822D]/15 active:scale-[0.97] transition-all duration-300 text-left border-2 overflow-hidden min-h-[215px] sm:min-h-[235px] md:min-h-[250px] cursor-pointer touch-manipulation ${
-              navigatingTo === 'hse'
-                ? 'scale-[0.97] ring-4 ring-[#5C822D] bg-[#F4F9EE] border-[#5C822D] shadow-2xl'
-                : navigatingTo === 'scanner'
-                ? 'opacity-40 scale-[0.98] pointer-events-none border-[#E8E2D5]'
-                : 'hover:-translate-y-1.5 border-[#E8E2D5] hover:border-[#5C822D]'
-            }`}
+            onClick={handleNavigate}
+            className="group relative flex flex-col justify-between p-5 sm:p-6 md:p-7 rounded-3xl bg-white hover:bg-[#FAF7F0] text-[#263026] shadow-md hover:shadow-2xl hover:shadow-[#5C822D]/15 active:scale-[0.97] transition-all duration-300 text-left border-2 border-[#E8E2D5] hover:border-[#5C822D] hover:-translate-y-1.5 overflow-hidden min-h-[215px] sm:min-h-[235px] md:min-h-[250px] cursor-pointer touch-manipulation"
           >
             {/* Ambient Soft Green Glow */}
             <div className="absolute top-0 right-0 -mt-10 -mr-10 w-44 h-44 rounded-full bg-[#5C822D]/5 blur-3xl group-hover:scale-150 group-hover:bg-[#5C822D]/12 transition-all duration-700 pointer-events-none" />
@@ -191,11 +150,7 @@ export default function HomePage() {
               
               {/* Header Icon & Category Badge */}
               <div className="flex items-center justify-between">
-                <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#EDF3E4] border border-[#C6DCC0] text-[#5C822D] flex items-center justify-center shadow-xs transition-all duration-300 ${
-                  navigatingTo === 'hse' 
-                    ? 'scale-110 bg-[#5C822D] text-white shadow-lg' 
-                    : 'group-hover:scale-108 group-hover:-translate-y-0.5 group-hover:bg-[#5C822D] group-hover:text-white group-active:scale-95'
-                }`}>
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#EDF3E4] border border-[#C6DCC0] text-[#5C822D] flex items-center justify-center shadow-xs transition-all duration-300 group-hover:scale-108 group-hover:-translate-y-0.5 group-hover:bg-[#5C822D] group-hover:text-white group-active:scale-95">
                   <BarChart3 className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
                 </div>
 
@@ -225,62 +180,26 @@ export default function HomePage() {
             {/* Bottom Action Footer Bar */}
             <div className="pt-3 sm:pt-3.5 mt-3 sm:mt-3.5 flex items-center justify-between border-t border-[#E8E2D5] group-hover:border-[#C6DCC0] text-[12.5px] sm:text-[13.5px] font-bold relative z-10 transition-colors duration-300">
               <span className="flex items-center gap-2 text-[#596158] group-hover:text-[#35551F] transition-colors duration-300">
-                <LayoutDashboard className={`w-4 h-4 text-[#5C822D] ${navigatingTo === 'hse' ? 'animate-pulse' : 'group-hover:scale-110'} transition-transform duration-300`} />
+                <LayoutDashboard className="w-4 h-4 text-[#5C822D] group-hover:scale-110 transition-transform duration-300" />
                 <span>
-                  {navigatingTo === 'hse'
-                    ? (language === 'hi' 
-                        ? 'सुरक्षा डैशबोर्ड खोला जा रहा है...' 
-                        : language === 'kn'
-                        ? 'ಸುರಕ್ಷತಾ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ತೆರೆಯಲಾಗುತ್ತಿದೆ...'
-                        : language === 'gu'
-                        ? 'સુરક્ષા ડેશબોર્ડ ખોલાઈ રહ્યું છે...'
-                        : 'Opening Safety Dashboard...')
-                    : (language === 'hi' 
-                        ? 'सुरक्षा डैशबोर्ड खोलें' 
-                        : language === 'kn'
-                        ? 'ಸುರಕ್ಷತಾ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ತೆರೆಯಿರಿ'
-                        : language === 'gu'
-                        ? 'સુરક્ષા ડેશબોર્ડ ખોલો'
-                        : 'Open Safety Dashboard')}
+                  {language === 'hi' 
+                    ? 'एचएसई डैशबोर्ड खोलें' 
+                    : language === 'kn'
+                    ? 'HSE ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ತೆರೆಯಿರಿ'
+                    : language === 'gu'
+                    ? 'HSE ડેશબોર્ડ ખોલો'
+                    : 'Open HSE Dashboard'}
                 </span>
               </span>
               
               {/* Action Arrow Button */}
-              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#FAF6EE] border border-[#E8E2D5] text-[#5C822D] flex items-center justify-center shadow-xs transition-all duration-300 ${
-                navigatingTo === 'hse' ? 'scale-105 bg-[#5C822D] text-white border-[#5C822D] shadow-md' : 'group-hover:translate-x-1.5 group-hover:scale-105 group-hover:shadow-md group-hover:bg-[#5C822D] group-hover:text-white group-hover:border-[#5C822D] group-active:scale-95'
-              }`}>
-                {navigatingTo === 'hse' ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-white" />
-                ) : (
-                  <ArrowRight className="w-4 h-4 stroke-[2.6]" />
-                )}
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#FAF6EE] text-[#5C822D] flex items-center justify-center shadow-xs transition-all duration-300 group-hover:translate-x-1.5 group-hover:scale-105 group-hover:bg-[#5C822D] group-hover:text-white group-hover:shadow-md group-active:scale-95">
+                <ArrowRight className="w-4 h-4 stroke-[2.6]" />
               </div>
             </div>
 
           </Link>
 
-        </div>
-
-        {/* ───────────────────────────────────────────────────────────── */}
-        {/* SUB-HERO EXPLORATION LINK                                     */}
-        {/* ───────────────────────────────────────────────────────────── */}
-        <div className="pt-1 text-center">
-          <Link
-            href="/about"
-            onClick={() => sfx.playClick()}
-            className="inline-flex items-center gap-1.5 text-[12px] sm:text-[13px] text-[#596158] hover:text-[#263026] font-semibold transition-all px-4 py-1.5 rounded-full hover:bg-white border border-transparent hover:border-[#E8E2D5] hover:shadow-2xs active:scale-95"
-          >
-            <Activity className="w-3.5 h-3.5 text-[#5C822D]" />
-            <span>
-              {language === 'hi' 
-                ? 'तकनीक, 4-पैच ऑप्टिकल ग्रिड एवं उत्पाद कार्यप्रणाली के बारे में जानें →' 
-                : language === 'kn'
-                ? 'ಸೀಸ-ಮುಕ್ತ ಸೆನ್ಸರ್ ಮ್ಯಾಟ್ರಿಕ್ಸ್ ಮತ್ತು ಆಪ್ಟಿಕಲ್ ಕ್ಯಾಲಿಬ್ರೇಶನ್ ತಂತ್ರಜ್ಞಾನದ ಬಗ್ಗೆ ತಿಳಿಯಿರಿ →'
-                : language === 'gu'
-                ? 'લીડ-મુક્ત સેન્સર મેટ્રિક્સ અને ઓપ્ટિકલ કેલિબ્રેશન તકનીક વિશે જાણો →'
-                : 'Learn about the lead-free chemosensor matrix & optical calibration technology →'}
-            </span>
-          </Link>
         </div>
 
       </div>

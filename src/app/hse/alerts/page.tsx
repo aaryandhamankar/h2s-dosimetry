@@ -9,10 +9,18 @@ import { formatDateTime } from '@/lib/utils';
 import { useMounted } from '@/hooks/use-mounted';
 
 export default function HSEAlertsPage() {
-  const { alerts, acknowledgeAlert, currentUser } = useAppStore();
+  const { alerts, acknowledgeAlert, currentUser, workers, scans } = useAppStore();
   const [filter, setFilter] = useState<'ALL' | 'OPEN' | 'ACKNOWLEDGED'>('ALL');
   const [acknowledgingId, setAcknowledgingId] = useState<string | null>(null);
   const mounted = useMounted();
+
+  const getWorkerDisplayName = (workerId: string) => {
+    const fromWorkers = workers.find(w => w.id === workerId);
+    if (fromWorkers) return fromWorkers.displayName;
+    const fromScans = scans.find(s => s.workerId === workerId);
+    if (fromScans?.workerName) return fromScans.workerName;
+    return workerId;
+  };
 
   const handleAcknowledge = async (id: string) => {
     if (acknowledgingId) return;
@@ -125,7 +133,7 @@ export default function HSEAlertsPage() {
                     </div>
 
                     <div className="text-[12px] sm:text-[13px] text-[#596158] flex items-center gap-2 flex-wrap">
-                      <span>Worker: <strong className="text-[#263026]">{alert.workerId}</strong></span>
+                      <span>Worker: <strong className="text-[#263026]">{getWorkerDisplayName(alert.workerId)}</strong> ({alert.workerId})</span>
                       <span>•</span>
                       <span>Logged: <strong className="text-[#263026] font-mono">{formatDateTime(alert.createdAt)}</strong></span>
                       <span className="hidden xs:inline">•</span>

@@ -24,31 +24,32 @@ export default function HSEExposurePage() {
   if (!mounted) return <div className="text-[13px] text-[#7A8178]">Loading exposure analytics...</div>;
 
   const validScans = scans
-    .filter(s => s.exposureResult?.estimatedDose !== null && s.exposureResult?.estimatedDose !== undefined)
-    .sort((a, b) => new Date(a.capturedAt).getTime() - new Date(b.capturedAt).getTime());
+    .filter(s => (s.h2sReading !== null && s.h2sReading !== undefined) || (s.exposureResult?.estimatedDose !== null && s.exposureResult?.estimatedDose !== undefined))
+    .sort((a, b) => new Date(a.capturedAt || a.timestamp || 0).getTime() - new Date(b.capturedAt || b.timestamp || 0).getTime());
 
   const chartData = validScans.map((s, idx) => ({
     name: `Scan ${idx + 1}`,
-    time: new Date(s.capturedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    dose: s.exposureResult?.estimatedDose || 0,
-    twa: s.exposureResult?.estimatedTwa || 0,
-    worker: s.workerId,
-    risk: s.exposureResult?.riskStatus,
+    time: new Date(s.capturedAt || s.timestamp || 0).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    dose: s.h2sReading ?? s.exposureResult?.estimatedDose ?? 0,
+    twa: s.exposureResult?.estimatedTwa || (s.h2sReading ? Math.round((s.h2sReading / 8) * 10) / 10 : 0),
+    worker: s.workerName || s.workerId,
+    risk: s.riskLevel || s.exposureResult?.riskStatus,
   }));
 
-  const workerTotals: Record<string, { count: number; maxDose: number; sumDose: number }> = {};
+  const workerTotals: Record<string, { count: number; maxDose: number; sumDose: number; displayName: string }> = {};
   validScans.forEach(s => {
-    const dose = s.exposureResult?.estimatedDose || 0;
-    if (!workerTotals[s.workerId]) {
-      workerTotals[s.workerId] = { count: 0, maxDose: 0, sumDose: 0 };
+    const dose = s.h2sReading ?? s.exposureResult?.estimatedDose ?? 0;
+    const workerKey = s.workerId;
+    if (!workerTotals[workerKey]) {
+      workerTotals[workerKey] = { count: 0, maxDose: 0, sumDose: 0, displayName: s.workerName || s.workerId };
     }
-    workerTotals[s.workerId].count += 1;
-    workerTotals[s.workerId].sumDose += dose;
-    workerTotals[s.workerId].maxDose = Math.max(workerTotals[s.workerId].maxDose, dose);
+    workerTotals[workerKey].count += 1;
+    workerTotals[workerKey].sumDose += dose;
+    workerTotals[workerKey].maxDose = Math.max(workerTotals[workerKey].maxDose, dose);
   });
 
   const workerBarData = Object.entries(workerTotals).map(([workerId, stats]) => ({
-    workerId,
+    workerId: stats.displayName,
     avgDose: Math.round((stats.sumDose / stats.count) * 10) / 10,
     maxDose: stats.maxDose,
   }));

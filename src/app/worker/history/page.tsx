@@ -184,25 +184,29 @@ export default function HistoryPage() {
               <div className="space-y-0.5 sm:space-y-1 min-w-0">
                 <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                   <span className={`gov-badge ${
-                    latestScan.exposureResult?.riskStatus === RiskStatus.NORMAL
+                    (latestScan.riskLevel || latestScan.exposureResult?.riskStatus) === RiskStatus.NORMAL
                       ? 'gov-badge-normal'
-                      : latestScan.exposureResult?.riskStatus === RiskStatus.ELEVATED
+                      : (latestScan.riskLevel || latestScan.exposureResult?.riskStatus) === RiskStatus.ELEVATED
                       ? 'gov-badge-elevated'
-                      : latestScan.exposureResult?.riskStatus === RiskStatus.HIGH
+                      : (latestScan.riskLevel || latestScan.exposureResult?.riskStatus) === RiskStatus.HIGH
                       ? 'gov-badge-high'
                       : 'gov-badge-critical'
                   } text-[10px] sm:text-[11px] font-bold py-0.5 px-2 shadow-2xs`}>
-                    {latestScan.exposureResult?.riskStatus || 'NORMAL'}
+                    {latestScan.riskLevel || latestScan.exposureResult?.riskStatus || 'NORMAL'}
                   </span>
                   <span className="font-mono text-[11px] sm:text-[12px] text-[#596158]">
-                    {language === 'hi' ? 'बैज:' : language === 'kn' ? 'ಬ್ಯಾಡ್ಜ್:' : language === 'gu' ? 'બેજ:' : 'Badge:'} <strong className="text-[#263026]">{latestScan.dosimeterId}</strong>
+                    {language === 'hi' ? 'बैज:' : language === 'kn' ? 'ಬ್ಯಾಡ್ಜ್:' : language === 'gu' ? 'બેજ:' : 'Badge:'} <strong className="text-[#263026]">{latestScan.dosimeterCode || latestScan.dosimeterId}</strong>
+                  </span>
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-[#5C822D] bg-[#EDF3E4] px-2 py-0.2 rounded-md border border-[#C6DCC0]">
+                    {latestScan.shiftName || 'Shift A (Morning)'} ({latestScan.shiftStart || '06:00'} – {latestScan.shiftEnd || '14:00'})
                   </span>
                 </div>
 
                 <div className="text-[11.5px] sm:text-[12.5px] text-[#596158] leading-tight truncate">
                   <strong className="text-[#263026]">
                     {language === 'hi' ? 'कार्रवाई:' : language === 'kn' ? 'ಕ್ರಮ:' : language === 'gu' ? 'પગલું:' : 'Action:'}
-                  </strong> {getActionSummary(latestScan.exposureResult?.riskStatus)}
+                  </strong> {getActionSummary(latestScan.riskLevel || latestScan.exposureResult?.riskStatus)}
+                  <span className="text-[#7A8178] ml-2">· {latestScan.location || 'Zone A'}</span>
                 </div>
               </div>
             </div>
@@ -211,12 +215,12 @@ export default function HistoryPage() {
             <div className="flex items-center justify-between sm:justify-end gap-3 self-stretch sm:self-center flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#E8E2D5]">
               <div className="text-left sm:text-right">
                 <div className="text-[18px] sm:text-[22px] font-black text-[#263026] font-mono leading-none">
-                  {latestScan.exposureResult?.estimatedDose !== null && latestScan.exposureResult?.estimatedDose !== undefined
-                    ? `${formatDose(latestScan.exposureResult.estimatedDose)} ${latestScan.exposureResult.doseUnit}`
+                  {(latestScan.h2sReading !== null && latestScan.h2sReading !== undefined) || (latestScan.exposureResult?.estimatedDose !== null && latestScan.exposureResult?.estimatedDose !== undefined)
+                    ? `${formatDose(latestScan.h2sReading ?? latestScan.exposureResult?.estimatedDose, 1)} ${latestScan.doseUnit || latestScan.exposureResult?.doseUnit || 'ppm·h'}`
                     : (language === 'hi' ? 'असत्यापित' : language === 'kn' ? 'ದೃಢೀಕರಿಸದ' : language === 'gu' ? 'અચકાસાયેલ' : 'Unverified')}
                 </div>
                 <div className="text-[10px] sm:text-[11px] text-[#7A8178] mt-0.5 font-medium">
-                  8h TWA: {latestScan.exposureResult?.estimatedTwa !== null && latestScan.exposureResult?.estimatedTwa !== undefined ? `${formatDose(latestScan.exposureResult.estimatedTwa)} ppm` : '0.4 ppm'}
+                  8h TWA: {latestScan.exposureResult?.estimatedTwa !== null && latestScan.exposureResult?.estimatedTwa !== undefined ? `${formatDose(latestScan.exposureResult.estimatedTwa, 1)} ppm` : '0.4 ppm'}
                 </div>
               </div>
 
@@ -290,14 +294,15 @@ export default function HistoryPage() {
           <div className="divide-y divide-[#E7E5DE]">
             {userScans.map((scan) => {
               const res = scan.exposureResult;
-              const isValid = res?.validityStatus === ValidityStatus.VALID;
+              const isValid = res?.validityStatus === ValidityStatus.VALID || scan.status === RiskStatus.NORMAL || scan.riskLevel === RiskStatus.NORMAL;
+              const currentRisk = scan.riskLevel || res?.riskStatus;
 
               let badge = <span className="gov-badge gov-badge-normal text-[10px] sm:text-[11px] font-bold">{language === 'hi' ? 'सामान्य' : language === 'kn' ? 'ಸಾಮಾನ್ಯ' : language === 'gu' ? 'સામાન્ય' : 'Normal'}</span>;
-              if (res?.riskStatus === RiskStatus.ELEVATED) {
+              if (currentRisk === RiskStatus.ELEVATED) {
                 badge = <span className="gov-badge gov-badge-elevated text-[10px] sm:text-[11px] font-bold">{language === 'hi' ? 'मध्यम' : language === 'kn' ? 'ಮಧ್ಯಮ' : language === 'gu' ? 'મધ્યમ' : 'Elevated'}</span>;
-              } else if (res?.riskStatus === RiskStatus.HIGH) {
+              } else if (currentRisk === RiskStatus.HIGH) {
                 badge = <span className="gov-badge gov-badge-high text-[10px] sm:text-[11px] font-bold">{language === 'hi' ? 'उच्च' : language === 'kn' ? 'ಅಧಿಕ' : language === 'gu' ? 'ઉચ્ચ' : 'High'}</span>;
-              } else if (res?.riskStatus === RiskStatus.CRITICAL) {
+              } else if (currentRisk === RiskStatus.CRITICAL) {
                 badge = <span className="gov-badge gov-badge-critical text-[10px] sm:text-[11px] font-bold">{language === 'hi' ? 'गंभीर' : language === 'kn' ? 'ತುರ್ತು' : language === 'gu' ? 'ગંભીર' : 'Critical'}</span>;
               } else if (!isValid) {
                 badge = <span className="gov-badge gov-badge-neutral text-[10px] sm:text-[11px] font-bold">{language === 'hi' ? 'अस्वीकृत' : language === 'kn' ? 'ತಿರಸ್ಕೃತ' : language === 'gu' ? 'અસ્વીકાર' : 'Refusal'}</span>;
@@ -321,11 +326,14 @@ export default function HistoryPage() {
                     </div>
 
                     <div className="min-w-0 space-y-0.5">
-                      <div className="font-semibold text-[13px] sm:text-[14px] text-[#263026] group-hover:text-[#5C822D] truncate transition-colors">
-                        {formatDateTime(scan.capturedAt)}
+                      <div className="font-semibold text-[13px] sm:text-[14px] text-[#263026] group-hover:text-[#5C822D] truncate transition-colors flex items-center gap-2">
+                        <span>{formatDateTime(scan.capturedAt || scan.timestamp || '')}</span>
+                        <span className="text-[10px] font-mono font-medium text-[#5C822D] bg-[#EDF3E4] px-1.5 py-0.2 rounded">
+                          {scan.shiftName || 'Shift A'}
+                        </span>
                       </div>
                       <div className="text-[11px] text-[#596158] font-mono truncate">
-                        {language === 'hi' ? 'बैज:' : language === 'kn' ? 'ಬ್ಯಾಡ್ಜ್:' : language === 'gu' ? 'બેજ:' : 'Badge:'} {scan.dosimeterId} · {currentUser?.site || 'Zone A'}
+                        {language === 'hi' ? 'बैज:' : language === 'kn' ? 'ಬ್ಯಾಡ್ಜ್:' : language === 'gu' ? 'બેજ:' : 'Badge:'} {scan.dosimeterCode || scan.dosimeterId} · {scan.workerName || currentUser?.displayName} · {scan.location || 'Zone A'}
                       </div>
                     </div>
                   </div>

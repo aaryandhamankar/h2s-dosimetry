@@ -223,9 +223,23 @@ export interface ExposureResult {
 
 export interface Scan {
   id: string;
+  scanId?: string; // Canonical alias for id
+  timestamp?: string; // Canonical alias for capturedAt
   workerId: string;
+  workerName?: string;
   shiftId: string;
+  shiftName?: string;
+  shiftStart?: string;
+  shiftEnd?: string;
   dosimeterId: string;
+  dosimeterCode?: string;
+  bandCode?: string;
+  h2sReading?: number | null;
+  doseUnit?: string;
+  riskLevel?: RiskStatus;
+  status?: string;
+  expiryStatus?: string;
+  location?: string;
   capturedAt: string;
   processedAt: string | null;
   processingStatus: ProcessingStatus;

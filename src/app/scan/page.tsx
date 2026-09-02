@@ -33,7 +33,10 @@ import { getScanPipeline } from '@/services/scientific/scan-processing-pipeline'
 import { formatDateTime, formatDose, getValidityLabel } from '@/lib/utils';
 import { sfx } from '@/lib/sound-effects';
 import Image from 'next/image';
-import mrplLogo from '../../../public/mrpl-logo.png';
+import { validateImage } from '@/services/scientific/image-validation-layer';
+import { resolveCode } from '@/services/scientific/demo-code-engine';
+import { useDemoConfigStore } from '@/stores/demo-config-store';
+import { resolveActiveShift } from '@/services/shift-service';
 
 function getScenarioBadgeImage(scenario: DemoScenario): string {
   const colors: Record<DemoScenario, string> = {
@@ -137,15 +140,31 @@ function ScanPageContent() {
     currentUser, 
     activeShift, 
     activeDosimeter, 
+    shiftConfigs,
     scans, 
     addScan, 
     updateUserProfile, 
     language 
   } = useAppStore();
 
+  // Demo config store — drives image-validation routing for live/upload captures
+  const {
+    demoModeEnabled,
+    scanMode,
+    fixedScenario,
+    currentSequenceScenario,
+    advanceSequence,
+    codeMappings,
+  } = useDemoConfigStore();
+
   // Screen states: 'viewfinder' | 'processing' | 'result'
   const [screenState, setScreenState] = useState<'viewfinder' | 'processing' | 'result'>('viewfinder');
   const [currentScan, setCurrentScan] = useState<Scan | null>(null);
+
+  // Image validation rejection — shown as brief toast on viewfinder before resetting
+  const [validationRejection, setValidationRejection] = useState<{ reason: string; status: string } | null>(null);
+  // OCR scanning indicator — shown while Tesseract.js reads the image
+  const [ocrScanning, setOcrScanning] = useState(false);
 
   // Processing pipeline animation states
   const [currentStage, setCurrentStage] = useState<ProcessingStatus | null>(null);
@@ -161,8 +180,9 @@ function ScanPageContent() {
   const [editSite, setEditSite] = useState(currentUser?.site || 'Refinery Zone A');
   const [editCode, setEditCode] = useState(currentUser?.workerCode || 'W-001');
 
-  // Metrology accordion
+  // Metrology accordion & Thresholds explainer
   const [showTechnical, setShowTechnical] = useState(false);
+  const [showThresholds, setShowThresholds] = useState(false);
 
   // Camera & Torch states
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -245,14 +265,16 @@ function ScanPageContent() {
 
     const pipeline = getScanPipeline();
     const workerId = currentUser?.id || 'worker-001';
-    const shiftId = activeShift?.id || 'shift-001';
+    const workerName = currentUser?.displayName || 'Rajesh Kumar';
+    const shiftInfo = resolveActiveShift(workerId, shiftConfigs);
     const dosimeterCode = activeDosimeter?.dosimeterCode || 'DOS-001';
+    const location = currentUser?.site || 'Refinery Zone A';
 
     try {
       const scan = await pipeline.processScenario(
         scenario,
         workerId,
-        shiftId,
+        shiftInfo.shiftId,
         dosimeterCode,
         (status) => {
           setCurrentStage(status);
@@ -262,7 +284,17 @@ function ScanPageContent() {
             sfx.playStepTick(stepIdx + 1);
           }
         },
-        finalImageUrl
+        finalImageUrl,
+        {
+          workerName,
+          shiftName: shiftInfo.shiftName,
+          shiftStart: shiftInfo.shiftStart,
+          shiftEnd: shiftInfo.shiftEnd,
+          location,
+          dosimeterCode,
+          bandCode: dosimeterCode,
+          expiryStatus: activeDosimeter?.status === 'EXPIRED' ? 'EXPIRED' : 'ACTIVE',
+        }
       );
 
       // Ensure all 8 stage labels are marked complete on finished
@@ -273,14 +305,20 @@ function ScanPageContent() {
 
       // Trigger affirmative / warning / alarm sound based on certified outcome
       const resRisk = scan.exposureResult?.riskStatus;
-      const isInv = scan.exposureResult?.validityStatus === ValidityStatus.INVALID_IMAGE || scan.exposureResult?.validityStatus === ValidityStatus.PROCESSING_ERROR;
-      const isOOR = scan.exposureResult?.validityStatus === ValidityStatus.OUT_OF_RANGE;
+      const isInv = scan.exposureResult?.validityStatus === ValidityStatus.INVALID_IMAGE || scan.exposureResult?.validityStatus === ValidityStatus.PROCESSING_ERROR || scan.scenarioId === DemoScenario.INVALID;
+      const isOOR = scan.exposureResult?.validityStatus === ValidityStatus.OUT_OF_RANGE || scan.scenarioId === DemoScenario.OUT_OF_RANGE;
 
       setTimeout(() => {
-        if (resRisk === RiskStatus.CRITICAL) {
+        if (isInv) {
+          sfx.playErrorRefusal();
+        } else if (isOOR) {
+          sfx.playOutOfRange();
+        } else if (resRisk === RiskStatus.CRITICAL) {
           sfx.playCriticalAlarm();
-        } else if (resRisk === RiskStatus.HIGH || resRisk === RiskStatus.ELEVATED || isOOR || isInv) {
-          sfx.playWarning();
+        } else if (resRisk === RiskStatus.HIGH) {
+          sfx.playHighAlarm();
+        } else if (resRisk === RiskStatus.ELEVATED) {
+          sfx.playElevatedWarning();
         } else {
           sfx.playSuccess();
         }
@@ -293,44 +331,127 @@ function ScanPageContent() {
     }
   };
 
+  /**
+   * Core logic: Camera → Image Validation (strip detection + OCR) → Scan Mode → Pipeline
+   *
+   * 1. Run validateImage() — strip colour analysis + Tesseract.js OCR (async).
+   * 2. If invalid: show rejection reason toast; do NOT proceed.
+   * 3. If valid:
+   *    a. Demo mode OFF → NORMAL (real CV model would replace this)
+   *    b. Demo mode ON:
+   *       - 'code': use OCR-extracted code → resolve from mapping
+   *       - 'sequence': current sequence item, then advance
+   *       - 'fixed': fixedScenario always
+   *
+   * ⚙ SCOPE: Replace the validateImage() call with a real backend CV API
+   *   call when the production model is ready — everything else stays the same.
+   */
+  const resolveCaptureScenario = async (
+    dataUrl: string,
+    isInternal: boolean,
+  ): Promise<{ scenario: DemoScenario; title: string } | null> => {
+    // ── Step 1: Image Validation (async — strip detection + OCR) ─────────
+    setOcrScanning(true);
+    let validation: Awaited<ReturnType<typeof validateImage>>;
+    try {
+      validation = await validateImage(dataUrl, isInternal);
+    } finally {
+      setOcrScanning(false);
+    }
+
+    if (validation.status !== 'VALID_DOSIMETER') {
+      const statusLabels: Record<string, string> = {
+        GLARE_DETECTED: 'Glare Detected',
+        PATCH_NOT_DETECTED: 'Patch Not Detected',
+        PLEASE_RESCAN: 'Please Re-scan',
+        INVALID_IMAGE: 'Invalid Image',
+      };
+      const reason = validation.rejectionReason ?? 'Invalid image';
+      const statusLabel = statusLabels[validation.status] ?? 'Invalid Image';
+      sfx.playErrorRefusal();
+      setValidationRejection({ reason, status: statusLabel });
+      setTimeout(() => setValidationRejection(null), 3500);
+      return null;
+    }
+
+    // ── Step 2: Demo mode OFF → normal capture ────────────────────────────
+    if (!demoModeEnabled) {
+      return {
+        scenario: DemoScenario.NORMAL,
+        title: language === 'hi' ? 'लाइव कैप्चर' : 'Live Optical Capture',
+      };
+    }
+
+    // ── Step 3a: Code mode — use OCR-extracted code ───────────────────────
+    if (scanMode === 'code') {
+      if (validation.demoCode) {
+        const resolution = resolveCode(validation.demoCode, codeMappings);
+        if (resolution.recognised && resolution.scenario) {
+          return {
+            scenario: resolution.scenario,
+            title: `Code ${resolution.code} → ${resolution.scenario}`,
+          };
+        }
+      }
+      // No recognised code → fall through to sequence
+    }
+
+    // ── Step 3b: Sequence mode ────────────────────────────────────────────
+    if (scanMode === 'sequence' || scanMode === 'code') {
+      const scenario = currentSequenceScenario();
+      advanceSequence();
+      return { scenario, title: `Demo Scan (${scenario})` };
+    }
+
+    // ── Step 3c: Fixed mode ───────────────────────────────────────────────
+    return { scenario: fixedScenario, title: `Demo — ${fixedScenario}` };
+  };
+
   // Live Camera Capture with Shutter Sound
-  const handleCapture = () => {
+  const handleCapture = async () => {
     sfx.playCameraShutter();
     // Turn off torch automatically after clicking a picture
     turnOffTorch();
 
-    if (!videoRef.current || !canvasRef.current) {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    // If live camera is not active or video has no dimensions, execute scenario directly
+    if (!video || !canvas || !cameraActive || !video.videoWidth || video.videoWidth === 0) {
+      const scenario = demoModeEnabled ? currentSequenceScenario() : DemoScenario.NORMAL;
+      if (demoModeEnabled && scanMode === 'sequence') advanceSequence();
       executePipeline(
-        DemoScenario.NORMAL, 
-        language === 'hi' ? '1. सामान्य शिफ्ट (3.2 ppm·h)' : '1. Normal Shift (3.2 ppm·h)'
+        scenario,
+        language === 'hi' ? '1. सामान्य शिफ्ट (3.2 ppm·h)' : '1. Normal Shift (3.2 ppm·h)',
       );
       return;
     }
 
     try {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
       canvas.width = video.videoWidth || 640;
       canvas.height = video.videoHeight || 480;
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-        executePipeline(
-          DemoScenario.NORMAL, 
-          language === 'hi' ? 'लाइव ऑप्टिकल कैप्चर' : 'Live Optical Capture', 
-          dataUrl
-        );
+        const resolved = await resolveCaptureScenario(dataUrl, false);
+        if (!resolved) return; // Rejected by validation — toast already shown
+        executePipeline(resolved.scenario, resolved.title, dataUrl);
       } else {
+        // Canvas unavailable — fallback directly to demo-config
+        const scenario = demoModeEnabled ? currentSequenceScenario() : DemoScenario.NORMAL;
+        if (demoModeEnabled && scanMode === 'sequence') advanceSequence();
         executePipeline(
-          DemoScenario.NORMAL, 
-          language === 'hi' ? '1. सामान्य शिफ्ट (3.2 ppm·h)' : '1. Normal Shift (3.2 ppm·h)'
+          scenario,
+          language === 'hi' ? '1. सामान्य शिफ्ट (3.2 ppm·h)' : '1. Normal Shift (3.2 ppm·h)',
         );
       }
     } catch {
+      const scenario = demoModeEnabled ? currentSequenceScenario() : DemoScenario.NORMAL;
+      if (demoModeEnabled && scanMode === 'sequence') advanceSequence();
       executePipeline(
-        DemoScenario.NORMAL, 
-        language === 'hi' ? '1. सामान्य शिफ्ट (3.2 ppm·h)' : '1. Normal Shift (3.2 ppm·h)'
+        scenario,
+        language === 'hi' ? '1. सामान्य शिफ्ट (3.2 ppm·h)' : '1. Normal Shift (3.2 ppm·h)',
       );
     }
   };
@@ -344,7 +465,7 @@ function ScanPageContent() {
     const runCamera = async () => {
       if (typeof window === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         if (!isCancelled) {
-          setCameraError(language === 'hi' ? 'कैमरा उपलब्ध नहीं है। कैप्चर बटन का उपयोग करें।' : 'Camera API unavailable in this browser environment.');
+          setCameraError(language === 'hi' ? 'कैमरा उपलब्ध नहीं है।' : 'Camera unavailable.');
           setCameraActive(false);
         }
         return;
@@ -352,14 +473,23 @@ function ScanPageContent() {
 
       try {
         setCameraError(null);
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-          audio: false,
-        });
+        let stream: MediaStream;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { ideal: 'environment' },
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+            },
+            audio: false,
+          });
+        } catch {
+          // Fallback to any available video camera (laptop webcam, front cam)
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false,
+          });
+        }
 
         if (isCancelled) {
           stream.getTracks().forEach(t => t.stop());
@@ -374,7 +504,7 @@ function ScanPageContent() {
         setCameraActive(true);
       } catch {
         if (!isCancelled) {
-          setCameraError(language === 'hi' ? 'कैमरा ऑफलाइन है। कैप्चर बटन या डेमो बटन का उपयोग करें।' : 'Camera offline. Click the capture button or use the Demo button.');
+          setCameraError(language === 'hi' ? 'कैमरा पूर्वावलोकन उपलब्ध नहीं है।' : 'Camera preview is unavailable.');
           setCameraActive(false);
         }
       }
@@ -388,6 +518,15 @@ function ScanPageContent() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screenState, cameraRetryCount]);
+
+  // Dispose Tesseract.js worker when scan page unmounts
+  useEffect(() => {
+    return () => {
+      import('@/services/scientific/ocr-engine').then(({ disposeOcrEngine }) => {
+        disposeOcrEngine();
+      }).catch(() => {});
+    };
+  }, []);
 
   // Trigger scenario if passed via query parameters (from global Demo button)
   useEffect(() => {
@@ -419,10 +558,12 @@ function ScanPageContent() {
     const reader = new FileReader();
     reader.onload = async (event) => {
       const dataUrl = event.target?.result as string;
+      const resolved = await resolveCaptureScenario(dataUrl, false);
+      if (!resolved) return; // Rejected by validation — toast already shown
       await executePipeline(
-        DemoScenario.HIGH, 
-        language === 'hi' ? `अपलोड की गई फ़ोटो (${file.name})` : `Uploaded Photo (${file.name})`, 
-        dataUrl
+        resolved.scenario,
+        language === 'hi' ? `अपलोड की गई फ़ोटो (${file.name})` : `Uploaded Photo (${file.name})`,
+        dataUrl,
       );
     };
     reader.readAsDataURL(file);
@@ -467,67 +608,103 @@ function ScanPageContent() {
     pointerPercent = Math.min(100, Math.max(0, (doseVal / 30) * 100));
   }
 
-  // Unified non-repetitive action guidance & badges
+  // Unified dynamic styling & action guidance reflecting result interpretation
   let statusBadge = (
-    <span className="gov-badge gov-badge-normal text-[13px] py-1 px-3.5 shadow-2xs font-bold">
-      <CheckCircle2 className="w-4 h-4 text-[#5C822D]" /> {language === 'hi' ? 'सुरक्षित बेसलाइन' : 'SAFE BASELINE'}
+    <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12px] sm:text-[13px] font-bold bg-[#EDF5E5] text-[#35551F] border border-[#C6DCC0] shadow-2xs">
+      <CheckCircle2 className="w-4 h-4 text-[#5C822D]" />
+      <span>{language === 'hi' ? 'सुरक्षित बेसलाइन' : 'SAFE BASELINE'}</span>
     </span>
   );
-  let actionTitle = language === 'hi' ? 'सामान्य शिफ्ट प्रक्रिया — सुरक्षित बेसलाइन' : 'Normal Shift Procedure — Safe Baseline';
-  let actionInstruction = language === 'hi' ? 'सामान्य प्रक्रिया — मानक पीपीई के साथ निर्धारित शिफ्ट संचालन जारी रखें।' : 'Normal procedure — continue scheduled shift operations with standard PPE.';
+  let actionTitle = language === 'hi' ? 'सामान्य शिफ्ट प्रक्रिया' : 'Normal Shift Procedure';
+  let actionInstruction = language === 'hi' ? 'मानक पीपीई के साथ निर्धारित शिफ्ट संचालन जारी रखें।' : 'Continue scheduled operations with standard PPE.';
+  let doseTextColor = 'text-[#35551F]';
+  let doseUnitColor = 'text-[#5C822D]';
   let cardAccentBorder = 'border-[#C6DCC0]';
-  let bannerBg = 'bg-[#FAF7F0]';
+  let bannerBg = 'bg-[#FAFDF6]';
+  let actionBoxBorder = 'border-[#C6DCC0]';
+  let actionBoxBg = 'bg-[#EDF5E5]';
+  let actionIconColor = 'text-[#35551F]';
 
   if (isInvalid) {
     statusBadge = (
-      <span className="gov-badge gov-badge-neutral text-[13px] py-1 px-3.5 font-bold">
-        <XCircle className="w-4 h-4 text-[#A94442]" /> {language === 'hi' ? 'गुणवत्ता अस्वीकृति' : 'QUALITY GATE REFUSAL'}
+      <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12px] sm:text-[13px] font-bold bg-[#FAF6EE] text-[#7A8178] border border-[#D8D0C0] shadow-2xs">
+        <XCircle className="w-4 h-4 text-[#A94442]" />
+        <span>{language === 'hi' ? 'अमान्य स्कैन / चमक' : 'UNVERIFIED / GLARE'}</span>
       </span>
     );
-    actionTitle = language === 'hi' ? 'रीडिंग अस्वीकृत — चमक / ऑप्टिकल धुंधलापन पहचाना गया' : 'Reading Refused — Glare / Optical Blur Detected';
-    actionInstruction = language === 'hi' ? '4-पैच ग्रिड पर अत्यधिक चमक या धुंधलापन है। रेटिकल के अंदर पुनः संरेखित करें और दोबारा फोटो लें।' : 'Specular glare or blur detected on 4-patch grid. Re-align inside reticle and retake photo.';
+    actionTitle = language === 'hi' ? 'रीडिंग अस्वीकृत — चमक / धुंधलापन' : 'Reading Refused — Glare / Optical Blur';
+    actionInstruction = language === 'hi' ? 'अत्यधिक चमक या धुंधलापन पहचाना गया। रिस्टबैंड को फ्रेम में संरेखित कर दोबारा फोटो लें।' : 'Specular glare or blur detected. Re-align wristband inside frame and retake scan.';
+    doseTextColor = 'text-[#7A8178]';
+    doseUnitColor = 'text-[#7A8178]';
     cardAccentBorder = 'border-[#D8D0C0]';
     bannerBg = 'bg-[#FAF6EE]';
+    actionBoxBorder = 'border-[#D8D0C0]';
+    actionBoxBg = 'bg-[#EDE7DA]';
+    actionIconColor = 'text-[#7A8178]';
   } else if (isOor) {
     statusBadge = (
-      <span className="gov-badge gov-badge-neutral text-[13px] py-1 px-3.5 bg-[#FAF2EB] text-[#9C4124] border-[#E8C4B8] font-bold">
-        <AlertTriangle className="w-4 h-4 text-[#9C4124]" /> {language === 'hi' ? 'सेंसर संतृप्त' : 'SENSOR SATURATED'}
+      <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12px] sm:text-[13px] font-bold bg-[#FAF2EB] text-[#9C4124] border border-[#E8C4B8] shadow-2xs">
+        <AlertTriangle className="w-4 h-4 text-[#9C4124]" />
+        <span>{language === 'hi' ? 'सेंसर संतृप्त' : 'SENSOR SATURATED'}</span>
       </span>
     );
-    actionTitle = language === 'hi' ? 'सेंसर संतृप्ति पहचानी गई (>30.0 ppm·h)' : 'Sensor Saturation Detected (>30.0 ppm·h)';
-    actionInstruction = language === 'hi' ? 'मैट्रिक्स 30 ppm·h सीमा से अधिक हो गया है। गैस क्रोमैटोग्राफी (GC) विश्लेषण के लिए बैज एचएसई लैब में जमा करें।' : 'Matrix exceeded 30 ppm·h ceiling. Submit badge to HSE laboratory for gas chromatography (GC) analysis.';
+    actionTitle = language === 'hi' ? 'सेंसर संतृप्ति (>30.0 ppm·h)' : 'Sensor Saturation (>30.0 ppm·h)';
+    actionInstruction = language === 'hi' ? 'मैट्रिक्स 30 ppm·h सीमा पार कर गया है। विस्तृत विश्लेषण के लिए बैज एचएसई लैब में जमा करें।' : 'Matrix exceeded 30 ppm·h ceiling. Submit wristband to HSE lab for chromatographic analysis.';
+    doseTextColor = 'text-[#9C4124]';
+    doseUnitColor = 'text-[#9C4124]';
     cardAccentBorder = 'border-[#E8C4B8]';
-    bannerBg = 'bg-[#FFFDFB]';
+    bannerBg = 'bg-[#FAF3EE]';
+    actionBoxBorder = 'border-[#E8C4B8]';
+    actionBoxBg = 'bg-[#F7E5DB]';
+    actionIconColor = 'text-[#9C4124]';
   } else if (res?.riskStatus === RiskStatus.CRITICAL) {
     statusBadge = (
-      <span className="gov-badge gov-badge-critical text-[13px] py-1 px-3.5 animate-pulse font-bold">
-        <ShieldAlert className="w-4 h-4" /> {language === 'hi' ? 'गंभीर खतरा' : 'CRITICAL HAZARD'}
+      <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12px] sm:text-[13px] font-bold bg-[#FFF0F0] text-[#A94442] border border-[#F0C4C4] shadow-2xs animate-pulse">
+        <ShieldAlert className="w-4 h-4 text-[#A94442]" />
+        <span>{language === 'hi' ? 'गंभीर अलार्म' : 'CRITICAL HAZARD'}</span>
       </span>
     );
-    actionTitle = language === 'hi' ? 'अनिवार्य सुरक्षा कार्रवाई: तत्काल निकासी' : 'MANDATORY SAFETY ACTION: IMMEDIATE EVACUATION';
-    actionInstruction = language === 'hi' ? 'सुरक्षा सीमा पार हो गई है। तुरंत हवा की विपरीत दिशा में बाहर निकलें और संयंत्र आपातकालीन नियंत्रण को सूचित करें।' : 'Ceiling safety threshold exceeded. Evacuate upwind immediately and notify plant emergency control.';
+    actionTitle = language === 'hi' ? 'तत्काल सुरक्षा कार्रवाई: क्षेत्र खाली करें' : 'Mandatory Action: Immediate Evacuation';
+    actionInstruction = language === 'hi' ? 'सुरक्षा सीमा पार हो गई है। तुरंत हवा की विपरीत दिशा में निकलें और आपातकालीन नियंत्रण को सूचित करें।' : 'Ceiling threshold exceeded. Evacuate upwind immediately and report to emergency safety officer.';
+    doseTextColor = 'text-[#A94442]';
+    doseUnitColor = 'text-[#A94442]';
     cardAccentBorder = 'border-[#F0C4C4]';
-    bannerBg = 'bg-[#FFF9F9]';
+    bannerBg = 'bg-[#FFF6F6]';
+    actionBoxBorder = 'border-[#F0C4C4]';
+    actionBoxBg = 'bg-[#FCE8E8]';
+    actionIconColor = 'text-[#A94442]';
   } else if (res?.riskStatus === RiskStatus.HIGH) {
     statusBadge = (
-      <span className="gov-badge gov-badge-high text-[13px] py-1 px-3.5 font-bold">
-        <AlertTriangle className="w-4 h-4" /> {language === 'hi' ? 'उच्च एक्सपोजर' : 'HIGH EXPOSURE'}
+      <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12px] sm:text-[13px] font-bold bg-[#FFF5F2] text-[#C96B32] border border-[#F3D5C0] shadow-2xs">
+        <AlertTriangle className="w-4 h-4 text-[#C96B32]" />
+        <span>{language === 'hi' ? 'उच्च एक्सपोज़र' : 'HIGH EXPOSURE'}</span>
       </span>
     );
-    actionTitle = language === 'hi' ? 'कार्रवाई आवश्यक — पीपीई का निरीक्षण करें और वेंटिलेशन जांचें' : 'Action Required — Inspect PPE & Check Ventilation';
-    actionInstruction = language === 'hi' ? '10 ppm 8h TWA सीमा के करीब। क्षेत्र में प्रवेश सीमित करें और रेस्पिरेटर की जांच करें।' : 'Approaching 10 ppm 8h TWA limit. Restrict zone access and inspect respirator / breathing apparatus.';
+    actionTitle = language === 'hi' ? 'कार्रवाई आवश्यक — पीपीई व वेंटिलेशन जांचें' : 'Action Required — Inspect PPE & Check Ventilation';
+    actionInstruction = language === 'hi' ? '10 ppm 8h TWA सीमा के करीब। क्षेत्र में प्रवेश सीमित करें और रेस्पिरेटर की जांच करें।' : 'Approaching 10 ppm 8h TWA limit. Restrict zone access and verify breathing apparatus.';
+    doseTextColor = 'text-[#C96B32]';
+    doseUnitColor = 'text-[#C96B32]';
     cardAccentBorder = 'border-[#F3D5C0]';
-    bannerBg = 'bg-[#FFFDFB]';
+    bannerBg = 'bg-[#FFFBF7]';
+    actionBoxBorder = 'border-[#F3D5C0]';
+    actionBoxBg = 'bg-[#FDF0E6]';
+    actionIconColor = 'text-[#C96B32]';
   } else if (res?.riskStatus === RiskStatus.ELEVATED) {
     statusBadge = (
-      <span className="gov-badge gov-badge-elevated text-[13px] py-1 px-3.5 font-bold">
-        <AlertTriangle className="w-4 h-4" /> {language === 'hi' ? 'मध्यम स्तर' : 'ELEVATED LEVEL'}
+      <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12px] sm:text-[13px] font-bold bg-[#FFFDF5] text-[#B8860B] border border-[#EAD7A8] shadow-2xs">
+        <AlertTriangle className="w-4 h-4 text-[#B8860B]" />
+        <span>{language === 'hi' ? 'मध्यम स्तर' : 'ELEVATED LEVEL'}</span>
       </span>
     );
-    actionTitle = language === 'hi' ? 'सावधानी बरतें — शिफ्ट पर्यवेक्षक को सूचित करें' : 'Caution Advised — Notify Shift Supervisor';
-    actionInstruction = language === 'hi' ? 'मध्यम CuS रंग परिवर्तन देखा गया। स्थानीय वेंटिलेशन की जांच करें और शिफ्ट लीड को रिपोर्ट करें।' : 'Moderate CuS staining observed. Verify local ventilation and report reading to shift supervisor.';
+    actionTitle = language === 'hi' ? 'सावधानी बरतें — सुपरवाइज़र को बताएं' : 'Caution Advised — Notify Shift Supervisor';
+    actionInstruction = language === 'hi' ? 'मध्यम रंग परिवर्तन देखा गया। स्थानीय वेंटिलेशन की जांच करें और सुपरवाइज़र को रिपोर्ट करें।' : 'Moderate sensor shift observed. Verify local ventilation and report reading to shift supervisor.';
+    doseTextColor = 'text-[#B8860B]';
+    doseUnitColor = 'text-[#B8860B]';
     cardAccentBorder = 'border-[#EAD7A8]';
-    bannerBg = 'bg-[#FAF8F2]';
+    bannerBg = 'bg-[#FFFDF7]';
+    actionBoxBorder = 'border-[#EAD7A8]';
+    actionBoxBg = 'bg-[#FAF3E0]';
+    actionIconColor = 'text-[#B8860B]';
   }
 
   return (
@@ -583,12 +760,6 @@ function ScanPageContent() {
 
             {/* Alignment Reticle Overlay */}
             <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 z-10">
-              <div className="flex justify-center">
-                <span className="text-[10px] sm:text-[11px] font-mono font-bold tracking-widest text-white/90 bg-black/60 backdrop-blur-xs px-3 py-1 rounded-full border border-white/20">
-                  D65 OPTICAL RETICLE
-                </span>
-              </div>
-
               {/* Central Reticle */}
               <div className="flex items-center justify-center flex-1">
                 <div className="w-48 sm:w-56 h-40 sm:h-48 border-2 border-dashed border-white/90 rounded-2xl flex items-center justify-center relative shadow-lg">
@@ -607,19 +778,50 @@ function ScanPageContent() {
               </div>
             </div>
 
+            {/* OCR Scanning Overlay — shown while Tesseract.js reads the code */}
+            {ocrScanning && (
+              <div className="absolute inset-0 z-40 bg-black/60 backdrop-blur-xs flex flex-col items-center justify-center gap-3">
+                <div className="w-10 h-10 rounded-full border-4 border-white/20 border-t-white animate-spin" />
+                <div className="text-center">
+                  <div className="text-white font-black text-[13px]">Reading Code…</div>
+                  <div className="text-white/70 text-[11px] mt-0.5">Tesseract OCR running</div>
+                </div>
+              </div>
+            )}
+
+            {/* Validation Rejection Toast */}
+            {validationRejection && (
+              <div className="absolute bottom-4 left-3 right-3 z-30 animate-in slide-in-from-bottom-2 duration-200">
+                <div className="bg-[#A94442]/95 backdrop-blur-sm border border-[#C96B32] rounded-xl px-4 py-3 flex items-start gap-3 shadow-xl">
+                  <div className="shrink-0 mt-0.5">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <circle cx="8" cy="8" r="7.5" stroke="white" strokeOpacity="0.7"/>
+                      <path d="M8 4.5V8.5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                      <circle cx="8" cy="11" r="0.75" fill="white"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-white font-black text-[12px] leading-tight">{validationRejection.status}</div>
+                    <div className="text-white/80 text-[11px] mt-0.5 leading-snug">{validationRejection.reason}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+
             {/* Offline Viewfinder Fallback */}
             {!cameraActive && (
               <div className="p-6 text-center text-white space-y-3 z-0">
-                <VideoOff className="w-10 h-10 text-white/40 mx-auto" />
-                <p className="text-[13px] text-white/85 max-w-xs mx-auto">
-                  {cameraError || (language === 'hi' ? 'कैमरा ऑफलाइन है। कैप्चर बटन या डेमो बटन का उपयोग करें।' : 'Camera offline. Use the capture button or click the floating demo button.')}
+                <VideoOff className="w-9 h-9 text-white/40 mx-auto" />
+                <p className="text-[13px] text-white/80 max-w-xs mx-auto">
+                  {cameraError || (language === 'hi' ? 'कैमरा पूर्वावलोकन उपलब्ध नहीं है।' : 'Camera preview is currently unavailable.')}
                 </p>
                 <button
                   onClick={() => setCameraRetryCount(c => c + 1)}
                   className="gov-btn-secondary text-[12px] h-8 px-3 text-white bg-white/15 hover:bg-white/25 border-white/30 rounded-lg inline-flex items-center gap-1.5"
                 >
                   <RefreshCw size={13} />
-                  <span>{language === 'hi' ? 'कैमरा पुनः प्रयास करें' : 'Retry Camera'}</span>
+                  <span>{language === 'hi' ? 'पुनः प्रयास करें' : 'Retry Camera'}</span>
                 </button>
               </div>
             )}
@@ -720,222 +922,254 @@ function ScanPageContent() {
       )}
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 3. STREAMLINED RESULT PRESENTATION REPORT                     */}
+      {/* 3. MOBILE-FIRST EXPOSURE RESULT SCREEN                        */}
       {/* ───────────────────────────────────────────────────────────── */}
       {screenState === 'result' && currentScan && (
-        <div className="space-y-4 sm:space-y-5 animate-in fade-in zoom-in-95 duration-200">
+        <div className="space-y-3.5 sm:space-y-4 max-w-[580px] md:max-w-[700px] mx-auto w-full animate-in fade-in duration-200">
           
-          {/* Top Breadcrumb & Actions Bar */}
-          <div className="flex items-center justify-between">
+          {/* 1. Compact Top Bar */}
+          <div className="flex items-center justify-between gap-2 px-1">
             <button
               onClick={handleResetScan}
-              className="text-[13px] font-semibold text-[#5C822D] hover:text-[#35551F] hover:underline flex items-center gap-1.5 transition-colors"
+              className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#5C822D] hover:text-[#35551F] active:scale-95 transition-all cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>{language === 'hi' ? 'स्कैनर पर वापस जाएं' : 'Back to Scanner'}</span>
+              <span>{language === 'hi' ? 'नया स्कैन' : 'Scan'}</span>
             </button>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => window.print()}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-white border border-[#E8E2D5] text-[#263026] text-[12px] font-semibold hover:bg-[#F4EFE6] shadow-2xs"
-                title="Print Report"
-              >
-                <Printer size={13} className="text-[#5C822D]" />
-                <span>{language === 'hi' ? 'रिपोर्ट प्रिंट करें' : 'Print Report'}</span>
-              </button>
-              <span className="text-[11px] text-[#7A8178] font-mono hidden sm:inline">
+
+            <div className="text-center">
+              <h1 className="text-[14px] sm:text-[15px] font-bold text-[#263026]">
+                {language === 'hi' ? 'एक्सपोजर परिणाम' : 'Exposure Result'}
+              </h1>
+              <span className="text-[10.5px] text-[#7A8178] font-mono block">
                 {formatDateTime(currentScan.capturedAt)}
+              </span>
+            </div>
+
+            <button
+              onClick={() => window.print()}
+              className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg bg-white border border-[#E8E2D5] text-[#596158] hover:text-[#263026] hover:bg-[#FAF8F3] active:scale-95 transition-all shadow-2xs cursor-pointer inline-flex items-center gap-1 text-[11px] font-semibold"
+              title={language === 'hi' ? 'रिपोर्ट प्रिंट करें' : 'Print Report'}
+            >
+              <Printer size={14} className="text-[#5C822D]" />
+              <span className="hidden sm:inline">{language === 'hi' ? 'प्रिंट' : 'Print'}</span>
+            </button>
+          </div>
+
+          {/* Operator & Shift Context Ribbon */}
+          <div className="flex items-center justify-between text-[11.5px] sm:text-[12px] bg-[#FAF8F3] px-3.5 py-2 rounded-xl border border-[#E8E2D5] text-[#596158]">
+            <div className="font-bold text-[#263026] truncate">
+              {currentScan.workerName || currentUser?.displayName || 'Rajesh Kumar'}
+              <span className="font-normal text-[#7A8178] ml-1.5">({currentScan.location || currentUser?.site || 'Zone A'})</span>
+            </div>
+            <div className="flex items-center gap-2 font-mono flex-shrink-0">
+              <span>Badge: <strong className="text-[#263026]">{currentScan.dosimeterCode || currentScan.dosimeterId}</strong></span>
+              <span>•</span>
+              <span className="text-[#5C822D] font-bold bg-[#EDF3E4] px-1.5 py-0.2 rounded border border-[#C6DCC0]">
+                {currentScan.shiftName || 'Shift A'} ({currentScan.shiftStart || '06:00'}–{currentScan.shiftEnd || '14:00'})
               </span>
             </div>
           </div>
 
-          {/* UNIFIED STREAMLINED HERO & DOSIMETRY CERTIFICATE CARD */}
-          <div className={`gov-card p-5 sm:p-7 rounded-3xl border-2 ${cardAccentBorder} ${bannerBg} space-y-5 shadow-lg`}>
+          {/* 2. Main Safety & Exposure Hero Card */}
+          <div className={`p-5 sm:p-6 rounded-3xl border ${cardAccentBorder} ${bannerBg} shadow-sm space-y-4 transition-all`}>
             
-            {/* Header: MRPL Identity + Calibrated / Status Badge */}
-            <div className="flex items-center justify-between gap-3 border-b border-[#E8E2D5] pb-4">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="h-10 w-10 flex-shrink-0 flex items-center justify-center p-1 bg-white rounded-lg border border-[#E8E2D5] shadow-xs">
-                  <Image 
-                    src={mrplLogo} 
-                    alt="MRPL Logo" 
-                    className="h-7 w-auto object-contain rounded-md"
-                    priority
-                  />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] sm:text-[11px] font-bold text-[#5C822D] uppercase tracking-wider block">
-                    {language === 'hi' ? 'एमआरपीएल गैस सुरक्षा सत्यापन' : 'MRPL Gas Safety Verification'}
-                  </span>
-                  <h1 className="text-[16px] sm:text-[19px] font-black text-[#263026] truncate">
-                    {language === 'hi' ? 'एक्सपोजर प्रमाणपत्र' : 'Exposure Certificate'}
-                  </h1>
-                </div>
-              </div>
-
-              <div className="flex-shrink-0">
-                {statusBadge}
-              </div>
+            {/* 2a. Safety Status Hero Pill */}
+            <div className="flex justify-center">
+              {statusBadge}
             </div>
 
-            {/* CUMULATIVE DOSE HERO NUMBER */}
-            <div className="text-center space-y-1.5 py-2">
-              <span className="text-[11px] sm:text-[12px] font-black uppercase tracking-widest text-[#7A8178] block">
-                {language === 'hi' ? 'संचयी H₂S एक्सपोजर खुराक' : 'Cumulative H₂S Exposure Dose'}
-              </span>
-              
-              <div className="text-[52px] sm:text-[68px] font-black text-[#263026] font-mono leading-none tracking-tight">
+            {/* 2b. Exposure Value: Largest Visual Hero */}
+            <div className="text-center space-y-1 py-0.5">
+              <div className={`text-[48px] sm:text-[62px] font-black ${doseTextColor} font-mono leading-none tracking-tight transition-colors duration-300`}>
                 {isInvalid ? (
-                  <span className="text-[32px] sm:text-[44px] text-[#7A8178]">{language === 'hi' ? 'असत्यापित' : 'UNVERIFIED'}</span>
+                  <span className="text-[28px] sm:text-[38px] text-[#7A8178]">
+                    {language === 'hi' ? 'अमान्य स्कैन' : 'UNVERIFIED'}
+                  </span>
                 ) : isOor ? (
-                  <span className="text-[#9C4124]">&gt; 30.0 <span className="text-[26px] sm:text-[34px] font-bold text-[#596158]">ppm·h</span></span>
+                  <span>
+                    &gt; 30.0 <span className={`text-[22px] sm:text-[28px] font-bold ${doseUnitColor}`}>ppm·h</span>
+                  </span>
                 ) : (
                   <span>
-                    {formatDose(res?.estimatedDose, 1)} <span className="text-[26px] sm:text-[34px] font-bold text-[#596158]">{res?.doseUnit || 'ppm·h'}</span>
+                    {formatDose(res?.estimatedDose, 1)}{' '}
+                    <span className={`text-[22px] sm:text-[28px] font-bold ${doseUnitColor}`}>
+                      {res?.doseUnit || 'ppm·h'}
+                    </span>
                   </span>
                 )}
               </div>
+              <p className="text-[12px] sm:text-[13px] font-medium text-[#7A8178]">
+                {language === 'hi' ? 'संचयी H₂S एक्सपोज़र' : 'Cumulative H₂S exposure'}
+              </p>
             </div>
 
-            {/* STREAMLINED INTERPRETATION BANNER */}
-            <div className="bg-white border border-[#E8E2D5] rounded-2xl p-4 sm:p-5 flex items-start gap-3 shadow-2xs">
-              <div className="p-2 rounded-xl bg-[#FAF7F0] border border-[#E8E2D5] flex-shrink-0 text-[#5C822D] mt-0.5">
-                {isInvalid ? <XCircle className="w-5 h-5 text-[#A94442]" /> : isOor ? <AlertTriangle className="w-5 h-5 text-[#9C4124]" /> : <ShieldCheck className="w-5 h-5 text-[#5C822D]" />}
+            {/* 2c. Clear Action Recommendation Box */}
+            <div className={`bg-white/90 backdrop-blur-xs border ${actionBoxBorder} rounded-2xl p-3.5 sm:p-4 flex items-start gap-3 shadow-2xs transition-colors duration-300`}>
+              <div className={`p-2 rounded-xl ${actionBoxBg} border ${actionBoxBorder} flex-shrink-0 ${actionIconColor} mt-0.5 transition-colors duration-300`}>
+                {isInvalid ? (
+                  <XCircle className="w-4 h-4" />
+                ) : isOor ? (
+                  <AlertTriangle className="w-4 h-4" />
+                ) : res?.riskStatus === RiskStatus.CRITICAL ? (
+                  <ShieldAlert className="w-4 h-4" />
+                ) : res?.riskStatus === RiskStatus.HIGH || res?.riskStatus === RiskStatus.ELEVATED ? (
+                  <AlertTriangle className="w-4 h-4" />
+                ) : (
+                  <ShieldCheck className="w-4 h-4" />
+                )}
               </div>
-              <div className="space-y-0.5">
-                <span className="font-bold text-[14px] sm:text-[15px] text-[#263026] block">
+              <div className="space-y-0.5 min-w-0">
+                <div className="font-bold text-[13px] sm:text-[14px] text-[#263026] leading-snug">
                   {actionTitle}
-                </span>
-                <p className="text-[12px] sm:text-[13px] text-[#596158] leading-relaxed">
+                </div>
+                <p className="text-[12px] text-[#596158] leading-relaxed">
                   {actionInstruction}
                 </p>
               </div>
             </div>
 
-            {/* DYNAMIC COLOR SCALE BAR WITH MOVING POINTER */}
-            <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E8E2D5] space-y-2.5 shadow-2xs">
-              <div className="flex items-center justify-between text-[11px] sm:text-[12px]">
-                <span className="font-bold text-[#263026]">
-                  {language === 'hi' ? 'OSHA स्वीकार्य पैमाना (0 से 30+ ppm·h)' : 'OSHA Permissible Scale (0 to 30+ ppm·h)'}
-                </span>
-                <span className="font-mono text-[#7A8178] text-[10px]">PEL: 10 ppm · Ceiling: 20 ppm</span>
-              </div>
+          </div>
 
-              {/* Dynamic Moving Pointer */}
-              {!isInvalid ? (
-                <div className="relative w-full h-5 pt-0.5">
-                  <div 
-                    className="absolute top-0 transform -translate-x-1/2 flex flex-col items-center transition-all duration-500 z-10"
+          {/* 3. Compact Exposure Scale Card */}
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E8E2D5] shadow-2xs space-y-3">
+            <div className="flex items-center justify-between text-[12px]">
+              <span className="font-bold text-[#263026]">
+                {language === 'hi' ? 'एक्सपोज़र स्तर' : 'Exposure Level'}
+              </span>
+              <span className="text-[11px] font-mono font-bold text-[#7A8178]">
+                {isInvalid ? '—' : isOor ? '> 30.0 ppm·h' : `${formatDose(doseVal, 1)} ppm·h`}
+              </span>
+            </div>
+
+            {/* Gauge bar with moving pointer needle */}
+            <div className="space-y-1.5">
+              {!isInvalid && (
+                <div className="relative w-full h-3.5">
+                  <div
+                    className="absolute top-0 -translate-x-1/2 flex flex-col items-center transition-all duration-500 z-10"
                     style={{ left: `${pointerPercent}%` }}
                   >
-                    <span className="text-white text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 rounded font-mono bg-[#263026] shadow-xs whitespace-nowrap">
-                      {isOor ? '> 30.0 ppm·h' : `${formatDose(doseVal, 1)} ppm·h`}
-                    </span>
                     <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px] border-t-[#263026]" />
                   </div>
                 </div>
-              ) : (
-                <div className="h-5 flex items-center justify-center text-[10px] text-[#7A8178] font-mono">
-                  {language === 'hi' ? '[पॉइंटर निष्क्रिय — गुणवत्ता अस्वीकृति]' : '[Pointer Inactive — Quality Gate Refusal]'}
-                </div>
               )}
 
-              {/* Multi-tier color bar */}
-              <div className="w-full h-4 rounded-md overflow-hidden flex border border-[#D8D0C0]">
-                <div className="w-[16.6%] bg-[#5C822D] h-full" title="Safe (<5)" />
-                <div className="w-[16.6%] bg-[#D99B26] h-full" title="Elevated (5-10)" />
-                <div className="w-[33.3%] bg-[#C96B32] h-full" title="High (10-20)" />
-                <div className="w-[16.6%] bg-[#A94442] h-full" title="Critical (20-30)" />
-                <div className="w-[16.6%] bg-[#4A1E1E] h-full" title="Out of Range (>30)" />
+              <div className="w-full h-2.5 rounded-full overflow-hidden flex bg-[#E8E2D5]">
+                <div className="w-[16.6%] bg-[#5C822D]" title="Safe (0-5 ppm·h)" />
+                <div className="w-[16.6%] bg-[#D99B26]" title="Elevated (5-10 ppm·h)" />
+                <div className="w-[33.3%] bg-[#C96B32]" title="High (10-20 ppm·h)" />
+                <div className="w-[16.6%] bg-[#A94442]" title="Critical (20-30 ppm·h)" />
+                <div className="w-[16.9%] bg-[#4A1E1E]" title="Out of Range (>30 ppm·h)" />
               </div>
 
-              <div className="flex justify-between text-[10px] text-[#7A8178] font-mono">
+              <div className="flex justify-between text-[10px] text-[#7A8178] font-mono pt-0.5">
                 <span>0</span>
-                <span>5 ({language === 'hi' ? 'सुरक्षित' : 'Safe'})</span>
-                <span className="font-bold text-[#D99B26]">10 (PEL)</span>
-                <span className="font-bold text-[#A94442]">20 (Ceiling)</span>
-                <span>30</span>
-                <span className="font-bold text-[#4A1E1E]">&gt;30 (OOR)</span>
+                <span className="text-[#35551F] font-semibold">5 ({language === 'hi' ? 'सुरक्षित' : 'Safe'})</span>
+                <span className="font-semibold text-[#D99B26]">10 (PEL)</span>
+                <span className="font-semibold text-[#A94442]">20 (Ceiling)</span>
+                <span className="font-bold text-[#4A1E1E]">30+</span>
               </div>
             </div>
 
-            {/* ACTION BUTTONS */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            {/* Collapsible Thresholds Explainer */}
+            <div className="pt-2 border-t border-[#F0EBE0]">
               <button
-                onClick={handleResetScan}
-                className="gov-btn-primary h-12 text-[15px] font-bold justify-center rounded-xl shadow-md hover:shadow-lg transition-all"
+                onClick={() => setShowThresholds(!showThresholds)}
+                className="text-[11px] font-semibold text-[#5C822D] hover:text-[#35551F] flex items-center gap-1 transition-colors cursor-pointer"
               >
-                <RotateCcw className="w-5 h-5" />
-                <span>{language === 'hi' ? 'दूसरा स्कैन करें' : 'Perform Another Scan'}</span>
+                <span>{language === 'hi' ? 'एक्सपोज़र सीमा मानक देखें' : 'View exposure thresholds'}</span>
+                <ChevronDown className={`w-3 h-3 transition-transform ${showThresholds ? 'rotate-180' : ''}`} />
               </button>
 
+              {showThresholds && (
+                <div className="mt-2 p-2.5 bg-[#FAF8F3] rounded-xl text-[11px] text-[#596158] space-y-1.5 animate-in fade-in duration-150 font-mono">
+                  <div className="flex justify-between"><strong className="text-[#35551F] font-sans">0 – 5 ppm·h:</strong> <span>Safe Baseline (Normal Shift)</span></div>
+                  <div className="flex justify-between"><strong className="text-[#D99B26] font-sans">5 – 10 ppm·h:</strong> <span>Elevated Exposure (Advisory)</span></div>
+                  <div className="flex justify-between"><strong className="text-[#C96B32] font-sans">10 ppm (8h TWA):</strong> <span>OSHA PEL Action Limit</span></div>
+                  <div className="flex justify-between"><strong className="text-[#A94442] font-sans">20 ppm:</strong> <span>OSHA Ceiling Limit (Evacuation)</span></div>
+                  <div className="flex justify-between"><strong className="text-[#4A1E1E] font-sans">&gt; 30 ppm·h:</strong> <span>Sensor Saturation (Lab GC)</span></div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 4. Actions: Mobile Stack (Scan Again + History) */}
+          <div className="space-y-2 pt-0.5">
+            <button
+              onClick={handleResetScan}
+              className="gov-btn-primary w-full h-12 text-[15px] font-bold rounded-xl shadow-md hover:shadow-lg active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>{language === 'hi' ? 'दोबारा स्कैन करें' : 'Scan Again'}</span>
+            </button>
+
+            <div className="text-center pt-0.5">
               <Link
                 href="/worker/history"
-                className="gov-btn-secondary h-12 text-[15px] font-bold justify-center rounded-xl border-2 border-[#D8D0C0] hover:border-[#5C822D] hover:text-[#263026] hover:bg-[#FAF7F0] transition-all"
+                className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-[#596158] hover:text-[#263026] py-1 px-3 rounded-lg hover:bg-black/5 transition-colors"
               >
-                <HistoryIcon className="w-5 h-5 text-[#5C822D]" />
-                <span>{language === 'hi' ? 'इतिहास देखें' : 'View History'}</span>
+                <span>{language === 'hi' ? 'स्कैन इतिहास देखें →' : 'View History →'}</span>
               </Link>
             </div>
+          </div>
 
-            {/* TECHNICAL ACCORDION */}
-            <div className="border border-[#E8E2D5] rounded-xl overflow-hidden bg-white mt-3">
-              <button
-                onClick={() => setShowTechnical(!showTechnical)}
-                className="w-full p-3.5 bg-[#FAF7F0] hover:bg-[#FAF6EE] flex items-center justify-between text-left text-[13px] font-semibold text-[#263026] transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  <Cpu className="w-4 h-4 text-[#5C822D]" />
-                  <span>{language === 'hi' ? 'निरीक्षण मेट्रोलॉजी और CIELAB ΔE*ab वैक्टर' : 'Inspection Metrology & CIELAB ΔE*ab Vectors'}</span>
-                </div>
-                <ChevronDown className={`w-4 h-4 text-[#7A8178] transition-transform ${showTechnical ? 'rotate-180' : ''}`} />
-              </button>
+          {/* 5. Collapsible Technical Details Accordion */}
+          <div className="border border-[#E8E2D5] rounded-2xl overflow-hidden bg-white shadow-2xs">
+            <button
+              onClick={() => setShowTechnical(!showTechnical)}
+              className="w-full p-3.5 bg-[#FAF8F3] hover:bg-[#F4EFE6] flex items-center justify-between text-left text-[12px] font-semibold text-[#596158] transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <Cpu className="w-3.5 h-3.5 text-[#5C822D]" />
+                <span>{language === 'hi' ? 'तकनीकी विवरण एवं मेट्रोलॉजी' : 'Technical Details & Metrology'}</span>
+              </div>
+              <ChevronDown className={`w-3.5 h-3.5 text-[#7A8178] transition-transform ${showTechnical ? 'rotate-180' : ''}`} />
+            </button>
 
-              {showTechnical && (
-                <div className="p-4 border-t border-[#E8E2D5] space-y-3 text-[12px] animate-in fade-in duration-150">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[#596158] font-mono">
-                    <div className="bg-[#FAF7F0] p-3 rounded-lg border border-[#E8E2D5] space-y-1">
-                      <div className="font-bold text-[#263026] font-sans">{language === 'hi' ? 'अंशांकन मॉडल:' : 'Calibration Model:'}</div>
-                      <div>ID: {res?.calibrationId || 'CAL-2026-D65'}</div>
-                      <div>Model: {res?.modelId || 'MRPL-CHEM-002'} (v{res?.modelVersion || '0.1.0'})</div>
-                      <div>Standard: ISO/CIE D65 Bradford</div>
-                    </div>
-
-                    <div className="bg-[#FAF7F0] p-3 rounded-lg border border-[#E8E2D5] space-y-1">
-                      <div className="font-bold text-[#263026] font-sans">{language === 'hi' ? 'CIELAB ΔE*ab वैक्टर:' : 'CIELAB ΔE*ab Vectors:'}</div>
-                      <div>ΔE*ab: <strong className="text-[#5C822D]">{currentScan.colorFeatures?.deltaE?.toFixed(2) || '12.20'}</strong></div>
-                      <div>L*: {currentScan.colorFeatures?.currentL?.toFixed(1) || '85.3'} (ΔL*: {currentScan.colorFeatures?.deltaL?.toFixed(1) || '-9.7'})</div>
-                      <div>Δa*: {currentScan.colorFeatures?.deltaA?.toFixed(1) || '3.1'}, Δb*: {currentScan.colorFeatures?.deltaB?.toFixed(1) || '6.7'}</div>
-                    </div>
+            {showTechnical && (
+              <div className="p-4 border-t border-[#E8E2D5] space-y-3 text-[11px] animate-in fade-in duration-150">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 font-mono text-[#596158]">
+                  <div className="bg-[#FAF7F0] p-2.5 rounded-xl border border-[#E8E2D5] space-y-1">
+                    <div className="font-bold text-[#263026] font-sans text-[11px]">{language === 'hi' ? 'अंशांकन व मॉडल:' : 'Calibration & Model:'}</div>
+                    <div>ID: {res?.calibrationId || 'CAL-2026-D65'}</div>
+                    <div>Model: {res?.modelId || 'MRPL-CHEM-002'} (v{res?.modelVersion || '0.1.0'})</div>
+                    <div>Standard: ISO/CIE D65 Bradford</div>
                   </div>
 
-                  {currentScan.capturedImageUrl && (
-                    <div className="flex items-center gap-3 bg-[#FAF7F0] p-3 rounded-lg border border-[#E8E2D5]">
-                      <div className="w-20 h-16 rounded border border-[#E8E2D5] overflow-hidden bg-black flex-shrink-0">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={currentScan.capturedImageUrl} alt="Badge Frame" className="w-full h-full object-cover" />
-                      </div>
-                      <div className="text-[#596158]">
-                        <div className="font-semibold text-[#263026] font-sans">{language === 'hi' ? 'ऑप्टिकल कैप्चर पुरालेख' : 'Optical Capture Archive'}</div>
-                        <div>{language === 'hi' ? 'विश्वास स्तर:' : 'Confidence:'} {res?.confidence ? `${(res.confidence * 100).toFixed(0)}%` : '95%'}</div>
-                        <div className="text-[10px] text-[#7A8178]">{language === 'hi' ? 'वैधता:' : 'Validity:'} {getValidityLabel(res?.validityStatus || ValidityStatus.VALID)}</div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex justify-end pt-1">
-                    <button
-                      onClick={() => window.print()}
-                      className="text-[#5C822D] font-semibold hover:underline inline-flex items-center gap-1 text-[12px]"
-                    >
-                      <Printer size={13} />
-                      <span>{language === 'hi' ? 'औपचारिक प्रमाणपत्र प्रिंट करें' : 'Print Formal Certificate'}</span>
-                    </button>
+                  <div className="bg-[#FAF7F0] p-2.5 rounded-xl border border-[#E8E2D5] space-y-1">
+                    <div className="font-bold text-[#263026] font-sans text-[11px]">{language === 'hi' ? 'CIELAB ΔE*ab वैक्टर:' : 'CIELAB ΔE*ab Vectors:'}</div>
+                    <div>ΔE*ab: <strong className="text-[#5C822D]">{currentScan.colorFeatures?.deltaE?.toFixed(2) || '12.20'}</strong></div>
+                    <div>L*: {currentScan.colorFeatures?.currentL?.toFixed(1) || '85.3'} (ΔL*: {currentScan.colorFeatures?.deltaL?.toFixed(1) || '-9.7'})</div>
+                    <div>Δa*: {currentScan.colorFeatures?.deltaA?.toFixed(1) || '3.1'}, Δb*: {currentScan.colorFeatures?.deltaB?.toFixed(1) || '6.7'}</div>
                   </div>
                 </div>
-              )}
-            </div>
 
+                {currentScan.capturedImageUrl && (
+                  <div className="flex items-center gap-3 bg-[#FAF7F0] p-2.5 rounded-xl border border-[#E8E2D5]">
+                    <div className="w-16 h-14 rounded-lg border border-[#E8E2D5] overflow-hidden bg-black flex-shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={currentScan.capturedImageUrl} alt="Badge Capture" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="text-[#596158] space-y-0.5">
+                      <div className="font-semibold text-[#263026] font-sans text-[11px]">{language === 'hi' ? 'ऑप्टिकल कैप्चर' : 'Optical Capture'}</div>
+                      <div>{language === 'hi' ? 'विश्वास स्तर:' : 'Confidence:'} {res?.confidence ? `${(res.confidence * 100).toFixed(0)}%` : '95%'}</div>
+                      <div className="text-[10px] text-[#7A8178]">{language === 'hi' ? 'वैधता:' : 'Validity:'} {getValidityLabel(res?.validityStatus || ValidityStatus.VALID)}</div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-end pt-1">
+                  <button
+                    onClick={() => window.print()}
+                    className="text-[#5C822D] font-semibold hover:underline inline-flex items-center gap-1 text-[11px] cursor-pointer"
+                  >
+                    <Printer size={12} />
+                    <span>{language === 'hi' ? 'औपचारिक प्रमाणपत्र प्रिंट करें' : 'Print Formal Certificate'}</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
         </div>

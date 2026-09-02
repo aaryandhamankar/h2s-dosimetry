@@ -208,9 +208,17 @@ class SoundEffectsEngine {
   }
 
   /**
-   * Caution / Warning Alert Chime (Elevated or High Risk)
+   * Generic Warning Alert Chime (alias for playElevatedWarning)
    */
   public playWarning() {
+    this.playElevatedWarning();
+  }
+
+  /**
+   * Caution / Warning Alert Chime (Elevated Exposure: 5-10 ppm·h)
+   * Warm, alerting double tone
+   */
+  public playElevatedWarning() {
     if (this.isMuted) return;
     try {
       const ctx = this.getContext();
@@ -218,10 +226,10 @@ class SoundEffectsEngine {
 
       const now = ctx.currentTime;
 
-      // Two-tone warning beep
+      // Two-tone warm advisory chime (E5 -> G#5)
       [
-        { freq: 660, time: now, dur: 0.09 },
-        { freq: 520, time: now + 0.11, dur: 0.14 }
+        { freq: 659.25, time: now, dur: 0.12, gain: 0.22 },
+        { freq: 830.61, time: now + 0.13, dur: 0.22, gain: 0.25 }
       ].forEach(tone => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -229,7 +237,7 @@ class SoundEffectsEngine {
         osc.frequency.setValueAtTime(tone.freq, tone.time);
 
         gain.gain.setValueAtTime(0, now);
-        gain.gain.setValueAtTime(0.24, tone.time);
+        gain.gain.setValueAtTime(tone.gain, tone.time);
         gain.gain.exponentialRampToValueAtTime(0.001, tone.time + tone.dur);
 
         osc.connect(gain);
@@ -244,7 +252,48 @@ class SoundEffectsEngine {
   }
 
   /**
-   * Emergency / Critical Exposure Alarm Tone
+   * High Risk Industrial Alert (High Exposure: 10-20 ppm·h)
+   * Urgent dual-frequency pulsing warning horn
+   */
+  public playHighAlarm() {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+
+      // Urgent two-pulse loud warning tone
+      [0, 0.14].forEach((offset) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(740, now + offset);
+        osc.frequency.exponentialRampToValueAtTime(580, now + offset + 0.1);
+
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.setValueAtTime(0.26, now + offset);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.11);
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(1800, now + offset);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.12);
+      });
+    } catch {
+      // Audio fallback silent
+    }
+  }
+
+  /**
+   * Emergency / Critical Exposure Alarm Tone (20-30+ ppm·h)
+   * Rapid urgent 3-pulse hazard siren
    */
   public playCriticalAlarm() {
     if (this.isMuted) return;
@@ -254,22 +303,21 @@ class SoundEffectsEngine {
 
       const now = ctx.currentTime;
 
-      // Rapid urgent 3-pulse alarm
-      [0, 0.12, 0.24].forEach((offset) => {
+      // Rapid urgent 3-pulse siren alarm
+      [0, 0.11, 0.22, 0.33].forEach((offset) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(880, now + offset);
-        osc.frequency.exponentialRampToValueAtTime(440, now + offset + 0.08);
+        osc.frequency.setValueAtTime(950, now + offset);
+        osc.frequency.exponentialRampToValueAtTime(420, now + offset + 0.08);
 
         gain.gain.setValueAtTime(0, now);
-        gain.gain.setValueAtTime(0.28, now + offset);
+        gain.gain.setValueAtTime(0.3, now + offset);
         gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.09);
 
-        // Lowpass filter to avoid harshness
         const filter = ctx.createBiquadFilter();
         filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(2000, now + offset);
+        filter.frequency.setValueAtTime(2200, now + offset);
 
         osc.connect(filter);
         filter.connect(gain);
@@ -277,6 +325,83 @@ class SoundEffectsEngine {
 
         osc.start(now + offset);
         osc.stop(now + offset + 0.1);
+      });
+    } catch {
+      // Audio fallback silent
+    }
+  }
+
+  /**
+   * Invalid Image / Optical Glare Refusal Buzzer
+   * Low discordant refusal buzz indicating scan rejected
+   */
+  public playErrorRefusal() {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+
+      // Low double buzz (220Hz + 233Hz slight dissonance)
+      [0, 0.12].forEach((offset) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(190, now + offset);
+
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.setValueAtTime(0.2, now + offset);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.08);
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(800, now + offset);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.09);
+      });
+    } catch {
+      // Audio fallback silent
+    }
+  }
+
+  /**
+   * Out of Range / Sensor Saturation Hazard Chime
+   * Deep descending hazard alert
+   */
+  public playOutOfRange() {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+
+      // Descending warning tones (A4 -> E4 -> C4)
+      [
+        { freq: 440, time: now, dur: 0.12 },
+        { freq: 330, time: now + 0.12, dur: 0.14 },
+        { freq: 261.63, time: now + 0.26, dur: 0.25 },
+      ].forEach((tone) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(tone.freq, tone.time);
+
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.setValueAtTime(0.25, tone.time);
+        gain.gain.exponentialRampToValueAtTime(0.001, tone.time + tone.dur);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(tone.time);
+        osc.stop(tone.time + tone.dur);
       });
     } catch {
       // Audio fallback silent

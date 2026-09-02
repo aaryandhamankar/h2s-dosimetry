@@ -42,11 +42,30 @@ export const getDemoScans = (): Scan[] => {
       estimatedDose = 15.0 + Math.random() * 5;
     }
 
+    const shiftNames = ['Shift A (Morning)', 'Shift B (Evening/Night)'];
+    const shiftStarts = ['06:00', '14:00'];
+    const shiftEnds = ['14:00', '06:00'];
+    const shiftIdx = i % 2;
+
     scans.push({
       id: `scan-${i}`,
+      scanId: `scan-${i}`,
+      timestamp: time,
       workerId: worker.id,
+      workerName: worker.displayName,
       shiftId: shift.id,
-      dosimeterId: dosimeter.id,
+      shiftName: shiftNames[shiftIdx],
+      shiftStart: shiftStarts[shiftIdx],
+      shiftEnd: shiftEnds[shiftIdx],
+      dosimeterId: dosimeter.dosimeterCode || dosimeter.id,
+      dosimeterCode: dosimeter.dosimeterCode || dosimeter.id,
+      bandCode: dosimeter.dosimeterCode || dosimeter.id,
+      h2sReading: estimatedDose,
+      doseUnit: 'ppm·h',
+      riskLevel: riskStatus,
+      status: riskStatus,
+      expiryStatus: 'ACTIVE',
+      location: worker.site || 'Refinery Zone A',
       capturedAt: time,
       processedAt: new Date(new Date(time).getTime() + 5000).toISOString(),
       processingStatus: ProcessingStatus.COMPLETE,
@@ -94,7 +113,7 @@ export const getDemoScans = (): Scan[] => {
         id: `exp-${i}`,
         scanId: `scan-${i}`,
         estimatedDose,
-        doseUnit: 'ppm*hr',
+        doseUnit: 'ppm·h',
         estimatedTwa: estimatedDose / 8,
         twaUnit: 'ppm',
         lowerBound: estimatedDose * 0.9,

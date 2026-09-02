@@ -103,7 +103,7 @@ export class ScanProcessingPipeline {
 
   /**
    * Process a demo scenario through the complete pipeline.
-   * Returns deterministic, reproducible results.
+   * Returns deterministic, reproducible results with a single canonical scan record.
    */
   async processScenario(
     scenario: DemoScenario,
@@ -111,7 +111,17 @@ export class ScanProcessingPipeline {
     shiftId: string,
     dosimeterId: string,
     onProgress?: (status: ProcessingStatus) => void,
-    capturedImageUrl?: string | null
+    capturedImageUrl?: string | null,
+    metadata?: {
+      workerName?: string;
+      shiftName?: string;
+      shiftStart?: string;
+      shiftEnd?: string;
+      location?: string;
+      dosimeterCode?: string;
+      bandCode?: string;
+      expiryStatus?: string;
+    }
   ): Promise<Scan> {
     const scanId = `scan-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
     const capturedAt = new Date().toISOString();
@@ -165,12 +175,28 @@ export class ScanProcessingPipeline {
       ? Math.round((prediction.estimatedDose / exposureDuration) * 10) / 10
       : null;
 
-    // Build the complete scan record
+    const resolvedDosimeterCode = metadata?.dosimeterCode || metadata?.bandCode || dosimeterId || 'DOS-001';
+
+    // Build the complete canonical scan record
     const scan: Scan = {
       id: scanId,
+      scanId,
+      timestamp: capturedAt,
       workerId,
-      shiftId,
-      dosimeterId,
+      workerName: metadata?.workerName || 'Rajesh Kumar',
+      shiftId: metadata?.shiftName ? shiftId : (shiftId || 'SHIFT-A'),
+      shiftName: metadata?.shiftName || 'Shift A (Morning)',
+      shiftStart: metadata?.shiftStart || '06:00',
+      shiftEnd: metadata?.shiftEnd || '14:00',
+      dosimeterId: resolvedDosimeterCode,
+      dosimeterCode: resolvedDosimeterCode,
+      bandCode: resolvedDosimeterCode,
+      h2sReading: prediction.estimatedDose,
+      doseUnit: prediction.unit || 'ppm·h',
+      riskLevel: riskStatus,
+      status: riskStatus,
+      expiryStatus: metadata?.expiryStatus || 'ACTIVE',
+      location: metadata?.location || 'Refinery Zone A',
       capturedAt,
       processedAt: new Date().toISOString(),
       processingStatus,

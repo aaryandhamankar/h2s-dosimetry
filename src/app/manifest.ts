@@ -3,9 +3,9 @@ import type { MetadataRoute } from 'next';
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: '/',
-    name: 'MRPL H₂S Exposure Monitoring Portal',
-    short_name: 'MRPL H2S',
-    description: 'Mangalore Refinery and Petrochemicals Limited — Occupational Health & Safety Dosimeter Verification System',
+    name: 'H2S Dosimeter',
+    short_name: 'H2S Dosimeter',
+    description: 'Continuous Personal Hydrogen Sulfide Gas Dosimetry System',
     start_url: '/',
     scope: '/',
     display: 'standalone',

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAppStore } from '@/stores/app-store';
 import { TRANSLATIONS } from '@/lib/i18n';
+import { determineActiveShift } from '@/services/shift-service';
 import { 
   Search, 
   Accessibility,
@@ -23,12 +24,11 @@ import {
   AlertTriangle,
   FileText
 } from 'lucide-react';
-import { UniversalSearch } from './universal-search';
 import Image from 'next/image';
 import mrplLogo from '../../public/mrpl-logo.png';
-
-import { useMounted } from '@/hooks/use-mounted';
+import { UniversalSearch } from './universal-search';
 import { sfx } from '@/lib/sound-effects';
+import { useMounted } from '@/hooks/use-mounted';
 
 interface FullscreenDoc extends Document {
   webkitFullscreenElement?: Element;
@@ -54,6 +54,7 @@ export function PortalHeaderWrapper() {
     setFontSize, 
     highContrast, 
     toggleHighContrast,
+    shiftConfigs,
     alerts 
   } = useAppStore();
 
@@ -82,6 +83,8 @@ export function PortalHeaderWrapper() {
     const interval = setInterval(updateDateTime, 1000);
     return () => clearInterval(interval);
   }, [language]);
+
+  const activeShiftData = determineActiveShift(shiftConfigs, new Date());
 
   // Sync DOM classes with Zustand state
   useEffect(() => {
@@ -229,11 +232,11 @@ export function PortalHeaderWrapper() {
             </div>
 
             <div className="flex flex-col justify-center min-w-0">
-              <span className="font-bold text-[14px] sm:text-[16px] text-[#263026] leading-tight tracking-tight">
-                {language === 'hi' ? 'एमआरपीएल डोसीमेट्री' : language === 'kn' ? 'MRPL ಡೋಸಿಮೆಟ್ರಿ' : language === 'gu' ? 'MRPL ડોસિમેટ્રી' : 'MRPL Dosimetry'}
+              <span className="font-bold text-[15px] sm:text-[17px] text-[#263026] leading-tight tracking-tight">
+                {language === 'hi' ? 'H2S डोसीमीटर' : language === 'kn' ? 'H2S ಡೋಸಿಮೀಟರ್' : language === 'gu' ? 'H2S ડોસિમીટર' : 'H2S Dosimeter'}
               </span>
-              <span className="text-[10px] sm:text-[11.5px] text-[#596158] leading-tight font-medium">
-                {language === 'hi' ? 'गैस डोसीमेट्री पोर्टल' : language === 'kn' ? 'ಗ್ಯಾಸ್ ಡೋಸಿಮೆಟ್ರಿ ಪೋರ್ಟಲ್' : language === 'gu' ? 'ગેસ ડોસિમેટ્રી પોર્ટલ' : 'Gas Dosimetry Portal'}
+              <span className="text-[10px] sm:text-[11px] text-[#596158] leading-tight font-medium">
+                {language === 'hi' ? 'गैस सुरक्षा एवं एक्सपोज़र मॉनिटरिंग' : 'Gas Safety & Exposure Monitoring'}
               </span>
             </div>
           </Link>
@@ -250,7 +253,7 @@ export function PortalHeaderWrapper() {
                   <ArrowLeft size={16} className="text-[#35551F] group-hover:-translate-x-0.5 transition-transform" />
                 </div>
                 <span className="font-bold text-[15px] text-[#263026] leading-tight truncate">
-                  {language === 'hi' ? 'फील्ड कार्मिक' : language === 'kn' ? 'ಫೀಲ್ಡ್ ಸಿಬ್ಬಂದಿ' : language === 'gu' ? 'ફીલ્ડ કર્મચારી' : 'Field Personnel'}
+                  {language === 'hi' ? 'H2S डोसीमीटर' : 'H2S Dosimeter'}
                 </span>
               </Link>
             ) : isHSE ? (
@@ -263,7 +266,7 @@ export function PortalHeaderWrapper() {
                   <ArrowLeft size={16} className="text-[#35551F] group-hover:-translate-x-0.5 transition-transform" />
                 </div>
                 <span className="font-bold text-[15px] text-[#263026] leading-tight truncate">
-                  {language === 'hi' ? 'एचएसई टीम' : language === 'kn' ? 'HSE ತಂಡ' : language === 'gu' ? 'HSE ટીમ' : 'HSE Team'}
+                  {language === 'hi' ? 'H2S डोसीमीटर' : 'H2S Dosimeter'}
                 </span>
               </Link>
             ) : (
@@ -277,7 +280,7 @@ export function PortalHeaderWrapper() {
                   />
                 </div>
                 <span className="font-bold text-[14px] text-[#263026] leading-tight truncate">
-                  {language === 'hi' ? 'एमआरपीएल डोसीमेट्री' : language === 'kn' ? 'MRPL ಡೋಸಿಮೆಟ್ರಿ' : language === 'gu' ? 'MRPL ડોસિમેટ્રી' : 'MRPL Dosimetry'}
+                  {language === 'hi' ? 'H2S डोसीमीटर' : 'H2S Dosimeter'}
                 </span>
               </Link>
             )}
@@ -361,7 +364,7 @@ export function PortalHeaderWrapper() {
               </span>
               <span className="text-[#D8D0C0] hidden sm:inline">|</span>
               <span className="hidden sm:inline text-[#35551F] font-semibold">
-                {t.shiftA} · Zone A
+                {activeShiftData.activeShift.name} ({activeShiftData.activeShift.startTime}–{activeShiftData.activeShift.endTime}) · Zone A
               </span>
             </div>
 

@@ -12,6 +12,7 @@ import {
   ShiftStatus
 } from '@/types';
 import { getDemoScans, getDemoAlerts, DEMO_WORKERS, DEMO_DOSIMETERS, DEMO_SHIFTS, HSE_USER } from '@/data/demo-data';
+import { ShiftConfig, DEFAULT_SHIFT_CONFIGS, determineActiveShift } from '@/services/shift-service';
 
 import { Language } from '@/lib/i18n';
 
@@ -57,6 +58,10 @@ export interface AppState {
   acknowledgeAlert: (alertId: string, userId: string) => void;
   updateUserProfile: (updates: Partial<User>) => void;
   
+  shiftConfigs: ShiftConfig[];
+  updateShiftConfig: (shiftId: string, updates: Partial<ShiftConfig>) => void;
+  setShiftConfigs: (configs: ShiftConfig[]) => void;
+  
   shiftTimerModalOpen: boolean;
   setShiftTimerModalOpen: (open: boolean) => void;
   teamModalOpen: boolean;
@@ -90,6 +95,7 @@ export const useAppStore = create<AppState>()(
       highContrast: false,
       teamModalOpen: false,
       shiftTimerModalOpen: false,
+      shiftConfigs: DEFAULT_SHIFT_CONFIGS,
 
       setLanguage: (lang: Language) => set({ language: lang }),
       setFontSize: (size: 'sm' | 'md' | 'lg') => set({ fontSize: size }),
@@ -97,6 +103,19 @@ export const useAppStore = create<AppState>()(
       toggleHighContrast: () => set(state => ({ highContrast: !state.highContrast })),
       setTeamModalOpen: (open: boolean) => set({ teamModalOpen: open }),
       setShiftTimerModalOpen: (open: boolean) => set({ shiftTimerModalOpen: open }),
+      
+      updateShiftConfig: (shiftId: string, updates: Partial<ShiftConfig>) => {
+        set(state => {
+          const updatedConfigs = (state.shiftConfigs || DEFAULT_SHIFT_CONFIGS).map(cfg =>
+            cfg.id === shiftId ? { ...cfg, ...updates } : cfg
+          );
+          return { shiftConfigs: updatedConfigs };
+        });
+      },
+      
+      setShiftConfigs: (configs: ShiftConfig[]) => {
+        set({ shiftConfigs: configs });
+      },
       
       login: (user: User) => {
         set({
@@ -236,9 +255,29 @@ export const useAppStore = create<AppState>()(
       
       addScan: (scan: Scan) => {
         set(state => {
-          const newScans = [scan, ...state.scans];
+          // Normalize and guarantee all canonical fields
+          const worker = state.workers.find(w => w.id === scan.workerId) || state.currentUser;
+          const canonicalScan: Scan = {
+            ...scan,
+            scanId: scan.scanId || scan.id,
+            timestamp: scan.timestamp || scan.capturedAt,
+            workerName: scan.workerName || worker?.displayName || 'Rajesh Kumar',
+            shiftName: scan.shiftName || 'Shift A (Morning)',
+            shiftStart: scan.shiftStart || '06:00',
+            shiftEnd: scan.shiftEnd || '14:00',
+            dosimeterCode: scan.dosimeterCode || scan.bandCode || scan.dosimeterId || 'DOS-001',
+            bandCode: scan.bandCode || scan.dosimeterCode || scan.dosimeterId || 'DOS-001',
+            h2sReading: scan.h2sReading ?? scan.exposureResult?.estimatedDose ?? null,
+            doseUnit: scan.doseUnit || scan.exposureResult?.doseUnit || 'ppm·h',
+            riskLevel: scan.riskLevel || scan.exposureResult?.riskStatus || RiskStatus.NORMAL,
+            status: scan.status || scan.exposureResult?.riskStatus || RiskStatus.NORMAL,
+            expiryStatus: scan.expiryStatus || 'ACTIVE',
+            location: scan.location || worker?.site || 'Refinery Zone A',
+          };
+
+          const newScans = [canonicalScan, ...state.scans];
           
-          const riskStatus = scan.exposureResult?.riskStatus;
+          const riskStatus = canonicalScan.riskLevel || canonicalScan.exposureResult?.riskStatus;
           let newAlerts = state.alerts;
           
           if (riskStatus === RiskStatus.HIGH || riskStatus === RiskStatus.CRITICAL || riskStatus === RiskStatus.ELEVATED) {
@@ -247,13 +286,13 @@ export const useAppStore = create<AppState>()(
                              AlertSeverity.INFO;
                              
             const alert: Alert = {
-              id: `alert-${Date.now()}`,
-              scanId: scan.id,
-              workerId: scan.workerId,
+              id: `alert-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+              scanId: canonicalScan.id,
+              workerId: canonicalScan.workerId,
               severity,
-              reason: `H₂S exposure risk tier: ${riskStatus} (${scan.exposureResult?.estimatedDose || 0} ${scan.exposureResult?.doseUnit || 'ppm·h'})`,
+              reason: `H₂S ${riskStatus} risk detected for ${canonicalScan.workerName} (${canonicalScan.shiftName}): ${canonicalScan.h2sReading || 0} ${canonicalScan.doseUnit}`,
               status: AlertStatus.OPEN,
-              createdAt: new Date().toISOString(),
+              createdAt: canonicalScan.capturedAt || new Date().toISOString(),
               acknowledgedBy: null,
               acknowledgedAt: null,
             };
