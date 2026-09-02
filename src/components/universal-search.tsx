@@ -190,7 +190,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
                     <div>
                       <span className="font-semibold text-[#263026]">{w.displayName}</span>
                       <span className="text-[12px] text-[#596158] ml-2 font-mono">({w.workerCode})</span>
-                      <span className="text-[12px] text-[#7A8178] block">{w.department} · MRPL Zone A</span>
+                      <span className="text-[12px] text-[#7A8178] block">{w.department} · Facility Zone A</span>
                     </div>
                     <ChevronRight size={16} className="text-[#7A8178]" />
                   </div>
@@ -313,7 +313,7 @@ export function UniversalSearch({ isOpen, onClose }: { isOpen: boolean; onClose:
               ? 'બંધ કરવા માટે ESC દબાવો'
               : 'Press ESC to exit'}
           </span>
-          <span className="text-[#35551F] font-semibold">MRPL Directory Search</span>
+          <span className="text-[#35551F] font-semibold">Personnel Directory Search</span>
         </div>
 
       </div>

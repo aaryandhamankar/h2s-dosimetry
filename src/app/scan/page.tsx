@@ -915,7 +915,7 @@ function ScanPageContent() {
           </div>
 
           <div className="text-[11px] text-[#7A8178] font-mono">
-            MRPL Optical Gating · ISO/CIE D65 Spectrometry
+            Optical Gating · ISO/CIE D65 Spectrometry
           </div>
 
         </div>
@@ -1133,7 +1133,7 @@ function ScanPageContent() {
                   <div className="bg-[#FAF7F0] p-2.5 rounded-xl border border-[#E8E2D5] space-y-1">
                     <div className="font-bold text-[#263026] font-sans text-[11px]">{language === 'hi' ? 'अंशांकन व मॉडल:' : 'Calibration & Model:'}</div>
                     <div>ID: {res?.calibrationId || 'CAL-2026-D65'}</div>
-                    <div>Model: {res?.modelId || 'MRPL-CHEM-002'} (v{res?.modelVersion || '0.1.0'})</div>
+                    <div>Model: {res?.modelId || 'DOSIM-CHEM-002'} (v{res?.modelVersion || '0.1.0'})</div>
                     <div>Standard: ISO/CIE D65 Bradford</div>
                   </div>
 

@@ -25,7 +25,7 @@ import {
   FileText
 } from 'lucide-react';
 import Image from 'next/image';
-import mrplLogo from '../../public/mrpl-logo.png';
+import brandLogo from '../../public/mrpl-logo.png';
 import { UniversalSearch } from './universal-search';
 import { sfx } from '@/lib/sound-effects';
 import { useMounted } from '@/hooks/use-mounted';
@@ -213,19 +213,19 @@ export function PortalHeaderWrapper() {
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-[#E7E5DE] shadow-2xs">
-      {/* Thin Orange / Green MRPL Accent Line */}
+      {/* Thin Tricolor Accent Line */}
       <div className="h-[2.5px] w-full bg-gradient-to-r from-[#FF9933] via-white to-[#138808]" />
       
       {/* 1. Institutional Master Header Bar */}
       <div className="max-w-[1240px] mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between min-h-[58px] sm:min-h-[64px] py-1.5 gap-2 sm:gap-4">
           
-          {/* Desktop Brand: Consistent ONGC MRPL Brand across desktop (hidden on mobile) */}
+          {/* Desktop Brand */}
           <Link href="/" className="hidden sm:flex items-center gap-2.5 sm:gap-3 group min-w-0 pr-1 flex-shrink-0 select-none">
             <div className="h-9 sm:h-10 w-9 sm:w-10 flex-shrink-0 flex items-center justify-center p-1 bg-white rounded-lg border border-[#E7E5DE] shadow-xs group-hover:border-[#5C822D] group-hover:shadow-sm transition-all overflow-hidden">
               <Image 
-                src={mrplLogo} 
-                alt="ONGC MRPL Official Logo" 
+                src={brandLogo} 
+                alt="Institutional Logo" 
                 className="h-7 sm:h-8 w-auto object-contain rounded-md block"
                 priority
               />
@@ -273,8 +273,8 @@ export function PortalHeaderWrapper() {
               <Link href="/" className="flex items-center gap-2 group min-w-0 pr-1 flex-shrink-0">
                 <div className="h-8 w-8 flex-shrink-0 flex items-center justify-center p-0.5 bg-white rounded-lg border border-[#E7E5DE] shadow-xs">
                   <Image 
-                    src={mrplLogo} 
-                    alt="ONGC MRPL Logo" 
+                    src={brandLogo} 
+                    alt="Institutional Logo" 
                     className="h-6 w-auto object-contain rounded block"
                     priority
                   />

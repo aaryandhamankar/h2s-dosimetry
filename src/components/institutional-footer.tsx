@@ -444,7 +444,7 @@ export function InstitutionalFooter() {
                     ? 'પ્રોજેક્ટ કોર ટીમ (6 લીડ્સ)'
                     : 'Core Project Team (6 Leads)'}
                 </span>
-                <span className="text-[#5C822D] font-mono">MRPL INVENT</span>
+                <span className="text-[#5C822D] font-mono">SAFETY R&D</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">

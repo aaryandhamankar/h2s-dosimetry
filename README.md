@@ -1,7 +1,7 @@
 # H2S Dosimeter — Continuous Personal Hydrogen Sulfide Gas Dosimetry
 
-> **An industrial-grade occupational health & safety companion system for personal hydrogen sulfide ($H_2S$) exposure monitoring and refinery surveillance.**
-> Developed for **Mangalore Refinery and Petrochemicals Limited (MRPL)** / Ministry of Petroleum and Natural Gas.
+> **An industrial-grade occupational health & safety companion system for personal hydrogen sulfide ($H_2S$) exposure monitoring and petrochemical refinery surveillance.**
+> Designed for **Petrochemical Refining & Industrial Safety Operations**.
 
 ---
 
@@ -151,7 +151,7 @@ npm run dev
 
 ## 7. Project Team
 
-**MRPL Hackathon Innovation Team 2026**:
+**Engineering & Research Team**:
 - **Aaryan Dhamankar** — Software, Digital Systems & Full-Stack Platform Lead
 - **Arya Modh** — Chemistry, Sensor Research & Development Lead
 - **Avani Abhyankar** — AI Model Development & Optical Inference Lead

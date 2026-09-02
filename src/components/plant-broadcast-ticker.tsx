@@ -17,7 +17,7 @@ export function PlantBroadcastTicker() {
         <div className="flex items-center gap-2 overflow-hidden">
           <span className="flex items-center gap-1.5 font-bold text-[#2E4415] whitespace-nowrap">
             <span className="w-1.5 h-1.5 rounded-full bg-[#557A2B] animate-pulse" />
-            <span>MRPL Zone A Refinery Unit: Operational</span>
+            <span>Facility Zone A Refinery Unit: Operational</span>
           </span>
 
           <span className="text-[#C8D8B8] hidden sm:inline">•</span>

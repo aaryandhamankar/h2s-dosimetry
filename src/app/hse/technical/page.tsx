@@ -29,7 +29,7 @@ function TechnicalContent() {
         <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
           Metrology Audit & Traceability
         </span>
-        <h1 className="text-[18px] sm:text-[24px] font-bold text-[#263026]">MRPL Metrology & Scientific Provenance</h1>
+        <h1 className="text-[18px] sm:text-[24px] font-bold text-[#263026]">Metrology & Scientific Provenance</h1>
         <p className="text-[13px] sm:text-[14px] text-[#596158]">
           Audit review for optical image validation, CIELAB colorimetry, & calibration curve traceability
         </p>

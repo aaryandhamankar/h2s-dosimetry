@@ -15,13 +15,12 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://h2s-dosimeter.mrpl.co.in'),
+  metadataBase: new URL('https://h2s-dosimeter.internal.safety'),
   title: 'H2S Dosimeter',
   description: 'H2S Dosimeter — Continuous Personal Hydrogen Sulfide Gas Dosimetry Verification System with ISO D65 Optical Normalization.',
   keywords: [
     'H2S Dosimeter',
     'H2S Dosimetry',
-    'MRPL',
     'Petrochemical Safety',
     'Occupational Health',
     'Hydrogen Sulfide Sensor',
@@ -30,8 +29,8 @@ export const metadata: Metadata = {
     'Colorimetry'
   ],
   authors: [{ name: 'Industrial Health & Safety Innovation Team' }],
-  creator: 'Mangalore Refinery and Petrochemicals Limited',
-  publisher: 'MRPL / Ministry of Petroleum and Natural Gas',
+  creator: 'Petrochemical Safety Directorate',
+  publisher: 'Occupational Safety & Health Administration',
   openGraph: {
     title: 'H2S Dosimeter',
     description: 'Real-time personal gas dosimetry verification and supervisory surveillance for petrochemical refinery personnel.',

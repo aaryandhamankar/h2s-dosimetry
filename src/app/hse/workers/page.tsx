@@ -71,7 +71,7 @@ export default function HSEWorkersPage() {
         <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider block">
           Personnel Roster
         </span>
-        <h1 className="text-[18px] sm:text-[24px] font-bold text-[#263026]">MRPL Monitored Workforce Roster</h1>
+        <h1 className="text-[18px] sm:text-[24px] font-bold text-[#263026]">Monitored Workforce Roster</h1>
         <p className="text-[13px] sm:text-[14px] text-[#596158]">Individual worker exposure records, assigned cartridges, and shift compliance</p>
       </div>
 
@@ -83,7 +83,7 @@ export default function HSEWorkersPage() {
             <span className="font-bold text-[#263026] uppercase tracking-wider">
               Assigned Personnel ({workerStats.length})
             </span>
-            <span className="text-[#7A8178]">MRPL Zone A</span>
+            <span className="text-[#7A8178]">Facility Zone A</span>
           </div>
 
           <div className="divide-y divide-[#E7E5DE]">

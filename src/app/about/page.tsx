@@ -84,7 +84,7 @@ export default function AboutPage() {
             className={`cursor-pointer select-none transition-all rounded-lg px-1 -mx-1 ${longPressActive ? 'ring-2 ring-[#5C822D] ring-offset-1' : ''}`}
           >
             <span className="text-[10px] sm:text-[11px] font-bold text-[#5C822D] uppercase tracking-wider block">
-              MRPL Innovation Lab
+              Innovation & Safety Research Lab
             </span>
             <h1 className="text-[18px] sm:text-[22px] font-black text-[#263026] leading-tight">
               {language === 'hi' 
@@ -112,19 +112,19 @@ export default function AboutPage() {
         <p className="text-[13px] sm:text-[14px] text-[#596158] leading-relaxed">
           {language === 'hi' ? (
             <>
-              <strong>MRPL H₂S वियरेबल डोसीमीटर</strong> एक हल्का, बिना बिजली (जीरो-पावर) वाला व्यक्तिगत रासायनिक सेंसर बैंड है जिसे स्मार्टफोन के ऑप्टिकल रीडआउट सिस्टम से जोड़ा गया है। यह रिफाइनरी कर्मियों और एचएसई सुरक्षा अधिकारियों को भारी इलेक्ट्रॉनिक बैज या महंगी प्रयोगशाला जांच के बिना वास्तविक समय में मात्रात्मक गैस एक्सपोज़र माप प्रदान करता है।
+              <strong>H₂S वियरेबल डोसीमीटर</strong> एक हल्का, बिना बिजली (जीरो-पावर) वाला व्यक्तिगत रासायनिक सेंसर बैंड है जिसे स्मार्टफोन के ऑप्टिकल रीडआउट सिस्टम से जोड़ा गया है। यह रिफाइनरी कर्मियों और एचएसई सुरक्षा अधिकारियों को भारी इलेक्ट्रॉनिक बैज या महंगी प्रयोगशाला जांच के बिना वास्तविक समय में मात्रात्मक गैस एक्सपोज़र माप प्रदान करता है।
             </>
           ) : language === 'kn' ? (
             <>
-              <strong>MRPL H₂S ಧರಿಸಬಹುದಾದ ಡೋಸಿಮೀಟರ್</strong> ಎಂಬುದು ಶೂನ್ಯ-ವಿದ್ಯುತ್ ವೈಯಕ್ತಿಕ ರಾಸಾಯನಿಕ ಸಂವೇದಕ ಬ್ಯಾಂಡ್ ಆಗಿದ್ದು, ಸ್ಮಾರ್ಟ್‌ಫೋನ್ ಆಪ್ಟಿಕಲ್ ರೀಡೌಟ್ ಸಿಸ್ಟಮ್‌ನೊಂದಿಗೆ ಜೋಡಿಸಲ್ಪಟ್ಟಿದೆ. ಇದು ರಿಫೈನರಿ ಸಿಬ್ಬಂದಿ ಮತ್ತು HSE ಸುರಕ್ಷತಾ ಅಧಿಕಾರಿಗಳಿಗೆ ನೈಜ-ಸಮಯದ ಅನಿಲ ಎಕ್ಸ್‌ಪೋಶರ್ ಮಾಪನವನ್ನು ನೀಡುತ್ತದೆ.
+              <strong>H₂S ಧರಿಸಬಹುದಾದ ಡೋಸಿಮೀಟರ್</strong> ಎಂಬುದು ಶೂನ್ಯ-ವಿದ್ಯುತ್ ವೈಯಕ್ತಿಕ ರಾಸಾಯನಿಕ ಸಂವೇದಕ ಬ್ಯಾಂಡ್ ಆಗಿದ್ದು, ಸ್ಮಾರ್ಟ್‌ಫೋನ್ ಆಪ್ಟಿಕಲ್ ರೀಡೌಟ್ ಸಿಸ್ಟಮ್‌ನೊಂದಿಗೆ ಜೋಡಿಸಲ್ಪಟ್ಟಿದೆ. ಇದು ರಿಫೈನರಿ ಸಿಬ್ಬಂದಿ ಮತ್ತು HSE ಸುರಕ್ಷತಾ ಅಧಿಕಾರಿಗಳಿಗೆ ನೈಜ-ಸಮಯದ ಅನಿಲ ಎಕ್ಸ್‌ಪೋಶರ್ ಮಾಪನವನ್ನು ನೀಡುತ್ತದೆ.
             </>
           ) : language === 'gu' ? (
             <>
-              <strong>MRPL H₂S પહેરી શકાય તેવું ડોસિમીટર</strong> એ ઝીરો-પાવર વ્યક્તિગત રાસાયણિક સેન્સર બેન્ડ છે જેને સ્માર્ટફોન ઓપ્ટિકલ રીડઆઉટ સિસ્ટમ સાથે જોડવામાં આવ્યું છે. તે રિફાઇનરી કર્મચારીઓ અને HSE સુરક્ષા અધિકારીઓને વાસ્તવિક સમયનું ગેસ એક્સપોઝર માપન પૂરું પાડે છે.
+              <strong>H₂S પહેરી શકાય તેવું ડોસિમીટર</strong> એ ઝીરો-પાવર વ્યક્તિગત રાસાયણિક સેન્સર બેન્ડ છે જેને સ્માર્ટફોન ઓપ્ટિકલ રીડઆઉટ સિસ્ટમ સાથે જોડવામાં આવ્યું છે. તે રિફાઇનરી કર્મચારીઓ અને HSE સુરક્ષા અધિકારીઓને વાસ્તવિક સમયનું ગેસ એક્સપોઝર માપન પૂરું પાડે છે.
             </>
           ) : (
             <>
-              The <strong>MRPL H₂S Wearable Dosimeter</strong> is a lightweight, zero-power personal chemical sensor band paired with an optical smartphone readout system. It gives refinery personnel and HSE safety officers real-time, quantitative exposure measurements without cumbersome electronic badges or expensive laboratory turnaround.
+              The <strong>H₂S Wearable Dosimeter</strong> is a lightweight, zero-power personal chemical sensor band paired with an optical smartphone readout system. It gives refinery personnel and HSE safety officers real-time, quantitative exposure measurements without cumbersome electronic badges or expensive laboratory turnaround.
             </>
           )}
         </p>

@@ -194,7 +194,7 @@ export function CADModelViewer({}: CADModelViewerProps = {}) {
       const dataUrl = mv.toDataURL('image/png');
       const a = document.createElement('a');
       a.href = dataUrl;
-      a.download = `MRPL-Dosimeter-CAD-${new Date().toISOString().slice(0, 10)}.png`;
+      a.download = `H2S-Dosimeter-CAD-${new Date().toISOString().slice(0, 10)}.png`;
       a.click();
     }
   };
@@ -342,7 +342,7 @@ export function CADModelViewer({}: CADModelViewerProps = {}) {
           <model-viewer
             ref={modelViewerRef}
             src={glbUrl}
-            alt="MRPL H2S Dosimeter Band 3D CAD Model"
+            alt="H2S Dosimeter Band 3D CAD Model"
             camera-controls
             auto-rotate={isAutoRotate ? true : undefined}
             auto-rotate-delay={1000}

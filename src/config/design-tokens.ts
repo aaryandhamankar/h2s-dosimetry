@@ -1,8 +1,8 @@
 /**
- * MRPL Institutional Design Tokens
+ * Institutional Safety Design Tokens
  * 
- * Theme: MRPL / ONGC Institutional Identity + Premium Indian Public-Sector Usability
- * Anchor Brand: MRPL Green (#5C822D), Deep Forest (#35551F)
+ * Theme: Industrial Occupational Safety Identity + Premium Usability
+ * Anchor Brand: Forest Green (#5C822D), Deep Forest (#35551F)
  * Canvas: Warm Cream (#FAF6EE), White Surface (#FFFFFF), Soft Surface (#F4EFE6)
  * Typography: Noto Sans (Primary text: #263026, Secondary: #596158, Muted: #7A8178)
  * Accents: Saffron Orange (#FF9933), Golden Amber (#FFDE59), Terracotta (#C96B32)
@@ -12,7 +12,7 @@
 export const DESIGN_TOKENS = {
   colors: {
     // Brand Anchor
-    brandGreen: '#5C822D',     // Primary action green (MRPL identity)
+    brandGreen: '#5C822D',     // Primary action green (safety identity)
     brandDarkGreen: '#35551F', // Deep forest supporting dark green
     brandLightGreen: '#EDF3E4',// Pale green background tint
     brandGreenBorder: '#C6DCC0',// Clean green border tone
