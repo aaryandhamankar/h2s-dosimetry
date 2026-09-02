@@ -30,7 +30,7 @@ import { useAppStore } from '@/stores/app-store';
 import { DemoScenario, RiskStatus, ValidityStatus, ProcessingStatus, Scan } from '@/types';
 import { getScanPipeline } from '@/services/scientific/scan-processing-pipeline';
 import { formatDateTime, formatDose, getValidityLabel } from '@/lib/utils';
-import { sfx } from '@/lib/sound-effects';
+import { feedback } from '@/lib/feedback';
 import { validateImage } from '@/services/scientific/image-validation-layer';
 import { resolveCode } from '@/services/scientific/demo-code-engine';
 import { useDemoConfigStore } from '@/stores/demo-config-store';
@@ -225,7 +225,7 @@ function ScanPageContent() {
   };
 
   const toggleTorch = async () => {
-    sfx.playClick();
+    feedback.tap();
     if (!mediaStream) {
       setTorchOn(!torchOn);
       return;
@@ -278,7 +278,7 @@ function ScanPageContent() {
           setCompletedStages(prev => prev.includes(status) ? prev : [...prev, status]);
           const stepIdx = STAGE_ORDER.indexOf(status);
           if (stepIdx >= 0) {
-            sfx.playStepTick(stepIdx + 1);
+            feedback.step(stepIdx + 1);
           }
         },
         finalImageUrl,
@@ -307,17 +307,17 @@ function ScanPageContent() {
 
       setTimeout(() => {
         if (isInv) {
-          sfx.playErrorRefusal();
+          feedback.refusal();
         } else if (isOOR) {
-          sfx.playOutOfRange();
+          feedback.outOfRange();
         } else if (resRisk === RiskStatus.CRITICAL) {
-          sfx.playCriticalAlarm();
+          feedback.criticalAlarm();
         } else if (resRisk === RiskStatus.HIGH) {
-          sfx.playHighAlarm();
+          feedback.highAlarm();
         } else if (resRisk === RiskStatus.ELEVATED) {
-          sfx.playElevatedWarning();
+          feedback.elevatedWarning();
         } else {
-          sfx.playSuccess();
+          feedback.success();
         }
         setScreenState('result');
       }, 450);
@@ -365,7 +365,7 @@ function ScanPageContent() {
       };
       const reason = validation.rejectionReason ?? 'Invalid image';
       const statusLabel = statusLabels[validation.status] ?? 'Invalid Image';
-      sfx.playErrorRefusal();
+      feedback.refusal();
       setValidationRejection({ reason, status: statusLabel });
       setTimeout(() => setValidationRejection(null), 3500);
       return null;
@@ -406,7 +406,7 @@ function ScanPageContent() {
 
   // Live Camera Capture with Shutter Sound
   const handleCapture = async () => {
-    sfx.playCameraShutter();
+    feedback.capture();
     // Turn off torch automatically after clicking a picture
     turnOffTorch();
 
@@ -567,7 +567,7 @@ function ScanPageContent() {
   };
 
   const handleResetScan = () => {
-    sfx.playClick();
+    feedback.tap();
     setCurrentScan(null);
     setCompletedStages([]);
     setCurrentStage(null);
@@ -688,20 +688,20 @@ function ScanPageContent() {
     actionIconColor = 'text-[#C96B32]';
   } else if (res?.riskStatus === RiskStatus.ELEVATED) {
     statusBadge = (
-      <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12px] sm:text-[13px] font-bold bg-[#FFFDF5] text-[#B8860B] border border-[#EAD7A8] shadow-2xs">
-        <AlertTriangle className="w-4 h-4 text-[#B8860B]" />
+      <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12px] sm:text-[13px] font-bold bg-[#FFFDF5] text-[#946800] border border-[#EAD7A8] shadow-2xs">
+        <AlertTriangle className="w-4 h-4 text-[#946800]" />
         <span>{language === 'hi' ? 'मध्यम स्तर' : 'ELEVATED LEVEL'}</span>
       </span>
     );
     actionTitle = language === 'hi' ? 'सावधानी बरतें — सुपरवाइज़र को बताएं' : 'Caution Advised — Notify Shift Supervisor';
     actionInstruction = language === 'hi' ? 'मध्यम रंग परिवर्तन देखा गया। स्थानीय वेंटिलेशन की जांच करें और सुपरवाइज़र को रिपोर्ट करें।' : 'Moderate sensor shift observed. Verify local ventilation and report reading to shift supervisor.';
-    doseTextColor = 'text-[#B8860B]';
-    doseUnitColor = 'text-[#B8860B]';
+    doseTextColor = 'text-[#946800]';
+    doseUnitColor = 'text-[#946800]';
     cardAccentBorder = 'border-[#EAD7A8]';
     bannerBg = 'bg-[#FFFDF7]';
     actionBoxBorder = 'border-[#EAD7A8]';
     actionBoxBg = 'bg-[#FAF3E0]';
-    actionIconColor = 'text-[#B8860B]';
+    actionIconColor = 'text-[#946800]';
   }
 
   return (
@@ -760,10 +760,10 @@ function ScanPageContent() {
               {/* Central Reticle */}
               <div className="flex items-center justify-center flex-1">
                 <div className="w-48 sm:w-56 h-40 sm:h-48 border-2 border-dashed border-white/90 rounded-2xl flex items-center justify-center relative shadow-lg">
-                  <div className="w-4 h-4 border-t-3 border-l-3 border-[#5C822D] absolute -top-1.5 -left-1.5 rounded-tl-sm" />
-                  <div className="w-4 h-4 border-t-3 border-r-3 border-[#5C822D] absolute -top-1.5 -right-1.5 rounded-tr-sm" />
-                  <div className="w-4 h-4 border-b-3 border-l-3 border-[#5C822D] absolute -bottom-1.5 -left-1.5 rounded-bl-sm" />
-                  <div className="w-4 h-4 border-b-3 border-r-3 border-[#5C822D] absolute -bottom-1.5 -right-1.5 rounded-br-sm" />
+                  <div className="w-5 h-5 border-t-2 border-l-2 border-[#5C822D] absolute -top-1 -left-1 rounded-tl-sm" />
+                  <div className="w-5 h-5 border-t-2 border-r-2 border-[#5C822D] absolute -top-1 -right-1 rounded-tr-sm" />
+                  <div className="w-5 h-5 border-b-2 border-l-2 border-[#5C822D] absolute -bottom-1 -left-1 rounded-bl-sm" />
+                  <div className="w-5 h-5 border-b-2 border-r-2 border-[#5C822D] absolute -bottom-1 -right-1 rounded-br-sm" />
                   <Crosshair className="w-8 h-8 text-white/80 animate-pulse" />
                 </div>
               </div>
@@ -969,7 +969,7 @@ function ScanPageContent() {
           </div>
 
           {/* 2. Main Safety & Exposure Hero Card */}
-          <div className={`p-5 sm:p-6 rounded-3xl border ${cardAccentBorder} ${bannerBg} shadow-sm space-y-4 transition-all`}>
+          <div className={`p-5 sm:p-6 rounded-2xl border ${cardAccentBorder} ${bannerBg} shadow-sm space-y-4 transition-all`}>
             
             {/* 2a. Safety Status Hero Pill */}
             <div className="flex justify-center">

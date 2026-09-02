@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Home, Camera, Info, User, Activity, Users, AlertTriangle, FileText } from 'lucide-react';
 import { useAppStore } from '@/stores/app-store';
 import { TRANSLATIONS } from '@/lib/i18n';
+import { feedback } from '@/lib/feedback';
 
 interface NavItem {
   label: string;
@@ -25,6 +26,7 @@ export function BottomNav() {
   const t = TRANSLATIONS[language] || TRANSLATIONS.en;
 
   const handleItemClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
+    feedback.select();
     if (href === '/about') {
       const now = e.timeStamp;
       if (now - lastTapTimeRef.current < 900) {
@@ -128,9 +130,9 @@ export function BottomNav() {
               }`}
             >
               <div className={`relative p-1 rounded-md transition-colors ${isActive ? 'bg-[#EDF3E4]' : ''}`}>
-                <Icon className={`w-5 h-5 ${isActive ? 'text-[#5C822D] stroke-[2.5]' : 'text-[#7A8178]'}`} />
+                <Icon className={`w-5 h-5 ${isActive ? 'text-[#5C822D] stroke-2' : 'text-[#7A8178] stroke-2'}`} />
                 {item.badgeCount && item.badgeCount > 0 ? (
-                  <span className="absolute -top-1 -right-1 bg-[#C53030] text-white text-[9px] font-bold px-1 min-w-[15px] h-[15px] flex items-center justify-center rounded-full shadow-xs">
+                  <span className="absolute -top-1 -right-1 bg-[#A94442] text-white text-[9px] font-bold px-1 min-w-[15px] h-[15px] flex items-center justify-center rounded-full shadow-xs">
                     {item.badgeCount}
                   </span>
                 ) : null}

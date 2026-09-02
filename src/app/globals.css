@@ -18,6 +18,32 @@
     --accent-terracotta: #C96B32;
     --accent-warm-amber: #D97706;
     --accent-gold: #B89B5E;
+
+    /* Semantic Token Aliases */
+    --color-bg-canvas: var(--bg-canvas);
+    --color-surface: var(--bg-surface);
+    --color-surface-soft: var(--bg-surface-soft);
+    --color-text-primary: var(--text-primary);
+    --color-text-secondary: var(--text-secondary);
+    --color-text-muted: var(--text-muted);
+    --color-border: var(--border-warm);
+    --color-border-strong: var(--border-strong);
+    
+    --color-status-normal-text: #35551F;
+    --color-status-normal-bg: #EDF3E4;
+    --color-status-normal-border: #C6DCC0;
+    
+    --color-status-elevated-text: #946800;
+    --color-status-elevated-bg: #FAF5E8;
+    --color-status-elevated-border: #EAD7A8;
+    
+    --color-status-high-text: #C96B32;
+    --color-status-high-bg: #FAF2EB;
+    --color-status-high-border: #F3D5C0;
+    
+    --color-status-critical-text: #A94442;
+    --color-status-critical-bg: #F8ECEC;
+    --color-status-critical-border: #F0C4C4;
   }
 
   html {
@@ -222,14 +248,14 @@ a.disabled {
 }
 
 .gov-badge-elevated {
-  background-color: #FAF2EB;
-  color: #C96B32;
-  border: 1px solid #F3D5C0;
+  background-color: #FAF5E8;
+  color: #946800;
+  border: 1px solid #EAD7A8;
 }
 
 .gov-badge-high {
   background-color: #FAF2EB;
-  color: #D47A32;
+  color: #C96B32;
   border: 1px solid #F3D5C0;
 }
 

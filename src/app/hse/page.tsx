@@ -96,7 +96,7 @@ export default function HSEOverviewPage() {
 
       {/* TIER 1: ACTIVE ALERTS BANNER (If open alerts exist) */}
       {openAlerts.length > 0 && (
-        <div className="p-3.5 sm:p-4 rounded-lg bg-[#F7EAEA] border-2 border-[#F0C4C4] text-[#A94442] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div className="p-3.5 sm:p-4 rounded-lg bg-[#F7EAEA] border border-[#F0C4C4] text-[#A94442] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
           <div className="flex items-center gap-2.5">
             <AlertTriangle className="w-5 h-5 flex-shrink-0 animate-pulse" />
             <div>

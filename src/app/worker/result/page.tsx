@@ -266,8 +266,8 @@ function ResultContent() {
     actionIconColor = 'text-[#C96B32]';
   } else if (res?.riskStatus === RiskStatus.ELEVATED) {
     statusBadge = (
-      <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12px] sm:text-[13px] font-bold bg-[#FFFDF5] text-[#B8860B] border border-[#EAD7A8] shadow-2xs">
-        <AlertTriangle className="w-4 h-4 text-[#B8860B]" />
+      <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12px] sm:text-[13px] font-bold bg-[#FFFDF5] text-[#946800] border border-[#EAD7A8] shadow-2xs">
+        <AlertTriangle className="w-4 h-4 text-[#946800]" />
         <span>
           {language === 'hi' 
             ? 'मध्यम स्तर' 
@@ -293,13 +293,13 @@ function ResultContent() {
       : language === 'gu'
       ? 'મધ્યમ રંગ પરિવર્તન જોવા મળ્યું. વેન્ટિલેશન તપાસો અને સુપરવાઇઝરને રિપોર્ટ કરો.'
       : 'Moderate sensor shift observed. Verify local ventilation and report reading to shift supervisor.';
-    doseTextColor = 'text-[#B8860B]';
-    doseUnitColor = 'text-[#B8860B]';
+    doseTextColor = 'text-[#946800]';
+    doseUnitColor = 'text-[#946800]';
     cardAccentBorder = 'border-[#EAD7A8]';
     bannerBg = 'bg-[#FFFDF7]';
     actionBoxBorder = 'border-[#EAD7A8]';
     actionBoxBg = 'bg-[#FAF3E0]';
-    actionIconColor = 'text-[#B8860B]';
+    actionIconColor = 'text-[#946800]';
   }
 
   const photoUrl = scan.capturedImageUrl || getFallbackBadgeThumbnail(res?.riskStatus);
@@ -352,7 +352,7 @@ function ResultContent() {
       </div>
 
       {/* 2. Main Safety & Exposure Hero Card */}
-      <div className={`p-5 sm:p-6 rounded-3xl border ${cardAccentBorder} ${bannerBg} shadow-sm space-y-4 transition-all`}>
+      <div className={`p-5 sm:p-6 rounded-2xl border ${cardAccentBorder} ${bannerBg} shadow-sm space-y-4 transition-all`}>
         
         {/* 2a. Safety Status Hero Pill */}
         <div className="flex justify-center">

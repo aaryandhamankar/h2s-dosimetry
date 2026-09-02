@@ -149,7 +149,7 @@ export default function HistoryPage() {
       {/* 2. RECENT SCAN LINKED TO LATEST SCAN / DEMO CASE             */}
       {/* ════════════════════════════════════════════════════════════ */}
       {latestScan ? (
-        <div className="gov-card p-4 sm:p-5 border-2 border-[#5C822D]/40 bg-[#FCFDFB] space-y-3 sm:space-y-3.5 shadow-md rounded-2xl">
+        <div className="gov-card p-4 sm:p-5 border border-[#5C822D]/50 bg-[#FCFDFB] space-y-3 sm:space-y-3.5 shadow-sm rounded-2xl">
           
           <div className="flex items-center justify-between border-b border-[#E7E5DE] pb-2">
             <span className="text-[11px] sm:text-[12px] font-bold text-[#5C822D] uppercase tracking-wider flex items-center gap-1.5">
@@ -172,7 +172,7 @@ export default function HistoryPage() {
             
             {/* Left: Clicked Photo Thumbnail & Badge Info */}
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-14 sm:w-18 h-11 sm:h-13 rounded-lg border-2 border-[#D8D0C0] overflow-hidden bg-black flex-shrink-0 shadow-xs">
+              <div className="w-14 sm:w-18 h-11 sm:h-13 rounded-lg border border-[#D8D0C0] overflow-hidden bg-black flex-shrink-0 shadow-2xs">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
                   src={getScanThumbnail(latestScan)} 

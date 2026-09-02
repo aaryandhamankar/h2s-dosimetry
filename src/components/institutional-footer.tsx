@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { CheckCircle2, X, Award, Beaker, Code2, Users2, Cpu, Compass } from 'lucide-react';
 import { useAppStore } from '@/stores/app-store';
-import { sfx } from '@/lib/sound-effects';
+import { feedback } from '@/lib/feedback';
 
 const TEAM_MEMBERS = [
   {
@@ -297,7 +297,7 @@ export function InstitutionalFooter() {
 
   // Master Celebration Trigger: 2 Rapid Successive Bursts for Maximum Impact
   const triggerCelebration = useCallback(() => {
-    sfx.playCelebration();
+    feedback.celebration();
     launchExplosion();
     setTimeout(() => {
       launchExplosion();
