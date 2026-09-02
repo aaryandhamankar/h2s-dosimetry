@@ -15,9 +15,6 @@ import { useAppStore } from '@/stores/app-store';
 import { TRANSLATIONS } from '@/lib/i18n';
 import { CADModelViewer } from '@/components/cad-model-viewer';
 
-// Long-press duration to trigger the hidden admin panel (ms)
-const LONG_PRESS_MS = 700;
-
 export default function AboutPage() {
   const { language, setTeamModalOpen } = useAppStore();
   const t = TRANSLATIONS[language];
@@ -40,28 +37,6 @@ export default function AboutPage() {
     lastTapRef.current = now;
   };
 
-  // ── Long-press → Hidden Demo Admin Panel ─────────────────────────────────
-  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [longPressActive, setLongPressActive] = useState(false);
-
-  const handleLongPressStart = () => {
-    setLongPressActive(false);
-    longPressTimer.current = setTimeout(() => {
-      setLongPressActive(true);
-      // Dispatch a custom window event that DemoControlPanel listens to
-      window.dispatchEvent(new CustomEvent('h2s:open-demo-admin'));
-    }, LONG_PRESS_MS);
-  };
-
-  const handleLongPressEnd = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-    // Reset after brief feedback delay
-    setTimeout(() => setLongPressActive(false), 300);
-  };
-
   return (
     <div className="flex-1 py-3 sm:py-6 px-3 sm:px-6 max-w-[800px] mx-auto w-full space-y-3 sm:space-y-4">
       
@@ -77,11 +52,7 @@ export default function AboutPage() {
           </Link>
           <div
             onClick={handleTitleTap}
-            onTouchStart={handleLongPressStart}
-            onTouchEnd={handleLongPressEnd}
-            onTouchCancel={handleLongPressEnd}
-            onContextMenu={e => { e.preventDefault(); handleLongPressStart(); setTimeout(handleLongPressEnd, 50); }}
-            className={`cursor-pointer select-none transition-all rounded-lg px-1 -mx-1 ${longPressActive ? 'ring-2 ring-[#5C822D] ring-offset-1' : ''}`}
+            className="cursor-pointer select-none transition-all rounded-lg px-1 -mx-1"
           >
             <span className="text-[10px] sm:text-[11px] font-bold text-[#5C822D] uppercase tracking-wider block">
               Innovation & Safety Research Lab

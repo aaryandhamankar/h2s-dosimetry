@@ -67,6 +67,9 @@ export function PortalHeaderWrapper() {
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isLongPressRef = useRef(false);
 
+  const searchLongPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isSearchLongPressRef = useRef(false);
+
   const [currentTime, setCurrentTime] = useState<string>('');
   const [currentDate, setCurrentDate] = useState<string>('');
   const mounted = useMounted();
@@ -204,6 +207,32 @@ export function PortalHeaderWrapper() {
     setAccessibilityBarOpen(!accessibilityBarOpen);
   };
 
+  const handleSearchPressStart = () => {
+    isSearchLongPressRef.current = false;
+    searchLongPressTimerRef.current = setTimeout(() => {
+      isSearchLongPressRef.current = true;
+      sfx.playClick();
+      window.dispatchEvent(new CustomEvent('h2s:open-demo-admin'));
+    }, 650);
+  };
+
+  const handleSearchPressEnd = () => {
+    if (searchLongPressTimerRef.current) {
+      clearTimeout(searchLongPressTimerRef.current);
+      searchLongPressTimerRef.current = null;
+    }
+  };
+
+  const handleSearchClick = (e: React.MouseEvent) => {
+    if (isSearchLongPressRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    sfx.playClick();
+    setSearchOpen(true);
+  };
+
   const isFieldPersonnel = pathname === '/scan' || pathname.startsWith('/worker');
   const isHSE = pathname.startsWith('/hse') || pathname.startsWith('/dashboard');
   const navLinks = [
@@ -298,7 +327,8 @@ export function PortalHeaderWrapper() {
               onTouchStart={handlePressStart}
               onTouchEnd={handlePressEnd}
               onTouchCancel={handlePressEnd}
-              className={`relative flex items-center gap-1.5 p-2 sm:px-2.5 sm:py-1.5 rounded-lg text-[12px] sm:text-[13px] font-semibold transition-all border select-none active:scale-95 cursor-pointer ${
+              onContextMenu={(e) => e.preventDefault()}
+              className={`relative flex items-center gap-1.5 p-2 sm:px-2.5 sm:py-1.5 rounded-lg text-[12px] sm:text-[13px] font-semibold transition-all border select-none active:scale-95 cursor-pointer touch-manipulation ${
                 accessibilityBarOpen
                   ? 'bg-[#5C822D] text-white border-[#476722] shadow-2xs'
                   : isFullscreen
@@ -328,11 +358,26 @@ export function PortalHeaderWrapper() {
               )}
             </button>
 
-            {/* Quick Search */}
+            {/* Quick Search (Short Tap: Search Portal, Long Press: Demo Admin Panel) */}
             <button
-              onClick={() => setSearchOpen(true)}
-              className="flex items-center gap-1.5 bg-[#F4EFE6] hover:bg-[#EBE4D8] text-[#263026] font-semibold p-2 sm:px-2.5 sm:py-1.5 rounded-lg text-[12px] sm:text-[13px] transition-colors border border-[#E8E2D5]"
-              title="Search Portal (Shortcut: /)"
+              onClick={handleSearchClick}
+              onMouseDown={handleSearchPressStart}
+              onMouseUp={handleSearchPressEnd}
+              onMouseLeave={handleSearchPressEnd}
+              onTouchStart={handleSearchPressStart}
+              onTouchEnd={handleSearchPressEnd}
+              onTouchCancel={handleSearchPressEnd}
+              onContextMenu={(e) => e.preventDefault()}
+              className="flex items-center gap-1.5 bg-[#F4EFE6] hover:bg-[#EBE4D8] active:scale-95 text-[#263026] font-semibold p-2 sm:px-2.5 sm:py-1.5 rounded-lg text-[12px] sm:text-[13px] transition-all border border-[#E8E2D5] select-none touch-manipulation cursor-pointer"
+              title={
+                language === 'hi' 
+                  ? 'पोर्टल खोजें (शॉर्टकट: /, डेमो पैनल के लिए दबाकर रखें)' 
+                  : language === 'kn'
+                  ? 'ಪೋರ್ಟಲ್ ಹುಡುಕಿ (ಡೆಮೊ ಪ್ಯಾನೆಲ್‌ಗಾಗಿ ಒತ್ತಿ ಹಿಡಿಯಿರಿ)'
+                  : language === 'gu'
+                  ? 'પોર્ટલ શોધો (ડેમો પેનલ માટે દબાવી રાખો)'
+                  : 'Search Portal (Shortcut: /, Press & hold for Demo Panel)'
+              }
               aria-label="Search Portal"
             >
               <Search size={15} className="text-[#5C822D]" />
